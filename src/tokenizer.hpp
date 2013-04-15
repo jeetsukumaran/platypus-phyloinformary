@@ -27,7 +27,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
+#include <vector>
 
 namespace platypus {
 
@@ -41,15 +41,9 @@ class Tokenizer {
             const std::string & esc_chars = "\\",
             const std::string & comment_begin = "[",
             const std::string & comment_end = "]",
-            bool capture_comments=true)
-            : uncaptured_delimiters_(uncaptured_delimiters)
-              , captured_delimiters_(captured_delimiters)
-              , quote_chars_(quote_chars)
-              , esc_chars_(esc_chars)
-              , comment_begin_(comment_begin)
-              , comment_end_(comment_end)
-              , capture_comments_(capture_comments) {
-        }
+            bool capture_comments=true);
+
+        virtual ~Tokenizer() {}
 
         class iterator {
             public:
@@ -62,6 +56,7 @@ class Tokenizer {
 				typedef std::forward_iterator_tag   iterator_category;
 
 			public:
+
 			    iterator(std::istream & src,
                         const std::string & uncaptured_delimiters,
                         const std::string & captured_delimiters,
@@ -69,20 +64,7 @@ class Tokenizer {
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
-                        bool capture_comments)
-                        : allocated_src_ptr_(nullptr)
-                          , src_ptr_(&src)
-                          , uncaptured_delimiters_(uncaptured_delimiters)
-                          , captured_delimiters_(captured_delimiters)
-                          , quote_chars_(quote_chars)
-                          , esc_quote_chars_by_doubling(true)
-                          , esc_chars_(esc_chars)
-                          , comment_begin_(comment_begin)
-                          , comment_end_(comment_end)
-                          , capture_comments_(capture_comments)
-                          , cur_char_(0) {
-                    this->get_next_token();
-                }
+                        bool capture_comments);
 			    iterator(const std::string & str,
                         const std::string & uncaptured_delimiters,
                         const std::string & captured_delimiters,
@@ -90,240 +72,35 @@ class Tokenizer {
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
-                        bool capture_comments)
-                        : src_string_copy_(str)
-                          , allocated_src_ptr_(new std::istringstream(src_string_copy_))
-                          , src_ptr_(this->allocated_src_ptr_)
-                          , uncaptured_delimiters_(uncaptured_delimiters)
-                          , captured_delimiters_(captured_delimiters)
-                          , quote_chars_(quote_chars)
-                          , esc_quote_chars_by_doubling(true)
-                          , esc_chars_(esc_chars)
-                          , comment_begin_(comment_begin)
-                          , comment_end_(comment_end)
-                          , capture_comments_(capture_comments)
-                          , cur_char_(0) {
-                    this->get_next_token();
-                }
-                iterator()
-                    : allocated_src_ptr_(nullptr)
-                      , src_ptr_(nullptr)
-                      , esc_quote_chars_by_doubling(true) {
-                }
-                ~iterator() {
-                    if (this->allocated_src_ptr_ != nullptr) {
-                        delete this->allocated_src_ptr_;
-                        this->allocated_src_ptr_ = nullptr;
-                    }
-                }
-                // const reference operator*() const {
-                //     return this->token_;
-                // }
-                // const pointer operator->() const {
-                //     return &(this->token_);
-                // }
-                reference operator*() {
-                    return this->token_;
-                }
-                pointer operator->() {
-                    return &(this->token_);
-                }
-                bool operator==(const self_type& rhs) const {
-                    if ( this->src_ptr_ == rhs.src_ptr_) {
-                        return true;
-                    // } else if (this->src_ptr_ == nullptr && (rhs.src_ptr_ != nullptr && !rhs.src_ptr_->good())) {
-                    //     return true;
-                    // } else if (rhs.src_ptr_ == nullptr && (this->src_ptr_ != nullptr && !this->src_ptr_->good())) {
-                    //     return true;
-                    } else if (this->src_ptr_ && rhs.src_ptr_) {
-                        return *(this->src_ptr_) == *(rhs.src_ptr_);
-                    } else {
-                        return false;
-                    }
-                }
-                bool operator!=(const self_type& rhs) const {
-                    return !(*this == rhs);
-                }
-                const self_type & operator++() {
-                    if (!this->src_ptr_->good()) {
-                        this->src_ptr_ = nullptr;
-                    }
-                    if (this->src_ptr_ != nullptr) {
-                        this->get_next_token();
-                    }
-                    return *this;
-                }
-                self_type operator++(int) {
-                    self_type i = *this;
-                    ++(*this);
-                    return i;
-                }
-                bool eof() {
-                    return (this->src_ptr_ == nullptr) || (!this->src_ptr_->good());
-                }
-                bool token_is_quoted() {
-                    return this->token_is_quoted_;
-                }
-                bool token_has_comments() {
-                    return !this->captured_comments_.empty();
-                }
-                std::vector<std::string>& captured_comments() {
-                    return this->captured_comments_;
-                }
-                void clear_captured_comments() {
-                    this->captured_comments_.clear();
-                }
+                        bool capture_comments);
+                iterator();
+                ~iterator();
+                // const reference operator*() const;
+                // const pointer operator->() const;
+                reference operator*();
+                pointer operator->();
+                bool operator==(const self_type& rhs) const;
+                bool operator!=(const self_type& rhs) const;
+                const self_type & operator++();
+                self_type operator++(int);
+                bool eof();
+                bool token_is_quoted();
+                bool token_has_comments();
+                std::vector<std::string>& captured_comments();
+                void clear_captured_comments();
 
             protected:
 
-                value_type & get_next_token() {
-                    assert(this->src_ptr_ != nullptr);
-                    this->token_is_quoted_ = false;
-                    auto & src = *(this->src_ptr_);
-                    this->skip_to_next_significant_char();
-                    if (this->cur_char_ == EOF && !src.good()) {
-                        this->src_ptr_ = nullptr;
-                        this->token_.clear();
-                        return this->token_;
-                    }
-                    if (this->is_captured_delimiter()) {
-                        this->token_ = this->cur_char_;
-                        this->get_next_char();
-                        return this->token_;
-                    } else if (this->is_quote_char()) {
-                        this->token_is_quoted_ = true;
-                        std::ostringstream dest;
-                        int cur_quote_char = this->cur_char_;
-                        if (!src.good()) {
-                            // TODO! unterminated quote
-                            this->src_ptr_ = nullptr;
-                            this->token_.clear();
-                            return this->token_;
-                        }
-                        this->get_next_char();
-                        while (true) {
-                            if (!src.good()) {
-                                // TODO! unterminated quote
-                                this->src_ptr_ = nullptr;
-                                this->token_.clear();
-                                return this->token_;
-                            }
-                            if (this->cur_char_ == cur_quote_char) {
-                                this->get_next_char();
-                                if (this->esc_quote_chars_by_doubling) {
-                                    if (this->cur_char_ == cur_quote_char) {
-                                        dest.put(cur_quote_char);
-                                        this->get_next_char();
-                                    } else {
-                                        this->get_next_char();
-                                        break;
-                                    }
-                                } else {
-                                    this->get_next_char();
-                                    break;
-                                }
-                            } else {
-                                dest.put(this->cur_char_);
-                                this->get_next_char();
-                            }
-                        }
-                        this->token_ = dest.str();
-                        return this->token_;
-                    } else {
-                        std::ostringstream dest;
-                        this->token_is_quoted_ = false;
-                        while (src.good() && this->cur_char_ != EOF) {
-                            if (this->is_uncaptured_delimiter() ) {
-                                this->get_next_char();
-                                break;
-                            } else if (this->is_captured_delimiter()) {
-                                break;
-                            } else if (this->is_comment_begin()) {
-                                this->handle_comment();
-                                if (!src.good()) {
-                                    this->src_ptr_ = nullptr;
-                                    break;
-                                }
-                            } else {
-                                dest.put(this->cur_char_);
-                                this->get_next_char();
-                            }
-                        }
-                        this->token_ = dest.str();
-                        if (this->token_.empty() && src.good()) {
-                            this->get_next_token();
-                        }
-                        return this->token_;
-                    }
-                }
-
-                void skip_to_next_significant_char() {
-                    auto & src = *(this->src_ptr_);
-                    if (! src.good() ) {
-                        return;
-                    }
-                    if (this->cur_char_ == 0) {
-                        this->get_next_char();
-                    }
-                    if ( !this->is_uncaptured_delimiter() ) {
-                        return;
-                    }
-                    while ( src.good() && this->is_uncaptured_delimiter() ) {
-                        this->get_next_char();
-                    }
-                }
-
-                void handle_comment() {
-                    auto & src = *(this->src_ptr_);
-                    std::ostringstream dest;
-                    unsigned int nesting = 0;
-                    while (src.good()) {
-                        if ( this->is_comment_end() ) {
-                            nesting -= 1;
-                            if (nesting <= 0) {
-                                this->get_next_char();
-                                break;
-                            }
-                        } else if ( this->is_comment_begin() ) {
-                            nesting += 1;
-                        } else if (this->capture_comments_) {
-                            dest.put(this->cur_char_);
-                        }
-                        this->get_next_char();
-                    }
-                    if (this->capture_comments_) {
-                        this->captured_comments_.push_back(dest.str());
-                    }
-                }
-
-                bool is_uncaptured_delimiter() {
-                    return this->uncaptured_delimiters_.find(this->cur_char_) != std::string::npos;
-                }
-
-                bool is_captured_delimiter(const std::string & s) {
-                    return this->captured_delimiters_.find(s) != std::string::npos;
-                }
-
-                bool is_captured_delimiter() {
-                    return this->captured_delimiters_.find(this->cur_char_) != std::string::npos;
-                }
-
-                bool is_quote_char() {
-                    return this->quote_chars_.find(this->cur_char_) != std::string::npos;
-                }
-
-                bool is_comment_begin() {
-                    return this->comment_begin_.find(this->cur_char_) != std::string::npos;
-                }
-
-                bool is_comment_end() {
-                    return this->comment_end_.find(this->cur_char_) != std::string::npos;
-                }
-
-                int get_next_char() {
-                    this->cur_char_ = this->src_ptr_->get();
-                    return this->cur_char_;
-                }
+                value_type & get_next_token();
+                void skip_to_next_significant_char();
+                void handle_comment();
+                bool is_uncaptured_delimiter();
+                bool is_captured_delimiter(const std::string & s);
+                bool is_captured_delimiter();
+                bool is_quote_char();
+                bool is_comment_begin();
+                bool is_comment_end();
+                int get_next_char();
 
             protected:
                 //  copy of source over lifespan
@@ -351,31 +128,9 @@ class Tokenizer {
 
         }; // iterator
 
-        iterator begin(std::istream & src) {
-            return iterator(src,
-                this->uncaptured_delimiters_,
-                this->captured_delimiters_,
-                this->quote_chars_,
-                this->esc_chars_,
-                this->comment_begin_,
-                this->comment_end_,
-                this->capture_comments_);
-        }
-
-        iterator begin(const std::string & str) {
-            return iterator(str,
-                this->uncaptured_delimiters_,
-                this->captured_delimiters_,
-                this->quote_chars_,
-                this->esc_chars_,
-                this->comment_begin_,
-                this->comment_end_,
-                this->capture_comments_);
-        }
-
-        iterator end() {
-            return iterator();
-        }
+        iterator begin(std::istream & src);
+        iterator begin(const std::string & str);
+        iterator end();
 
     private:
         std::string     uncaptured_delimiters_;
@@ -385,6 +140,7 @@ class Tokenizer {
         std::string     comment_begin_;
         std::string     comment_end_;
         bool            capture_comments_;
+
 }; // Tokenizer
 
 } // namespace platypus

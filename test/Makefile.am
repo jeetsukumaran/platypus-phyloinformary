@@ -51,8 +51,9 @@ bin_PROGRAMS = \
 	tokenizer_padded_quoted_str
 
 COMMON_SRC = \
-	../../src/tokenizer.hpp \
-	../../src/tree.hpp \
+	../src/tokenizer.hpp \
+	../src/tokenizer.cpp \
+	../src/tree.hpp \
 	src/tests.hpp \
 	src/tests.cpp
 
