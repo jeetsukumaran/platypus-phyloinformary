@@ -30,6 +30,7 @@ Tokenizer::Tokenizer(
     const std::string & uncaptured_delimiters,
     const std::string & captured_delimiters,
     const std::string & quote_chars,
+    bool esc_quote_chars_by_doubling,
     const std::string & esc_chars,
     const std::string & comment_begin,
     const std::string & comment_end,
@@ -37,6 +38,7 @@ Tokenizer::Tokenizer(
     : uncaptured_delimiters_(uncaptured_delimiters)
     , captured_delimiters_(captured_delimiters)
     , quote_chars_(quote_chars)
+    , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
     , esc_chars_(esc_chars)
     , comment_begin_(comment_begin)
     , comment_end_(comment_end)
@@ -48,6 +50,7 @@ Tokenizer::iterator Tokenizer::begin(std::istream & src) {
         this->uncaptured_delimiters_,
         this->captured_delimiters_,
         this->quote_chars_,
+        this->esc_quote_chars_by_doubling_,
         this->esc_chars_,
         this->comment_begin_,
         this->comment_end_,
@@ -59,6 +62,7 @@ Tokenizer::iterator Tokenizer::begin(const std::string & str) {
         this->uncaptured_delimiters_,
         this->captured_delimiters_,
         this->quote_chars_,
+        this->esc_quote_chars_by_doubling_,
         this->esc_chars_,
         this->comment_begin_,
         this->comment_end_,
@@ -76,6 +80,7 @@ Tokenizer::iterator::iterator(std::istream & src,
         const std::string & uncaptured_delimiters,
         const std::string & captured_delimiters,
         const std::string & quote_chars,
+        bool esc_quote_chars_by_doubling,
         const std::string & esc_chars,
         const std::string & comment_begin,
         const std::string & comment_end,
@@ -85,7 +90,7 @@ Tokenizer::iterator::iterator(std::istream & src,
             , uncaptured_delimiters_(uncaptured_delimiters)
             , captured_delimiters_(captured_delimiters)
             , quote_chars_(quote_chars)
-            , esc_quote_chars_by_doubling(true)
+            , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
             , esc_chars_(esc_chars)
             , comment_begin_(comment_begin)
             , comment_end_(comment_end)
@@ -98,6 +103,7 @@ Tokenizer::iterator::iterator(const std::string & str,
         const std::string & uncaptured_delimiters,
         const std::string & captured_delimiters,
         const std::string & quote_chars,
+        bool esc_quote_chars_by_doubling,
         const std::string & esc_chars,
         const std::string & comment_begin,
         const std::string & comment_end,
@@ -108,7 +114,7 @@ Tokenizer::iterator::iterator(const std::string & str,
             , uncaptured_delimiters_(uncaptured_delimiters)
             , captured_delimiters_(captured_delimiters)
             , quote_chars_(quote_chars)
-            , esc_quote_chars_by_doubling(true)
+            , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
             , esc_chars_(esc_chars)
             , comment_begin_(comment_begin)
             , comment_end_(comment_end)
@@ -120,7 +126,7 @@ Tokenizer::iterator::iterator(const std::string & str,
 Tokenizer::iterator::iterator()
     : allocated_src_ptr_(nullptr)
         , src_ptr_(nullptr)
-        , esc_quote_chars_by_doubling(true) {
+        , esc_quote_chars_by_doubling_(true) {
 }
 
 Tokenizer::iterator::~iterator() {
@@ -226,7 +232,7 @@ Tokenizer::iterator::value_type & Tokenizer::iterator::get_next_token() {
             }
             if (this->cur_char_ == cur_quote_char) {
                 this->get_next_char();
-                if (this->esc_quote_chars_by_doubling) {
+                if (this->esc_quote_chars_by_doubling_) {
                     if (this->cur_char_ == cur_quote_char) {
                         dest.put(cur_quote_char);
                         this->get_next_char();

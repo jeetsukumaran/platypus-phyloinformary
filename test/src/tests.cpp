@@ -124,6 +124,7 @@ platypus::Tokenizer get_nexus_tokenizer() {
             " \t\n\r",      // uncaptured delimiters
             "(),;:",        // quote_chars
             "\"'",          // quote_chars
+            true,           // esc_quote_chars_by_doubling
             "",             // esc_chars
             "[",            // comment_begin
             "]",            // comment_end

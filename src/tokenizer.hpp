@@ -38,10 +38,11 @@ class Tokenizer {
             const std::string & uncaptured_delimiters,
             const std::string & captured_delimiters,
             const std::string & quote_chars,
+            bool esc_quote_chars_by_doubling,
             const std::string & esc_chars,
             const std::string & comment_begin,
             const std::string & comment_end,
-            bool capture_comments=true);
+            bool capture_comments);
 
         virtual ~Tokenizer() {}
 
@@ -61,6 +62,7 @@ class Tokenizer {
                         const std::string & uncaptured_delimiters,
                         const std::string & captured_delimiters,
                         const std::string & quote_chars,
+                        bool esc_quote_chars_by_doubling,
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
@@ -69,6 +71,7 @@ class Tokenizer {
                         const std::string & uncaptured_delimiters,
                         const std::string & captured_delimiters,
                         const std::string & quote_chars,
+                        bool esc_quote_chars_by_doubling,
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
@@ -114,7 +117,7 @@ class Tokenizer {
                 std::string                 uncaptured_delimiters_;
                 std::string                 captured_delimiters_;
                 std::string                 quote_chars_;
-                bool                        esc_quote_chars_by_doubling;
+                bool                        esc_quote_chars_by_doubling_;
                 std::string                 esc_chars_;
                 std::string                 comment_begin_;
                 std::string                 comment_end_;
@@ -136,6 +139,7 @@ class Tokenizer {
         std::string     uncaptured_delimiters_;
         std::string     captured_delimiters_;
         std::string     quote_chars_;
+        bool            esc_quote_chars_by_doubling_;
         std::string     esc_chars_;
         std::string     comment_begin_;
         std::string     comment_end_;
