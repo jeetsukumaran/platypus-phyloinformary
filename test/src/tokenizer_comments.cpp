@@ -10,7 +10,7 @@ int main() {
     std::string str = "[&R] (foo:1 [a foo object], [start of subgroup](bar:2, c:2)[end of group][][][";
     // std::cout << "\n[" << str << "]" << std::endl;
     std::istringstream s(str);
-    platypus::Tokenizer tokenizer;
+    platypus::Tokenizer tokenizer = get_nexus_tokenizer();
     std::vector<std::string> observed;
     for (auto iter = tokenizer.begin(s); iter != tokenizer.end(); ++iter) {
         // std::cout << "'" << *iter << "'" << std::endl;

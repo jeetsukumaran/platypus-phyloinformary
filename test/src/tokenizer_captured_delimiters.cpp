@@ -10,7 +10,7 @@ int main() {
     std::string str = "(aaa:1.00,     (b:2.18e-1,      (ccc:11, d:1e-1)   k:  3)  u:   7)    rrr:0.0;";
     // std::cout << "\n[" << str << "]" << std::endl;
     std::istringstream s(str);
-    platypus::Tokenizer tokenizer;
+    platypus::Tokenizer tokenizer = get_nexus_tokenizer();
     std::vector<std::string> observed;
     for (auto iter = tokenizer.begin(s); iter != tokenizer.end(); ++iter) {
         // std::cout << "'" << *iter << "'" << std::endl;

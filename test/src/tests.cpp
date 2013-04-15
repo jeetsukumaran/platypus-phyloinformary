@@ -117,6 +117,22 @@ std::vector<std::string> split(const std::string& str,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Tokenizer
+
+platypus::Tokenizer get_nexus_tokenizer() {
+    return platypus::Tokenizer(
+            " \t\n\r",      // uncaptured delimiters
+            "(),;:",        // quote_chars
+            "\"'",          // quote_chars
+            "",             // esc_chars
+            "[",            // comment_begin
+            "]",            // comment_end
+            true            // capture_comments
+            );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Checking/Verification
 
 bool compare_token_vectors(const std::string & test_title,

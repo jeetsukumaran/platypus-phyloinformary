@@ -9,7 +9,7 @@
 int main() {
     std::string str = "";
     std::istringstream s(str);
-    platypus::Tokenizer tokenizer;
+    platypus::Tokenizer tokenizer = get_nexus_tokenizer();
     std::vector<std::string> observed;
     for (auto iter = tokenizer.begin(s); iter != tokenizer.end(); ++iter) {
         observed.push_back(*iter);

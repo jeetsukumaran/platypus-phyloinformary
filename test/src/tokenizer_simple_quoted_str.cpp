@@ -8,7 +8,7 @@
 
 int main() {
     std::string str = "the quick 'brown fox' jumps over the 'lazy dog'";
-    platypus::Tokenizer tokenizer;
+    platypus::Tokenizer tokenizer = get_nexus_tokenizer();
     std::vector<std::string> observed;
     for (auto iter = tokenizer.begin(str); iter != tokenizer.end(); ++iter) {
         observed.push_back(*iter);

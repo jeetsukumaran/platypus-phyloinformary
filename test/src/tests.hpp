@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <map>
 #include "../../src/tree.hpp"
+#include "../../src/tokenizer.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 // BasicTree
@@ -213,6 +214,7 @@ void build_tree(TreeType& tree,
 
 //////////////////////////////////////////////////////////////////////////////
 // Standard Tree for Tests
+
 const std::string STANDARD_TEST_TREE_STRING = "a -> b -> i; b -> e -> j; e -> k; a -> c; c -> g; c -> f; g -> l; g -> m; f -> n; f -> h -> o; h -> p;";
 const std::string STANDARD_TEST_TREE_NEWICK = "((i, (j, k)e)b, ((l, m)g, (n, (o, p)h)f)c)a;";
 const std::vector<std::string> STANDARD_TEST_TREE_PREORDER = {"a", "b", "i", "e", "j", "k", "c", "g", "l", "m", "f", "n", "h", "o", "p"};
@@ -325,6 +327,10 @@ void write_newick(const TreeT& tree, std::ostream& out) {
     write_newick(tree, out, write_node_f);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Tokenizer
+
+platypus::Tokenizer get_nexus_tokenizer();
 
 //////////////////////////////////////////////////////////////////////////////
 // Checking/Verification

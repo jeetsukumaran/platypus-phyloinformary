@@ -8,7 +8,7 @@
 
 int main() {
     std::string str = "([the quick]apple[brown],([fox]banjo,([jumps]cucumber[over the],[really]dogwood)[lazy]eggplant)) rhubarb[dog];";
-    platypus::Tokenizer tokenizer;
+    platypus::Tokenizer tokenizer = get_nexus_tokenizer();
     std::vector<std::string> observed;
     std::map<std::string, std::vector<std::string>> exp_comments({
             { "apple",          {"the quick", "brown"},},
