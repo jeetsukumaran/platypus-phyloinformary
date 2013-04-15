@@ -117,18 +117,27 @@ std::vector<std::string> split(const std::string& str,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Logging/Reporting
+// Checking/Verification
 
-// void fail_test(const std::string& test_name,
-//         const std::string& expected,
-//         const std::string& observed,
-//         const std::string& message) {
-//     std::cerr << "\n|| *** FAIL ***" << std::endl;
-//     std::cerr << "||     Test: " << test_name << std::endl;
-//     std::cerr << "|| Expected: " << expected << std::endl;
-//     std::cerr << "|| Observed: " << observed << std::endl;
-//     if (!message.empty()) {
-//         std::cerr << message << std::endl;
-//     }
-//     exit(1);
-// }
+bool compare_token_vectors(const std::string & test_title,
+        const std::vector<std::string> & expected,
+        const std::vector<std::string> & observed) {
+    if (expected != observed) {
+        std::cerr << "\n[" << test_title << "]" << std::endl;
+        std::cerr << "Expected:\n";
+        for (auto & s : expected) {
+            std::cerr << " '" << s << "'\n";
+        }
+        // std::copy(expected.begin(), expected.end(), std::ostream_iterator<std::string>(std::cerr, ", "));
+        std::cerr << std::endl;
+        std::cerr << "Received:\n";
+        // std::copy(observed.begin(), observed.end(), std::ostream_iterator<std::string>(std::cerr, ", "));
+        for (auto & s : observed) {
+            std::cerr << " '" << s << "'\n";
+        }
+        std::cerr << std::endl;
+        return false;
+    } else {
+        return true;
+    }
+}

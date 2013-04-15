@@ -327,7 +327,7 @@ void write_newick(const TreeT& tree, std::ostream& out) {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Tests
+// Checking/Verification
 
 template <class TreeT>
 void check_newick(TreeT& tree,
@@ -346,4 +346,7 @@ void check_newick(TreeT& tree,
     }
 }
 
+bool compare_token_vectors(const std::string & test_title,
+        const std::vector<std::string> & expected,
+        const std::vector<std::string> & observed);
 #endif

@@ -22,7 +22,14 @@ TESTS = \
 	basic_tree_deep_copy \
 	heterogenous_tree_deep_copy \
 	heterogenous_tree_deep_copy2 \
-	data_tree
+	data_tree \
+	tokenizer_simple_str \
+	tokenizer_empty \
+	tokenizer_captured_delimiters \
+	tokenizer_comments \
+	tokenizer_comment_capture \
+	tokenizer_simple_quoted_str \
+	tokenizer_padded_quoted_str
 
 bin_PROGRAMS = \
 	basic_tree \
@@ -34,9 +41,17 @@ bin_PROGRAMS = \
 	basic_tree_deep_copy \
 	heterogenous_tree_deep_copy \
 	heterogenous_tree_deep_copy2 \
-	data_tree
+	data_tree \
+	tokenizer_simple_str \
+	tokenizer_empty \
+	tokenizer_captured_delimiters \
+	tokenizer_comments \
+	tokenizer_comment_capture \
+	tokenizer_simple_quoted_str \
+	tokenizer_padded_quoted_str
 
 COMMON_SRC = \
+	../../src/tokenizer.hpp \
 	../../src/tree.hpp \
 	src/tests.hpp \
 	src/tests.cpp
@@ -80,3 +95,34 @@ heterogenous_tree_deep_copy2_SOURCES = \
 data_tree_SOURCES = \
 	$(COMMON_SRC) \
 	src/data_tree.cpp
+
+tokenizer_simple_str_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_simple_str.cpp
+
+tokenizer_empty_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_empty.cpp
+
+tokenizer_captured_delimiters_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_captured_delimiters.cpp
+
+tokenizer_comments_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_comments.cpp
+
+tokenizer_comment_capture_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_comment_capture.cpp
+
+tokenizer_simple_quoted_str_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_simple_quoted_str.cpp
+
+tokenizer_padded_quoted_str_SOURCES = \
+	$(COMMON_SRC) \
+	src/tokenizer_padded_quoted_str.cpp
+
+
+
