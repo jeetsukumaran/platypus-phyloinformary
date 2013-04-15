@@ -35,12 +35,12 @@ class Tokenizer {
 
     public:
         Tokenizer(
-            const std::string & uncaptured_delimiters = " \t\n\r",
-            const std::string & captured_delimiters = "(),;:",
-            const std::string & quote_chars = "\"'",
-            const std::string & esc_chars = "\\",
-            const std::string & comment_begin = "[",
-            const std::string & comment_end = "]",
+            const std::string & uncaptured_delimiters,
+            const std::string & captured_delimiters,
+            const std::string & quote_chars,
+            const std::string & esc_chars,
+            const std::string & comment_begin,
+            const std::string & comment_end,
             bool capture_comments=true);
 
         virtual ~Tokenizer() {}
