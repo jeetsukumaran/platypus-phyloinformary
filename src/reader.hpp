@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <functional>
+#include "tree.hpp"
 
 namespace platypus {
 
@@ -90,20 +91,16 @@ namespace platypus {
  *
  */
 template <typename TreeT>
-class TreeReader {
+class TreeReader : public TreeBuilder<TreeT> {
 
     public:
-
-        // typdefs for data
-        typedef TreeT                           TreeType;
-        typedef typename TreeType::node_type    NodeType;
-        typedef typename TreeType::value_type   NodeValueType;
-
-        // typedefs for functions used in construction
-        typedef std::function<TreeType& ()>                                 TreeFactoryType;
-        typedef std::function<void (TreeType&, bool)>                       TreeIsRootedFuncType;
-        typedef std::function<void (NodeValueType&, const std::string&)>    SetNodeValueLabelFuncType;
-        typedef std::function<void (NodeValueType&, double)>                SetNodeValueEdgeLengthFuncType;
+        typedef typename TreeBuilder<TreeT>::TreeType                        TreeType;
+        typedef typename TreeBuilder<TreeT>::NodeType                        NodeType;
+        typedef typename TreeBuilder<TreeT>::NodeValueType                   NodeValueType;
+        typedef typename TreeBuilder<TreeT>::TreeFactoryType                 TreeFactoryType;
+        typedef typename TreeBuilder<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
+        typedef typename TreeBuilder<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
+        typedef typename TreeBuilder<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -145,11 +142,12 @@ class TreeReader {
                 const TreeFactoryType & tree_factory,
                 const TreeIsRootedFuncType & tree_is_rooted_func,
                 const SetNodeValueLabelFuncType & node_value_label_func,
-                const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func) {
-            this->bind_tree_factory(tree_factory);
-            this->set_tree_is_rooted_func(tree_is_rooted_func);
-            this->set_node_value_label_func(node_value_label_func);
-            this->set_node_value_edge_length_func(node_value_edge_length_func);
+                const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
+            : TreeBuilder<TreeT>(
+                    tree_factory,
+                    tree_is_rooted_func,
+                    node_value_label_func,
+                    node_value_edge_length_func) {
         }
 
         /**
@@ -185,31 +183,10 @@ class TreeReader {
                 TreeIsRootedFuncPtrType tree_is_rooted_setter=nullptr,
                 NodeValueLabelFuncPtrType node_value_label_setter=nullptr,
                 NodeValueEdgeLengthFuncPtrType node_value_edge_length_setter=nullptr) {
-            this->bind_tree_factory(tree_factory);
+            this->set_tree_factory(tree_factory);
             this->set_tree_is_rooted_func(tree_is_rooted_setter);
             this->set_node_value_label_func(node_value_label_setter);
             this->set_node_value_edge_length_func(node_value_edge_length_setter);
-        }
-
-        /**
-         * @brief Sets the function object that will be called to allocate,
-         * construct and * return a new TreeT object.
-         *
-         * @param tree_factory
-         *   A Function object that takes no arguments and returns a reference
-         *   to a new TreeT object. This function should take responsibility
-         *   for allocating memory, constructing, and initializing the TreeT
-         *   object. In addition, the function should also take responsibility
-         *   for storage ofthe object. Client code is responsible for the
-         *   management (including disposal) of the object.
-         *
-         */
-        void bind_tree_factory(const TreeFactoryType & tree_factory) {
-            this->tree_factory_ = tree_factory;
-        }
-
-        void set_tree_is_rooted_func(const TreeIsRootedFuncType & tree_is_rooted_func) {
-            this->set_tree_is_rooted_ = tree_is_rooted_func;
         }
 
         void set_tree_is_rooted_func(TreeIsRootedFuncPtrType tree_is_rooted_func_ptr) {
@@ -220,14 +197,6 @@ class TreeReader {
             }
         }
 
-        void clear_tree_is_rooted_func() {
-            this->set_tree_is_rooted_ = [] (TreeType&, bool) { };
-        }
-
-        void set_node_value_label_func(const SetNodeValueLabelFuncType & node_value_label_func) {
-            this->set_node_value_label_ = node_value_label_func;
-        }
-
         void set_node_value_label_func(NodeValueLabelFuncPtrType node_value_label_func_ptr) {
             if (node_value_label_func_ptr != nullptr) {
                 this->set_node_value_label_ = [node_value_label_func_ptr] (NodeValueType& nd, const std::string label) { ((nd).*(node_value_label_func_ptr))(label); };
@@ -236,24 +205,12 @@ class TreeReader {
             }
         }
 
-        void clear_node_value_label_func() {
-            this->set_node_value_label_ = [] (NodeValueType&, const std::string&) { };
-        }
-
-        void set_node_value_edge_length_func(const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func) {
-            this->set_node_value_edge_length_ = node_value_edge_length_func;
-        }
-
         void set_node_value_edge_length_func(NodeValueEdgeLengthFuncPtrType node_value_edge_length_func_ptr) {
             if (node_value_edge_length_func_ptr != nullptr) {
                 this->set_node_value_edge_length_ = [node_value_edge_length_func_ptr] (NodeValueType& nd, double len) { ((nd).*(node_value_edge_length_func_ptr))(len); };
             } else {
                 this->clear_node_value_edge_length_func();
             }
-        }
-
-        void clear_node_value_edge_length_func() {
-            this->set_node_value_edge_length_ = [] (NodeValueType&, double) { };
         }
 
         virtual int read_from_stream(std::istream& src, const std::string& format) = 0;
@@ -270,12 +227,6 @@ class TreeReader {
             std::istringstream s(str);
             return this->read_from_stream(s, format);
         }
-
-    protected:
-        TreeFactoryType                         tree_factory_;
-        TreeIsRootedFuncType                    set_tree_is_rooted_;
-        SetNodeValueLabelFuncType               set_node_value_label_;
-        SetNodeValueEdgeLengthFuncType          set_node_value_edge_length_;
 
 }; // TreeReader
 
