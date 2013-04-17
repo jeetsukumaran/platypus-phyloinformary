@@ -34,7 +34,6 @@ AC_C_INLINE
 AC_CHECK_FUNCS([memmove strchr strtol])
 AC_CONFIG_FILES([				\
 	Makefile                    \
-	src/Makefile                \
 	test/Makefile
 	])
 AC_OUTPUT
