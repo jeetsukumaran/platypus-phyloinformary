@@ -21,17 +21,16 @@ if ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 "Please delete them.")
 endif()
 
-# CXX="/usr/platform/bin/g++" cmake -DENABLE_INSTALL_PREFIX=true -DCMAKE_INSTALL_PREFIX="/custom/install/prefix"
-option(ENABLE_INSTALL_PREFIX "Install build targets to system (path given by '-DCMAKE_INSTALL_PREFIX' or '${CMAKE_INSTALL_PREFIX}' if not specified)." OFF)
-if ( ENABLE_INSTALL_PREFIX )
-    set (CMAKE_INSTALL_PREFIX installed CACHE PATH "Installation root")
-else()
-    set (CMAKE_INSTALL_PREFIX installed CACHE PATH "Installation root" FORCE)
+# Install prefix is sub-directory `installed` of top build directory unless
+# explicity specified as otherwise by using `-DCMAKE_INSTALL_PREFIX=/foo/bar`
+# option on cmake.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "Default install path" FORCE )
 endif()
 
 # Offer the user the choice of overriding the installation directories
-set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
+set(INSTALL_BIN_DIR bin CACHE PATH "Installation sub-directory for executables")
 set(INSTALL_INCLUDE_DIR include CACHE PATH
   "Installation directory for header files")
 if(WIN32 AND NOT CYGWIN)
