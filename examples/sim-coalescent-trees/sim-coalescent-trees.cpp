@@ -66,16 +66,23 @@ int main(int argc, const char * argv []) {
     unsigned long num_trees = 1;
     double population_size = 1.0;;
     platypus::OptionParser parser(
-             "SimCoalescentTree v1.0.0",
-            "Coalescent Tree Simulator",
+            "SimCoalescentTree v1.0.0",
+            "Simulate basic coalescent trees using the platypus-phyloinformary library.",
             "%prog [options] <NUM-TIPS>");
     // parser.add_option<unsigned long>(&num_tips, "-t", "--num-tips",
     //                            "number of tips in each tree");
-    parser.add_option<unsigned long>(&num_trees, "-t", "--num-treess",
+    parser.add_option<unsigned long>(&num_trees, "-t", "--num-trees",
                                "number of trees to simulate (default = %default)");
     parser.add_option<double>(&num_trees, "-p", "--pop-size",
                                "haploid population size (default = %default)");
     parser.parse(argc, argv);
+
+    const auto & args = parser.get_args();
+    if (args.size() != 1) {
+        std::cerr << "Expecting exactly one argument: number of tips" << std::endl;
+        exit(1);
+    }
+    num_tips = std::atol(args[0].c_str());
 
     typedef platypus::Tree<NodeData> TreeType;
     std::vector<TreeType> trees;
