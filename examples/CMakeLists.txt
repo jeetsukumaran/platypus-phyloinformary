@@ -64,8 +64,8 @@ else()
 endif()
 
 # add main library to includes
-# include_directories(include)
+# include_directories(src/include)
 # include_directories(../src)
 
 # Add sub-directories
-add_subdirectory(sim-coalescent-trees)
+add_subdirectory(src/sim-coalescent-trees)

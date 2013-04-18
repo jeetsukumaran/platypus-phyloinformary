@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "../include/cmdopt.hpp"
-#include "../../src/coalescent.hpp"
+#include "../../../src/coalescent.hpp"
 
 template <class TreeT, class iter>
 void write_newick_node(const TreeT& tree,
