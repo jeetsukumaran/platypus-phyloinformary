@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "coalescent.hpp"
+#include "../include/cmdopt.hpp"
+#include "../../src/coalescent.hpp"
 
 template <class TreeT, class iter>
 void write_newick_node(const TreeT& tree,
@@ -50,6 +51,32 @@ struct NodeData {
 };
 
 int main(int argc, const char * argv []) {
+
+    // cmdline::parser args_parser;
+    // args_parser.add<unsigned long>("num-trees", 'n', "number of trees to simulate", false, 1);
+    // args_parser.add<double>("population-size", 'p', "(haploid) population size", false, 1.0);
+    // args_parser.parse_check(argc, argv);
+    // auto & rest = args_parser.rest();
+    // if (rest.size() == 0) {
+    //     std::cerr << "Need to specify the number of tips on each tree" << std::endl;
+    //     exit(1);
+    // }
+
+    unsigned long num_tips = 10;
+    unsigned long num_trees = 1;
+    double population_size = 1.0;;
+    platypus::OptionParser parser(
+             "SimCoalescentTree v1.0.0",
+            "Coalescent Tree Simulator",
+            "%prog [options] <NUM-TIPS>");
+    // parser.add_option<unsigned long>(&num_tips, "-t", "--num-tips",
+    //                            "number of tips in each tree");
+    parser.add_option<unsigned long>(&num_trees, "-t", "--num-treess",
+                               "number of trees to simulate (default = %default)");
+    parser.add_option<double>(&num_trees, "-p", "--pop-size",
+                               "haploid population size (default = %default)");
+    parser.parse(argc, argv);
+
     typedef platypus::Tree<NodeData> TreeType;
     std::vector<TreeType> trees;
     auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
@@ -64,8 +91,8 @@ int main(int argc, const char * argv []) {
                 out << ":" << nv.edge_length;
             });
     platypus::coalescent::BasicCoalescentSimulator<TreeType> sim(tree_factory, is_rooted_f, node_label_f, node_edge_f);
-    for (unsigned int i = 0; i < 1; ++i) {
-        auto tree = sim.generate_fixed_pop_size_tree(10, 1000);
+    for (unsigned long i = 0; i < num_trees; ++i) {
+        auto tree = sim.generate_fixed_pop_size_tree(num_tips, population_size);
         std::cout << "[&R] ";
         write_newick(tree, std::cout, write_node_f);
     }
