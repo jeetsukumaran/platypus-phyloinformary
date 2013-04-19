@@ -28,7 +28,7 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header fi
 IF (WIN32 AND NOT CYGWIN)
   SET(DEF_INSTALL_CMAKE_DIR CMake)
 ELSE()
-    set(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
+  SET(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
 ENDIF()
 SET(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
@@ -40,13 +40,7 @@ SET(MAIN_PLATYPUS_SOURCE_DIR ${PROJECT_SOURCE_DIR}/platypus CACHE PATH "Director
 # if files are added
 FILE(GLOB MAIN_PLATYPUS_SOURCE_FILES ${MAIN_PLATYPUS_SOURCE_DIR}/*.cpp ${MAIN_PLATYPUS_SOURCE_DIR}/*.hpp)
 
-# Set include-directories
-INCLUDE_DIRECTORIES(
-  "${PROJECT_SOURCE_DIR}"   # to find foo/foo.h
-  "${PROJECT_BINARY_DIR}"  # to find foo/config.h
-    )
-
-# Compiler flags
+# Set compiler flags
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 IF (CMAKE_BUILD_TYPE MATCHES debug)
     ADD_DEFINITIONS(-O0 -Wall -g)
@@ -57,10 +51,14 @@ ENDIF()
 # enable tests
 ENABLE_TESTING ()
 
-# Add main library to includes
-INCLUDE_DIRECTORIES(src/include)
+# Set include-directories
+INCLUDE_DIRECTORIES(
+  "${PROJECT_SOURCE_DIR}"   # to find foo/foo.h
+  "${PROJECT_BINARY_DIR}"   # to find foo/config.h
+    )
 
 # Add test subdirectory
-# `add_subdirectory(dir EXCLUDE_FROM_ALL)` means it will be excluded from
-# ``make all``
+# Note: specifying `add_subdirectory(dir EXCLUDE_FROM_ALL)` means it will be
+# excluded from ``make all`` (but not from, e.g. `make check` if this custom
+# target is defined).
 ADD_SUBDIRECTORY(test)
