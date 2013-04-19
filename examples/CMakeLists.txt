@@ -54,7 +54,7 @@ include_directories(
   "${PROJECT_SOURCE_DIR}"   # to find foo/foo.h
   "${PROJECT_BINARY_DIR}")  # to find foo/config.h
 
-# standard flags
+# compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 if (CMAKE_BUILD_TYPE MATCHES debug)
     add_definitions(-O0 -Wall -g)

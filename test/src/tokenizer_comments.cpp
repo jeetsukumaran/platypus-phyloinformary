@@ -3,7 +3,7 @@
 #include <vector>
 #include <iterator>
 #include <map>
-#include "../../src/tokenizer.hpp"
+#include <platypus/tokenizer.hpp>
 #include "tests.hpp"
 
 int main() {

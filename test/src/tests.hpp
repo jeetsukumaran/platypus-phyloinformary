@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
-#include "../../src/tree.hpp"
-#include "../../src/tokenizer.hpp"
+#include <platypus/tree.hpp>
+#include <platypus/tokenizer.hpp>
 
 //////////////////////////////////////////////////////////////////////////////
 // BasicTree
@@ -138,6 +138,7 @@ void fail_test(const std::string& test_name,
 template <class TreeType>
 void build_tree(TreeType& tree,
         const std::string& str) {
+    /*
     //
     // Following tree:
     //
@@ -174,6 +175,7 @@ void build_tree(TreeType& tree,
     // Newick:
     //
     //      ((i, (j, k)e)b, ((l, m)g, (n, (o, p)h)f)c)a;
+    */
 
     std::unordered_map<std::string, typename TreeType::node_type *>                  nodes;
     std::unordered_map<std::string, std::vector<typename TreeType::node_type *>>     parent_children;
