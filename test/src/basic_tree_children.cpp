@@ -17,11 +17,12 @@ int main() {
         assert(expected_iter != STANDARD_TEST_TREE_CHILDREN.end());
         auto expected_children = expected_iter->second;
         if (children[*ndi] != expected_children) {
-            fail_test(__FILE__,
+            return fail_test(__FILE__,
                 expected_children,
                 children[*ndi],
                 "Parent node: ", *ndi);
+        } else {
+            return 0;
         }
     }
-    exit(0);
 }

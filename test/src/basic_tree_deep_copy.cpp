@@ -22,9 +22,12 @@ int main() {
         uppercase(s);
         *ndi = s;
     }
-    check_newick(tree_copy, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
-    check_newick(tree_original, "original tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true);
-
+    if (check_newick(tree_copy, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
+        return 1;
+    };
+    if (check_newick(tree_original, "original tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
+        return 1;
+    }
     // Restore labels on original tree and make sure it is valid
     for (auto ndi = tree_original.preorder_begin(); ndi != tree_original.preorder_end(); ++ndi) {
         std::string s = ndi->data();
@@ -36,8 +39,11 @@ int main() {
         uppercase(s);
         *ndi = s;
     }
-    check_newick(tree_original, "original tree with restored labels failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
-    check_newick(tree_copy, "cloned tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true);
-
-    exit(0);
+    if (check_newick(tree_original, "original tree with restored labels failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
+        return 1;
+    }
+    if (check_newick(tree_copy, "cloned tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
+        return 1;
+    }
+    return 0;
 }

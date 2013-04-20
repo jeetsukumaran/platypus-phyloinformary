@@ -21,8 +21,8 @@ int main() {
             });
     auto success = compare_token_vectors(__FILE__, expected, observed);
     if (!success) {
-        exit(1);
+        return 1;
     } else {
-        exit(0);
+        return 0;
     }
 }

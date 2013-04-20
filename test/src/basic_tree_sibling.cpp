@@ -21,11 +21,11 @@ int main() {
         assert(expected_iter != STANDARD_TEST_TREE_SIBLINGS.end());
         auto expected_siblings = expected_iter->second;
         if (siblings[*ndi] != expected_siblings) {
-            fail_test(__FILE__,
+            return fail_test(__FILE__,
                 expected_siblings,
                 siblings[*ndi],
                 "Start node: ", *ndi);
         }
     }
-    exit(0);
+    return 0;
 }

@@ -11,8 +11,8 @@ int main() {
     std::string result = out.str();
     trim(result, " \t\n\r");
     if (result == STANDARD_TEST_TREE_NEWICK) {
-        exit(0);
+        return 0;
     } else {
-        fail_test(__FILE__, STANDARD_TEST_TREE_NEWICK, result);
+        return fail_test(__FILE__, STANDARD_TEST_TREE_NEWICK, result);
     }
 }

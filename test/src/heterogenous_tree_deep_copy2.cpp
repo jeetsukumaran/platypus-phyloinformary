@@ -28,6 +28,7 @@ class Y {
         }
         const Y & operator=(const X & x) {
             this->label_ = x.get_label();
+            return *this;
         }
         const std::string & get_label() const {
             return this->label_;
@@ -49,7 +50,6 @@ int main() {
     build_tree(x, STANDARD_TEST_TREE_STRING);
     platypus::Tree<Y> y;
     y.deep_copy_from(x);
-    check_newick(y, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
-    exit(0);
+    return check_newick(y, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
 }
 

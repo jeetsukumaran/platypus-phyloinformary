@@ -13,9 +13,9 @@ int main() {
         leaves.push_back(*ndi);
     }
     if (leaves == STANDARD_TEST_TREE_LEAVES) {
-        exit(0);
+        return 0;
     } else {
-        fail_test(__FILE__,
+        return fail_test(__FILE__,
             STANDARD_TEST_TREE_LEAVES,
             leaves);
     }

@@ -75,11 +75,6 @@ std::vector<std::string> split(const std::string& str,
 //////////////////////////////////////////////////////////////////////////////
 // Logging/Reporting
 
-// void fail_test(const std::string& test_name,
-//         const std::string& expected,
-//         const std::string& observed,
-//         const std::string& message);
-
 template<class T>
 void write_container(const T& container, std::ostream& out, const std::string& separator=", ") {
     std::copy(container.cbegin(), container.cend(), std::ostream_iterator<typename T::value_type>(out, separator.c_str()));
@@ -119,7 +114,7 @@ void log(S& stream, const T& arg1, const Types&... args) {
 }
 
 template <typename T, typename U, typename... Types>
-void fail_test(const std::string& test_name,
+int fail_test(const std::string& test_name,
         const T& expected,
         const U& observed,
         const Types&... args) {
@@ -129,7 +124,7 @@ void fail_test(const std::string& test_name,
     log(std::cerr, "\n|| Observed: ", observed);
     log(std::cerr, "\n||  Remarks: ", args...);
     std::cerr << std::endl;
-    exit(1);
+    return 1;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,7 +333,7 @@ platypus::Tokenizer get_nexus_tokenizer();
 // Checking/Verification
 
 template <class TreeT>
-void check_newick(TreeT& tree,
+int check_newick(TreeT& tree,
         const std::string & remarks,
         const std::string & compare_str=STANDARD_TEST_TREE_NEWICK,
         bool fail_if_equal=false) {
@@ -347,10 +342,12 @@ void check_newick(TreeT& tree,
     std::string result = out.str();
     trim(result, " \t\n\r");
     if ( (fail_if_equal && result == compare_str) || (!fail_if_equal && result != compare_str) ) {
-        fail_test(__FILE__,
+        return fail_test(__FILE__,
                 STANDARD_TEST_TREE_NEWICK,
                 result,
                 remarks);
+    } else {
+        return 0;
     }
 }
 

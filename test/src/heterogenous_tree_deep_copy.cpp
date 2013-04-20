@@ -24,6 +24,7 @@ class Y {
     public:
         const Y & operator=(const X & x) {
             this->label_ = static_cast<int>(x.get_label()[0]) - 96;
+            return *this;
         }
         const int get_label() const {
             return this->label_;
@@ -47,7 +48,6 @@ int main() {
     y.deep_copy_from(x);
     // write_newick(y, std::cout);
     std::string expected = "((9, (10, 11)5)2, ((12, 13)7, (14, (15, 16)8)6)3)1;";
-    check_newick(y, "cloned tree failed to yield expected newick string", expected, false);
-    exit(0);
+    return check_newick(y, "cloned tree failed to yield expected newick string", expected, false);
 }
 

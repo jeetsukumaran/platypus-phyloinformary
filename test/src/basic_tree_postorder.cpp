@@ -13,9 +13,9 @@ int main() {
         visits.push_back(*ndi);
     }
     if (visits == STANDARD_TEST_TREE_POSTORDER) {
-        exit(0);
+        return 0;
     } else {
-        fail_test(__FILE__,
+        return fail_test(__FILE__,
             STANDARD_TEST_TREE_POSTORDER,
             visits);
     }

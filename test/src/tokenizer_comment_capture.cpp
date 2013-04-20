@@ -65,8 +65,8 @@ int main() {
             });
     auto success2 = compare_token_vectors(__FILE__, expected, observed);
     if (!success || !success2) {
-        exit(1);
+        return 1;
     } else {
-        exit(0);
+        return 0;
     }
 }
