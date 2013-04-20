@@ -201,7 +201,6 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                 bool use_expected_tmrca=false) {
             auto & tree = this->tree_factory_();
             this->set_tree_is_rooted_(tree, true);
-            double elapsed_time = 0.0;
             std::map<typename TreeT::node_type *, double> nodes;
             for (auto & leaf_iter = leaf_values_begin; leaf_iter != leaf_values_end; ++leaf_iter) {
                 typename TreeT::node_type * new_node = tree.create_leaf_node(*leaf_iter);
