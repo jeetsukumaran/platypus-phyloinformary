@@ -25,7 +25,7 @@
 #include <map>
 #include "numeric/rng.hpp"
 #include "numeric/functions.hpp"
-#include "tree.hpp"
+#include "treeproducer.hpp"
 
 namespace platypus {
 namespace coalescent {
@@ -123,16 +123,16 @@ double expected_time_to_coalescence(
  *   Random number generator type.
  */
 template <typename TreeT, typename RngT=platypus::numeric::RandomNumberGenerator>
-class BasicCoalescentSimulator : public platypus::TreeBuilder<TreeT> {
+class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
 
     public:
 
         BasicCoalescentSimulator(RngT & rng,
-                const typename TreeBuilder<TreeT>::TreeFactoryType & tree_factory,
-                const typename TreeBuilder<TreeT>::TreeIsRootedFuncType & tree_is_rooted_func,
-                const typename TreeBuilder<TreeT>::SetNodeValueLabelFuncType & node_value_label_func,
-                const typename TreeBuilder<TreeT>::SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
-            : TreeBuilder<TreeT>(
+                const typename TreeProducer<TreeT>::TreeFactoryType & tree_factory,
+                const typename TreeProducer<TreeT>::TreeIsRootedFuncType & tree_is_rooted_func,
+                const typename TreeProducer<TreeT>::SetNodeValueLabelFuncType & node_value_label_func,
+                const typename TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
+            : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
@@ -142,11 +142,11 @@ class BasicCoalescentSimulator : public platypus::TreeBuilder<TreeT> {
         }
 
         BasicCoalescentSimulator(
-                const typename TreeBuilder<TreeT>::TreeFactoryType & tree_factory,
-                const typename TreeBuilder<TreeT>::TreeIsRootedFuncType & tree_is_rooted_func,
-                const typename TreeBuilder<TreeT>::SetNodeValueLabelFuncType & node_value_label_func,
-                const typename TreeBuilder<TreeT>::SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
-            : TreeBuilder<TreeT>(
+                const typename TreeProducer<TreeT>::TreeFactoryType & tree_factory,
+                const typename TreeProducer<TreeT>::TreeIsRootedFuncType & tree_is_rooted_func,
+                const typename TreeProducer<TreeT>::SetNodeValueLabelFuncType & node_value_label_func,
+                const typename TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
+            : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,

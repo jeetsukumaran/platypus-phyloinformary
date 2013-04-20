@@ -27,7 +27,7 @@
 #include <string>
 #include <sstream>
 #include <functional>
-#include "tree.hpp"
+#include "treeproducer.hpp"
 
 namespace platypus {
 
@@ -91,16 +91,16 @@ namespace platypus {
  *
  */
 template <typename TreeT>
-class TreeReader : public TreeBuilder<TreeT> {
+class TreeReader : public TreeProducer<TreeT> {
 
     public:
-        typedef typename TreeBuilder<TreeT>::TreeType                        TreeType;
-        typedef typename TreeBuilder<TreeT>::NodeType                        NodeType;
-        typedef typename TreeBuilder<TreeT>::NodeValueType                   NodeValueType;
-        typedef typename TreeBuilder<TreeT>::TreeFactoryType                 TreeFactoryType;
-        typedef typename TreeBuilder<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
-        typedef typename TreeBuilder<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
-        typedef typename TreeBuilder<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
+        typedef typename TreeProducer<TreeT>::TreeType                        TreeType;
+        typedef typename TreeProducer<TreeT>::NodeType                        NodeType;
+        typedef typename TreeProducer<TreeT>::NodeValueType                   NodeValueType;
+        typedef typename TreeProducer<TreeT>::TreeFactoryType                 TreeFactoryType;
+        typedef typename TreeProducer<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
+        typedef typename TreeProducer<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
+        typedef typename TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -143,7 +143,7 @@ class TreeReader : public TreeBuilder<TreeT> {
                 const TreeIsRootedFuncType & tree_is_rooted_func,
                 const SetNodeValueLabelFuncType & node_value_label_func,
                 const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
-            : TreeBuilder<TreeT>(
+            : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
