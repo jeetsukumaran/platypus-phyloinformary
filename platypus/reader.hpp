@@ -215,19 +215,22 @@ class TreeReader : public TreeProducer<TreeT> {
             }
         }
 
-        virtual int read_from_stream(std::istream& src, const std::string& format) = 0;
+        virtual int parse_from_stream(std::istream& src, const std::string& format) = 0;
 
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="nexus") {
             std::ifstream f(filepath);
             if (!f.good()) {
                 throw std::runtime_error("platypus::TreeReader::read_from_filepath(): Error opening file for input");
             }
-            return this->read_from_stream(f, format);
+            return this->parse_from_stream(s, format);
         }
 
         virtual int read_from_string(const std::string& str, const std::string& format="nexus") {
             std::istringstream s(str);
-            return this->read_from_stream(s, format);
+            return this->parse_from_stream(s, format);
+
+        virtual int read_from_stream(std::istream& src, const std::string& format) {
+            return this->parse_from_stream(s, format);
         }
 
 }; // TreeReader

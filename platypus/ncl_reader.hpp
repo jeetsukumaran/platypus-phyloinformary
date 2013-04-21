@@ -67,7 +67,7 @@ class NclTreeReader : public TreeReader<TreeT> {
         }
 
 
-        int read_from_stream(std::istream& src, const std::string& format) override {
+        int parse_from_stream(std::istream& src, const std::string& format) override {
             MultiFormatReader reader(-1, NxsReader::IGNORE_WARNINGS);
             reader.SetWarningOutputLevel(NxsReader::AMBIGUOUS_CONTENT_WARNING);
             reader.SetCoerceUnderscoresToSpaces(false);

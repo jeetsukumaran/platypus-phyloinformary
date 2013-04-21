@@ -42,6 +42,15 @@ namespace platypus {
 ////////////////////////////////////////////////////////////////////////////////
 // TreeNode
 
+/**
+ * 'TreeNode' serves as a abstraction layer between the data associated with the
+ * node (it's "value") and the tree structure itself.
+ *
+ * @tparam NodeDataT
+ *   Any assignable type an be used as the data -- a primitive type, or a
+ *   struct or class provides an assignment operator method, ``NodeDataT &
+ *   operator=(const NodeDataT &)``.
+ */
 template<class NodeDataT>
 class TreeNode {
 
