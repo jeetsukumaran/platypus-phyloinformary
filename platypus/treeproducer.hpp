@@ -35,15 +35,15 @@ class TreeProducer {
     public:
 
         // typdefs for data
-        typedef TreeT                           TreeType;
-        typedef typename TreeType::node_type    NodeType;
-        typedef typename TreeType::value_type   NodeValueType;
+        typedef TreeT                           tree_type;
+        typedef typename tree_type::node_type    tree_node_type;
+        typedef typename tree_type::value_type   tree_value_type;
 
         // typedefs for functions used in construction
-        typedef std::function<TreeType & ()>                                 TreeFactoryType;
-        typedef std::function<void (TreeType &, bool)>                       TreeIsRootedFuncType;
-        typedef std::function<void (NodeValueType &, const std::string &)>   SetNodeValueLabelFuncType;
-        typedef std::function<void (NodeValueType &, double)>                SetNodeValueEdgeLengthFuncType;
+        typedef std::function<tree_type & ()>                                 TreeFactoryType;
+        typedef std::function<void (tree_type &, bool)>                       TreeIsRootedFuncType;
+        typedef std::function<void (tree_value_type &, const std::string &)>   SetNodeValueLabelFuncType;
+        typedef std::function<void (tree_value_type &, double)>                SetNodeValueEdgeLengthFuncType;
 
     public:
 
@@ -107,21 +107,21 @@ class TreeProducer {
             this->set_tree_is_rooted_ = tree_is_rooted_func;
         }
         virtual void clear_tree_is_rooted_func() {
-            this->set_tree_is_rooted_ = [] (TreeType&, bool) { };
+            this->set_tree_is_rooted_ = [] (tree_type&, bool) { };
         }
 
         virtual void set_node_value_label_func(const SetNodeValueLabelFuncType & node_value_label_func) {
             this->set_node_value_label_ = node_value_label_func;
         }
         virtual void clear_node_value_label_func() {
-            this->set_node_value_label_ = [] (NodeValueType&, const std::string&) { };
+            this->set_node_value_label_ = [] (tree_value_type&, const std::string&) { };
         }
 
         virtual void set_node_value_edge_length_func(const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func) {
             this->set_node_value_edge_length_ = node_value_edge_length_func;
         }
         virtual void clear_node_value_edge_length_func() {
-            this->set_node_value_edge_length_ = [] (NodeValueType&, double) { };
+            this->set_node_value_edge_length_ = [] (tree_value_type&, double) { };
         }
 
     protected:

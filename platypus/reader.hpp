@@ -94,13 +94,15 @@ template <typename TreeT>
 class TreeReader : public TreeProducer<TreeT> {
 
     public:
-        typedef typename TreeProducer<TreeT>::TreeType                        TreeType;
-        typedef typename TreeProducer<TreeT>::NodeType                        NodeType;
-        typedef typename TreeProducer<TreeT>::NodeValueType                   NodeValueType;
-        typedef typename TreeProducer<TreeT>::TreeFactoryType                 TreeFactoryType;
-        typedef typename TreeProducer<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
-        typedef typename TreeProducer<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
-        typedef typename TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
+        typedef TreeProducer<TreeT>::tree_type                       tree_type;
+        typedef TreeProducer<TreeT>::tree_node_type                  tree_node_type;
+        typedef TreeProducer<TreeT>::tree_value_type                 tree_value_type;
+
+    public:
+        typedef TreeProducer<TreeT>::TreeFactoryType                 TreeFactoryType;
+        typedef TreeProducer<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
+        typedef TreeProducer<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
+        typedef TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -191,7 +193,7 @@ class TreeReader : public TreeProducer<TreeT> {
 
         void set_tree_is_rooted_func(TreeIsRootedFuncPtrType tree_is_rooted_func_ptr) {
             if (tree_is_rooted_func_ptr != nullptr) {
-                this->set_tree_is_rooted_ = [tree_is_rooted_func_ptr] (TreeType& tree, bool is_rooted) { ((tree).*(tree_is_rooted_func_ptr))(is_rooted); };
+                this->set_tree_is_rooted_ = [tree_is_rooted_func_ptr] (tree_type& tree, bool is_rooted) { ((tree).*(tree_is_rooted_func_ptr))(is_rooted); };
             } else {
                 this->clear_tree_is_rooted_func();
             }
@@ -199,7 +201,7 @@ class TreeReader : public TreeProducer<TreeT> {
 
         void set_node_value_label_func(NodeValueLabelFuncPtrType node_value_label_func_ptr) {
             if (node_value_label_func_ptr != nullptr) {
-                this->set_node_value_label_ = [node_value_label_func_ptr] (NodeValueType& nd, const std::string label) { ((nd).*(node_value_label_func_ptr))(label); };
+                this->set_node_value_label_ = [node_value_label_func_ptr] (tree_value_type& nd, const std::string label) { ((nd).*(node_value_label_func_ptr))(label); };
             } else {
                 this->clear_node_value_label_func();
             }
@@ -207,7 +209,7 @@ class TreeReader : public TreeProducer<TreeT> {
 
         void set_node_value_edge_length_func(NodeValueEdgeLengthFuncPtrType node_value_edge_length_func_ptr) {
             if (node_value_edge_length_func_ptr != nullptr) {
-                this->set_node_value_edge_length_ = [node_value_edge_length_func_ptr] (NodeValueType& nd, double len) { ((nd).*(node_value_edge_length_func_ptr))(len); };
+                this->set_node_value_edge_length_ = [node_value_edge_length_func_ptr] (tree_value_type& nd, double len) { ((nd).*(node_value_edge_length_func_ptr))(len); };
             } else {
                 this->clear_node_value_edge_length_func();
             }
