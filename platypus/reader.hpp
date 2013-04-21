@@ -99,10 +99,10 @@ class TreeReader : public TreeProducer<TreeT> {
         typedef TreeProducer<TreeT>::tree_value_type                 tree_value_type;
 
     public:
-        typedef TreeProducer<TreeT>::TreeFactoryType                 TreeFactoryType;
-        typedef TreeProducer<TreeT>::TreeIsRootedFuncType            TreeIsRootedFuncType;
-        typedef TreeProducer<TreeT>::SetNodeValueLabelFuncType       SetNodeValueLabelFuncType;
-        typedef TreeProducer<TreeT>::SetNodeValueEdgeLengthFuncType  SetNodeValueEdgeLengthFuncType;
+        typedef TreeProducer<TreeT>::tree_factory_fntype                tree_factory_fntype;
+        typedef TreeProducer<TreeT>::tree_set_rooted_fntype             tree_set_rooted_fntype;
+        typedef TreeProducer<TreeT>::tree_value_set_label_fntype        tree_value_set_label_fntype;
+        typedef TreeProducer<TreeT>::tree_value_set_edge_length_fntype  tree_value_set_edge_length_fntype;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -141,10 +141,10 @@ class TreeReader : public TreeProducer<TreeT> {
          *   accordingly.
          */
         TreeReader(
-                const TreeFactoryType & tree_factory,
-                const TreeIsRootedFuncType & tree_is_rooted_func,
-                const SetNodeValueLabelFuncType & node_value_label_func,
-                const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
+                const tree_factory_fntype & tree_factory,
+                const tree_set_rooted_fntype & tree_is_rooted_func,
+                const tree_value_set_label_fntype & node_value_label_func,
+                const tree_value_set_edge_length_fntype & node_value_edge_length_func)
             : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
@@ -181,7 +181,7 @@ class TreeReader : public TreeProducer<TreeT> {
          *   edge subtending thenode.
          */
         TreeReader(
-                const TreeFactoryType & tree_factory,
+                const tree_factory_fntype & tree_factory,
                 TreeIsRootedFuncPtrType tree_is_rooted_setter=nullptr,
                 NodeValueLabelFuncPtrType node_value_label_setter=nullptr,
                 NodeValueEdgeLengthFuncPtrType node_value_edge_length_setter=nullptr) {

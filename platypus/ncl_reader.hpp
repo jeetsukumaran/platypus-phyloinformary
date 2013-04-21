@@ -45,10 +45,10 @@ class NclTreeReader : public TreeReader<TreeT> {
     public:
 
         NclTreeReader(
-                const typename TreeReader<TreeT>::TreeFactoryType & tree_factory,
-                const typename TreeReader<TreeT>::TreeIsRootedFuncType & tree_is_rooted_func,
-                const typename TreeReader<TreeT>::SetNodeValueLabelFuncType & node_value_label_func,
-                const typename TreeReader<TreeT>::SetNodeValueEdgeLengthFuncType & node_value_edge_length_func)
+                const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory,
+                const typename TreeReader<TreeT>::tree_set_rooted_fntype & tree_is_rooted_func,
+                const typename TreeReader<TreeT>::tree_value_set_label_fntype & node_value_label_func,
+                const typename TreeReader<TreeT>::tree_value_set_edge_length_fntype & node_value_edge_length_func)
             : TreeReader<TreeT>(tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
@@ -56,7 +56,7 @@ class NclTreeReader : public TreeReader<TreeT> {
         }
 
         NclTreeReader(
-                const typename TreeReader<TreeT>::TreeFactoryType & tree_factory,
+                const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory,
                 typename TreeReader<TreeT>::TreeIsRootedFuncPtrType tree_is_rooted_setter=nullptr,
                 typename TreeReader<TreeT>::NodeValueLabelFuncPtrType node_value_label_setter=nullptr,
                 typename TreeReader<TreeT>::NodeValueEdgeLengthFuncPtrType node_value_edge_length_setter=nullptr)

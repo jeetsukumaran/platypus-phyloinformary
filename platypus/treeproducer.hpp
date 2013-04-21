@@ -40,10 +40,10 @@ class TreeProducer {
         typedef typename tree_type::value_type   tree_value_type;
 
         // typedefs for functions used in construction
-        typedef std::function<tree_type & ()>                                 TreeFactoryType;
-        typedef std::function<void (tree_type &, bool)>                       TreeIsRootedFuncType;
-        typedef std::function<void (tree_value_type &, const std::string &)>   SetNodeValueLabelFuncType;
-        typedef std::function<void (tree_value_type &, double)>                SetNodeValueEdgeLengthFuncType;
+        typedef std::function<tree_type & ()>                                  tree_factory_fntype;
+        typedef std::function<void (tree_type &, bool)>                        tree_set_rooted_fntype;
+        typedef std::function<void (tree_value_type &, const std::string &)>   tree_value_set_label_fntype;
+        typedef std::function<void (tree_value_type &, double)>                tree_value_set_edge_length_fntype;
 
     public:
 
@@ -74,10 +74,10 @@ class TreeProducer {
          *   accordingly.
          */
         TreeProducer(
-                const TreeFactoryType & tree_factory,
-                const TreeIsRootedFuncType & tree_is_rooted_func,
-                const SetNodeValueLabelFuncType & node_value_label_func,
-                const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func) {
+                const tree_factory_fntype & tree_factory,
+                const tree_set_rooted_fntype & tree_is_rooted_func,
+                const tree_value_set_label_fntype & node_value_label_func,
+                const tree_value_set_edge_length_fntype & node_value_edge_length_func) {
             this->set_tree_factory(tree_factory);
             this->set_tree_is_rooted_func(tree_is_rooted_func);
             this->set_node_value_label_func(node_value_label_func);
@@ -99,25 +99,25 @@ class TreeProducer {
          *   management (including disposal) of the object.
          *
          */
-        virtual void set_tree_factory(const TreeFactoryType & tree_factory) {
+        virtual void set_tree_factory(const tree_factory_fntype & tree_factory) {
             this->tree_factory_ = tree_factory;
         }
 
-        virtual void set_tree_is_rooted_func(const TreeIsRootedFuncType & tree_is_rooted_func) {
+        virtual void set_tree_is_rooted_func(const tree_set_rooted_fntype & tree_is_rooted_func) {
             this->set_tree_is_rooted_ = tree_is_rooted_func;
         }
         virtual void clear_tree_is_rooted_func() {
             this->set_tree_is_rooted_ = [] (tree_type&, bool) { };
         }
 
-        virtual void set_node_value_label_func(const SetNodeValueLabelFuncType & node_value_label_func) {
+        virtual void set_node_value_label_func(const tree_value_set_label_fntype & node_value_label_func) {
             this->set_node_value_label_ = node_value_label_func;
         }
         virtual void clear_node_value_label_func() {
             this->set_node_value_label_ = [] (tree_value_type&, const std::string&) { };
         }
 
-        virtual void set_node_value_edge_length_func(const SetNodeValueEdgeLengthFuncType & node_value_edge_length_func) {
+        virtual void set_node_value_edge_length_func(const tree_value_set_edge_length_fntype & node_value_edge_length_func) {
             this->set_node_value_edge_length_ = node_value_edge_length_func;
         }
         virtual void clear_node_value_edge_length_func() {
@@ -125,10 +125,10 @@ class TreeProducer {
         }
 
     protected:
-        TreeFactoryType                         tree_factory_;
-        TreeIsRootedFuncType                    set_tree_is_rooted_;
-        SetNodeValueLabelFuncType               set_node_value_label_;
-        SetNodeValueEdgeLengthFuncType          set_node_value_edge_length_;
+        tree_factory_fntype                         tree_factory_;
+        tree_set_rooted_fntype                    set_tree_is_rooted_;
+        tree_value_set_label_fntype               set_node_value_label_;
+        tree_value_set_edge_length_fntype          set_node_value_edge_length_;
 
 }; // TreeProducer
 
