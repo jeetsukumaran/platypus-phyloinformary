@@ -20,21 +20,21 @@
  */
 
 #include "tests.hpp"
-#include <platypus/treereader.hpp>
+#include <platypus/datareader.hpp>
 
 namespace platypus {
 
 template <typename TreeT>
 
-class NewickTreeReader : public TreeReader<TreeT> {
+class NewickTreeReader : public BaseTreeReader<TreeT> {
     public:
 
         NewickTreeReader(
-                const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const typename TreeReader<TreeT>::node_value_label_setter_fntype & node_value_label_func,
-                const typename TreeReader<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
-            : TreeReader<TreeT>(tree_factory,
+                const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory,
+                const typename BaseTreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename BaseTreeReader<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename BaseTreeReader<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
+            : BaseTreeReader<TreeT>(tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
                     node_value_edge_length_func) {

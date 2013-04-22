@@ -32,7 +32,7 @@
 namespace platypus {
 
 ////////////////////////////////////////////////////////////////////////////////
-// TreeReader
+// BaseTreeReader
 
 /**
  * @brief Encapsulates creation and population of TreeT objects from data
@@ -63,7 +63,7 @@ namespace platypus {
  *    auto is_rooted_f = [] (TreeType& tree, bool) {}; // no-op
  *    auto node_label_f = [] (NodeData& nd, const std::string& label) {nd.label = label;};
  *    auto node_edge_f = [] (NodeData& nd, double len) {nd.edge_length = len;};
- *    TreeReader<TreeType> tree_reader(tree_factory, is_rooted_f, node_label_f, node_edge_f);
+ *    BaseTreeReader<TreeType> tree_reader(tree_factory, is_rooted_f, node_label_f, node_edge_f);
  *    tree_reader.read_from_string("[&R](A:1,(B:1,(D:1,(E:1,F:1):1):1):1):1;", "newick");
  *  @endcode@
  *
@@ -85,13 +85,13 @@ namespace platypus {
  *    typedef platypus::Tree<NodeData> TreeType;
  *    std::vector<TreeType> trees;
  *    auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
- *    TreeReader<TreeType> tree_reader(tree_factory, nullptr, &NodeData::set_label, &NodeData::set_edge_length);
+ *    BaseTreeReader<TreeType> tree_reader(tree_factory, nullptr, &NodeData::set_label, &NodeData::set_edge_length);
  *    tree_reader.read_from_string("[&R](A:1,(B:1,(D:1,(E:1,F:1):1):1):1):1;", "newick");
  *  @endcode@
  *
  */
 template <typename TreeT>
-class TreeReader : public TreeProducer<TreeT> {
+class BaseTreeReader : public TreeProducer<TreeT> {
 
     public:
         typedef typename TreeProducer<TreeT>::tree_type             tree_type;
@@ -107,7 +107,7 @@ class TreeReader : public TreeProducer<TreeT> {
     public:
 
         /**
-         * @brief Constructs a TreeReader object that can parse data sources
+         * @brief Constructs a BaseTreeReader object that can parse data sources
          * and instantiate corresponding TreeT objects, with labels and edge
          * lengths set by function objects passed as arguments.
          *
@@ -134,7 +134,7 @@ class TreeReader : public TreeProducer<TreeT> {
          *   a double value as arguments and sets the edge length of the node
          *   accordingly.
          */
-        TreeReader(
+        BaseTreeReader(
                 const tree_factory_fntype & tree_factory,
                 const tree_is_rooted_setter_fntype & tree_is_rooted_func,
                 const node_value_label_setter_fntype & node_value_label_func,
@@ -147,7 +147,7 @@ class TreeReader : public TreeProducer<TreeT> {
         }
 
         /**
-         * @brief Constructs a TreeReader object that can parse data sources
+         * @brief Constructs a BaseTreeReader object that can parse data sources
          * and instantiate corresponding TreeT objects.
          *
          * @param tree_factory
@@ -159,17 +159,17 @@ class TreeReader : public TreeProducer<TreeT> {
          *   management (including disposal) of the object.
          *
          */
-        TreeReader(const tree_factory_fntype & tree_factory)
+        BaseTreeReader(const tree_factory_fntype & tree_factory)
             : TreeProducer<TreeT>(tree_factory) {
         }
 
         /**
          * Default constructor.
          */
-        TreeReader() {
+        BaseTreeReader() {
         }
 
-        virtual ~TreeReader() {
+        virtual ~BaseTreeReader() {
         }
 
         /**
@@ -185,7 +185,7 @@ class TreeReader : public TreeProducer<TreeT> {
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="nexus") {
             std::ifstream f(filepath);
             if (!f.good()) {
-                throw std::runtime_error("platypus::TreeReader::read_from_filepath(): Error opening file for input");
+                throw std::runtime_error("platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
             }
             return this->parse_from_stream(f, format);
         }
@@ -199,7 +199,7 @@ class TreeReader : public TreeProducer<TreeT> {
             return this->parse_from_stream(src, format);
         }
 
-}; // TreeReader
+}; // BaseTreeReader
 
 } // namespace platypus
 
