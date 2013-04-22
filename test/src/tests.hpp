@@ -199,7 +199,7 @@ void build_tree(TreeType& tree,
         auto & child_nodes = subtree.second;
         if (nodes.find(parent_src) == nodes.end()) {
             cur_node = tree.begin().node();
-            cur_node->set_data(typename TreeType::value_type(parent_src));
+            cur_node->set_value(typename TreeType::value_type(parent_src));
         } else {
             cur_node = nodes[parent_src];
         }

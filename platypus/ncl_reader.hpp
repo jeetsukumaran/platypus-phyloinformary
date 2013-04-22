@@ -130,8 +130,8 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                         new_node = ttree.create_internal_node();
                     }
                 }
-                this->set_node_value_label(new_node->data(), label);
-                this->set_node_value_edge_length(new_node->data(), edge_len);
+                this->set_node_value_label(new_node->value(), label);
+                this->set_node_value_edge_length(new_node->value(), edge_len);
                 ncl_to_native[ncl_node] = new_node;
                 if (ncl_par) {
                     if (ncl_to_native.find(ncl_par) == ncl_to_native.end()) {

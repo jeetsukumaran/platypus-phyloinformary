@@ -18,7 +18,7 @@ int main() {
     // nodes are not linked to tree copy; and then check cloned tree
     // for validity
     for (auto ndi = tree_original.preorder_begin(); ndi != tree_original.preorder_end(); ++ndi) {
-        std::string s = ndi->data();
+        std::string s = *ndi;
         uppercase(s);
         *ndi = s;
     }
@@ -30,12 +30,12 @@ int main() {
     }
     // Restore labels on original tree and make sure it is valid
     for (auto ndi = tree_original.preorder_begin(); ndi != tree_original.preorder_end(); ++ndi) {
-        std::string s = ndi->data();
+        std::string s = *ndi;
         lowercase(s);
         *ndi = s;
     }
     for (auto ndi = tree_copy.preorder_begin(); ndi != tree_copy.preorder_end(); ++ndi) {
-        std::string s = ndi->data();
+        std::string s = *ndi;
         uppercase(s);
         *ndi = s;
     }

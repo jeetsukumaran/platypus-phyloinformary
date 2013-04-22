@@ -46,12 +46,12 @@ namespace platypus {
  * 'TreeNode' serves as a abstraction layer between the data associated with the
  * node (it's "value") and the tree structure itself.
  *
- * @tparam NodeDataT
+ * @tparam NodeValueT
  *   Any assignable type an be used as the data -- a primitive type, or a
- *   struct or class provides an assignment operator method, ``NodeDataT &
- *   operator=(const NodeDataT &)``.
+ *   struct or class provides an assignment operator method, ``NodeValueT &
+ *   operator=(const NodeValueT &)``.
  */
-template<class NodeDataT>
+template<class NodeValueT>
 class TreeNode {
 
     public:
@@ -65,19 +65,19 @@ class TreeNode {
               , last_child_(nullptr)
               , next_sibling_(nullptr) { }
 
-        TreeNode(const NodeDataT& data)
+        TreeNode(const NodeValueT& value)
             : parent_(nullptr)
               , first_child_(nullptr)
               , last_child_(nullptr)
               , next_sibling_(nullptr)
-              , data_(data) { }
+              , value_(value) { }
 
         TreeNode(TreeNode&& other)
             : parent_(other.parent_)
               , first_child_(other.first_child_)
               , last_child_(other.last_child_)
               , next_sibling_(other.next_sibling_)
-              , data_(std::move(other.data_)) {
+              , value_(std::move(other.value_)) {
             other.parent_ = nullptr;
             other.first_child_ = nullptr;
             other.last_child_ = nullptr;
@@ -90,7 +90,7 @@ class TreeNode {
               , first_child_(other.first_child_)
               , last_child_(other.last_child_)
               , next_sibling_(other.next_sibling_)
-              , data_(other.data_) {
+              , value_(other.value_) {
         }
 
         // note: shallow copy!
@@ -99,7 +99,7 @@ class TreeNode {
             this->first_child_ = other.first_child_;
             this->last_child_ = other.last_child_;
             this->next_sibling_ = other.next_sibling_;
-            this->data_ = other.data_;
+            this->value_ = other.value_;
             return *this;
         }
 
@@ -110,7 +110,7 @@ class TreeNode {
         /////////////////////////////////////////////////////////////////////////
         // Structure
 
-        inline void add_child(TreeNode<NodeDataT> * ch) {
+        inline void add_child(TreeNode<NodeValueT> * ch) {
             if (this->first_child_ == nullptr) {
                 this->first_child_ = ch;
                 this->last_child_ = ch;
@@ -122,26 +122,26 @@ class TreeNode {
             ch->next_sibling_ = nullptr;
         }
 
-        inline TreeNode<NodeDataT> * parent_node() const {
+        inline TreeNode<NodeValueT> * parent_node() const {
             return this->parent_;
         }
 
-        inline void set_parent(TreeNode<NodeDataT> * parent) {
+        inline void set_parent(TreeNode<NodeValueT> * parent) {
             this->parent_ = parent;
         }
 
-        inline TreeNode<NodeDataT> * first_child_node() const {
+        inline TreeNode<NodeValueT> * first_child_node() const {
             return this->first_child_;
         }
 
-        inline TreeNode<NodeDataT> * last_child_node() const {
+        inline TreeNode<NodeValueT> * last_child_node() const {
             return this->last_child_;
         }
 
-        inline TreeNode<NodeDataT> * next_sibling_node() const {
+        inline TreeNode<NodeValueT> * next_sibling_node() const {
             return this->next_sibling_;
         }
-        inline void set_next_sibling_node(TreeNode<NodeDataT> * nd) {
+        inline void set_next_sibling_node(TreeNode<NodeValueT> * nd) {
             this->next_sibling_ = nd;
         }
 
@@ -159,56 +159,56 @@ class TreeNode {
         /////////////////////////////////////////////////////////////////////////
         // Data
 
-        const NodeDataT& data() const {
-            return this->data_;
+        const NodeValueT& value() const {
+            return this->value_;
         }
 
-        NodeDataT& data() {
-            return this->data_;
+        NodeValueT& value() {
+            return this->value_;
         }
 
-        void set_data(const NodeDataT& data) {
-            this->data_ = data;
+        void set_value(const NodeValueT& value) {
+            this->value_ = value;
         }
 
-        inline NodeDataT& parent() const {
+        inline NodeValueT& parent() const {
             assert(this->parent_);
-            return this->parent_->data;
+            return this->parent_->value;
         }
 
-        inline NodeDataT& first_child() const {
+        inline NodeValueT& first_child() const {
             assert(this->first_child_);
-            return this->first_child_->data_;
+            return this->first_child_->value_;
         }
 
-        inline NodeDataT& last_child() const {
+        inline NodeValueT& last_child() const {
             assert(this->last_child_);
-            return this->last_child_->data_;
+            return this->last_child_->value_;
         }
 
-        inline NodeDataT& next_sibling() const {
+        inline NodeValueT& next_sibling() const {
             assert(this->next_sibling_);
-            return this->next_sibling_->data;
+            return this->next_sibling_->value;
         }
 
     private:
-        TreeNode<NodeDataT> *        parent_;
-        TreeNode<NodeDataT> *        first_child_;
-        TreeNode<NodeDataT> *        last_child_;
-        TreeNode<NodeDataT> *        next_sibling_;
-        NodeDataT                    data_;
+        TreeNode<NodeValueT> *        parent_;
+        TreeNode<NodeValueT> *        first_child_;
+        TreeNode<NodeValueT> *        last_child_;
+        TreeNode<NodeValueT> *        next_sibling_;
+        NodeValueT                    value_;
 
 }; // TreeNode
 
 ////////////////////////////////////////////////////////////////////////////////
 // Tree
 
-template<class NodeDataT, class TreeNodeAllocatorT = std::allocator<TreeNode<NodeDataT>>>
+template<class NodeValueT, class TreeNodeAllocatorT = std::allocator<TreeNode<NodeValueT>>>
 class Tree {
 
     public:
-        typedef TreeNode<NodeDataT> node_type;
-        typedef NodeDataT value_type;
+        typedef TreeNode<NodeValueT> node_type;
+        typedef NodeValueT value_type;
 
     public:
 
@@ -232,9 +232,9 @@ class Tree {
             }
         }
 
-        // Constructs a deep copy of structure; node data is copied using the
-        // assignment operator (operator=) implemented for NodeDataT, so whether
-        // or not the node data is deep copied or shallow copied depends
+        // Constructs a deep copy of structure; node value is copied using the
+        // assignment operator (operator=) implemented for NodeValueT, so whether
+        // or not the node value is deep copied or shallow copied depends
         // on the behavior of this operator
         Tree(const Tree& other)
             : manage_node_allocation_(other.manage_node_allocation_) {
@@ -255,9 +255,9 @@ class Tree {
             this->dispose_node(this->stop_node_);
         }
 
-        // Creates a deep copy of structure; node data is copied using the
-        // assignment operator (operator=) implemented for NodeDataT, so whether
-        // or not the node data is deep copied or shallow copied depends
+        // Creates a deep copy of structure; node value is copied using the
+        // assignment operator (operator=) implemented for NodeValueT, so whether
+        // or not the node value is deep copied or shallow copied depends
         // on the behavior of this operator
         Tree& operator=(const Tree& other) {
             this->deep_copy_from(other);
@@ -291,9 +291,9 @@ class Tree {
         class base_iterator {
             public:
 				typedef base_iterator               self_type;
-				typedef NodeDataT                    value_type;
-				typedef NodeDataT *                  pointer;
-				typedef NodeDataT &                  reference;
+				typedef NodeValueT                    value_type;
+				typedef NodeValueT *                  pointer;
+				typedef NodeValueT &                  reference;
 				typedef unsigned long               size_type;
 				typedef int                         difference_type;
 				typedef std::forward_iterator_tag   iterator_category;
@@ -302,10 +302,10 @@ class Tree {
                     : node_(node) { }
                 virtual ~base_iterator() {}
                 reference operator*() const {
-                    return this->node_->data();
+                    return this->node_->value();
                 }
                 pointer operator->() const {
-                    return &(this->node_->data());
+                    return &(this->node_->value());
                 }
                 bool operator==(const self_type& rhs) const {
                     return this->node_ == rhs.node_;
@@ -632,8 +632,8 @@ class Tree {
             return this->add_child(pos, this->create_node());
         }
 
-        template<typename iter> iter add_child(iter& pos, const value_type& data) {
-            return this->add_child(pos, this->create_node(data));
+        template<typename iter> iter add_child(iter& pos, const value_type& value) {
+            return this->add_child(pos, this->create_node(value));
         }
 
         template<typename iter, typename... Types> iter emplace_child(iter& pos, const Types&... args) {
@@ -654,14 +654,14 @@ class Tree {
             }
         }
 
-        virtual node_type * create_node(const value_type& data) {
+        virtual node_type * create_node(const value_type& value) {
             if (this->manage_node_allocation_) {
                 node_type * nd = this->tree_node_allocator_.allocate(1, 0);
-                this->tree_node_allocator_.construct(nd, data);
+                this->tree_node_allocator_.construct(nd, value);
                 this->allocated_nodes_.insert(nd);
                 return nd;
             } else {
-                throw std::logic_error("Tree::create_node(const value_type& data): Request for node allocation but resource is not managed");
+                throw std::logic_error("Tree::create_node(const value_type& value): Request for node allocation but resource is not managed");
             }
         }
 
@@ -676,20 +676,20 @@ class Tree {
             return this->create_node();
         }
 
-        virtual node_type * create_leaf_node(const value_type& data) {
-            return this->create_node(data);
+        virtual node_type * create_leaf_node(const value_type& value) {
+            return this->create_node(value);
         }
 
         virtual node_type * create_internal_node() {
             return this->create_node();
         }
 
-        virtual node_type * create_internal_node(const value_type& data) {
-            return this->create_node(data);
+        virtual node_type * create_internal_node(const value_type& value) {
+            return this->create_node(value);
         }
 
 //         template <typename... Types>
-//         virtual node_type * create_emplaced_data_node(const Types&... args) {
+//         virtual node_type * create_emplaced_value_node(const Types&... args) {
 //             if (this->manage_node_allocation_) {
 //                 node_type * nd = this->tree_node_allocator_.allocate(1, 0);
 //                 this->tree_node_allocator_.construct(nd, value_type(args...));
@@ -697,7 +697,7 @@ class Tree {
 //                 this->allocated_nodes_.insert(nd);
 //                 return nd;
 //             } else {
-//                 throw std::logic_error("Tree::create_emplaced_data_node(const Types&... args): Request for node allocation but resource is not managed");
+//                 throw std::logic_error("Tree::create_emplaced_value_node(const Types&... args): Request for node allocation but resource is not managed");
 //             }
 //         }
 
@@ -722,12 +722,12 @@ class Tree {
          *   Specialization or derived of platypus::Tree.
          * @param src_tree
          *   Tree to be copied.
-         * @param deep_copy_node_data_f
+         * @param deep_copy_node_value_f
          *   Function object which deep copies nodes: f(const typename T::value_type & src, typename Tree::value_type & dest)
          */
         template <typename T>
         void deep_copy_from(const T& src_tree,
-                const std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_data_f
+                const std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_value_f
                 ) {
             this->clear();
             if (this->head_node_ == nullptr && this->stop_node_ == nullptr) {
@@ -762,16 +762,16 @@ class Tree {
                         new_node->add_child(node_map[other_child_node]);
                     }
                 }
-                // new_node->set_data(other_node->data());
-                // new_node->data() = other_node->data();
-                deep_copy_node_data_f(other_node->data(), new_node->data());
+                // new_node->set_value(other_node->value());
+                // new_node->value() = other_node->value();
+                deep_copy_node_value_f(other_node->value(), new_node->value());
                 node_map[other_node] = new_node;
             }
         }
 
         /**
          * Rebuilds this as a deep copy of ``other``.
-         * Node data value (Tree::value_type) is copied using the assignment
+         * Node value value (Tree::value_type) is copied using the assignment
          * operator, which must be defined/overloaded to accept const
          * reference to type other::value_type.
          *
@@ -782,9 +782,9 @@ class Tree {
          */
         template <typename T>
         void deep_copy_from(const T& src_tree) {
-            // std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_data_f( [] (const typename T::value_type & src, typename Tree::value_type & dest) { dest = src; } );
-            std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_data_f( [] (const typename T::value_type & src, typename Tree::value_type & dest) { dest = src; } );
-            this->deep_copy_from(src_tree, deep_copy_node_data_f);
+            // std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_value_f( [] (const typename T::value_type & src, typename Tree::value_type & dest) { dest = src; } );
+            std::function<void (const typename T::value_type &, typename Tree::value_type &)> deep_copy_node_value_f( [] (const typename T::value_type & src, typename Tree::value_type & dest) { dest = src; } );
+            this->deep_copy_from(src_tree, deep_copy_node_value_f);
         }
 
     protected:

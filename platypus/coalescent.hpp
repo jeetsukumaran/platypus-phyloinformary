@@ -319,7 +319,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                         std::advance(nd_iter, idx);
                         assert(nd_iter != nodes.end());
                         ch = nd_iter->first;
-                        this->set_node_value_edge_length(ch->data(), nodes[ch]);
+                        this->set_node_value_edge_length(ch->value(), nodes[ch]);
                         anc->add_child(ch);
                         nodes.erase(nd_iter);
                     }
@@ -327,7 +327,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                     anc = tree.head_node();
                     for (auto & chi : nodes) {
                         anc->add_child(chi.first);
-                        this->set_node_value_edge_length(chi.first->data(), nodes[chi.first]);
+                        this->set_node_value_edge_length(chi.first->value(), nodes[chi.first]);
                     }
                     nodes.clear();
                 }
