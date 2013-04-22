@@ -23,8 +23,21 @@
 #define PLATYPUS_TREEPRODUCER_HPP
 
 #include <functional>
+#include "utility/exception.hpp"
 
 namespace platypus {
+
+////////////////////////////////////////////////////////////////////////////////
+// TreeProducerException
+
+/**
+ * Base class for exceptions.
+ */
+class TreeProducerException : public PlatypusException {
+public:
+    TreeProducerException(const std::string& message)
+        : PlatypusException(message) { }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // TreeProducer (base class)

@@ -32,6 +32,15 @@
 namespace platypus {
 
 ////////////////////////////////////////////////////////////////////////////////
+// TreeReaderException
+
+class TreeReaderException : public PlatypusException {
+public:
+    TreeReaderException(const std::string& message)
+        : PlatypusException(message) { }
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // BaseTreeReader
 
 /**
@@ -175,7 +184,7 @@ class BaseTreeReader : public TreeProducer<TreeT> {
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="nexus") {
             std::ifstream f(filepath);
             if (!f.good()) {
-                throw std::runtime_error("platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
+                throw TreeReaderException("platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
             }
             return this->parse_from_stream(f, format);
         }
