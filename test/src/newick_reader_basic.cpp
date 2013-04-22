@@ -72,6 +72,15 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     : PlatypusException(message) { }
         };
 
+        /**
+         * Exception thrown when encountering a non-recognized NEWICK token.
+         */
+        class NewickReaderMalformedStatement : public PlatypusException {
+            public:
+                NewickReaderMalformedStatement(const std::string& message)
+                    : PlatypusException(message) { }
+        };
+
         NewickReader(
                 const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory,
                 const typename BaseTreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
@@ -136,8 +145,14 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 NexusTokenizer::iterator & src_iter) {
             if (*src_iter == "(") {
                 // begin processing of child nodes
+                if (src_iter.eof()) {
+                    throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                }
                 src_iter.require_next();
                 while (true) {
+                    if (src_iter.eof()) {
+                        throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                    }
                     if (*src_iter == ",") {
                         // next child
                         src_iter.require_next();
@@ -162,7 +177,12 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     }
                 }
             }
-            while (true) {
+            bool label_parsed = false;
+            while (*src_iter != ";") {
+                // begin processing of current node
+                if (src_iter.eof()) {
+                    throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                }
                 if (*src_iter == ":") {
                     ++src_iter;
                     double edge_len = std::atof(src_iter->c_str());
@@ -174,20 +194,22 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 } else if (*src_iter == ",") {
                     // end of this node
                     return current_node;
-                } else if (*src_iter == ";") {
-                    // end of tree statement
-                    ++src_iter;
-                    // src_iter.require_next();
-                    // if (!src_iter.eof()) {
-                    //     ++src_iter;
-                    // }
-                    return current_node;
+                // } else if (*src_iter == ";") {
+                //     // end of tree statement
+                //     ++src_iter;
+                //     return current_node;
                 } else {
                     // label
-                    this->set_node_value_label(current_node->value(), *src_iter);
-                    src_iter.require_next();
+                    if (label_parsed) {
+                        throw NewickReaderMalformedStatement("platypus::NewickReader: Expecting ':', ')', ',' or ';' after reading label");
+                    } else {
+                        this->set_node_value_label(current_node->value(), *src_iter);
+                        label_parsed = true;
+                        src_iter.require_next();
+                    }
                 }
             }
+            ++src_iter; // advance past ";"
             return current_node;
         }
 
@@ -233,8 +255,10 @@ int main () {
     tree_reader.set_node_label_setter(node_label_f);
     tree_reader.set_edge_length_setter(node_edge_f);
 
-    tree_reader.read_from_string(tree_string, "newick");
-    // tree_reader.read_from_string("(a, (b, c));", "newick");
+    // tree_reader.read_from_string(tree_string, "newick");
+    // tree_reader.read_from_string("(a b); ", "newick"); // test case: missing comma
+    // tree_reader.read_from_string("(a, b, ,,); ", "newick"); // test case: extra commas (should be treated as blank nodes); TODO: deal with this case!!
+    // tree_reader.read_from_string("(a, (b, c)) ", "newick"); // test case: missing semi-colon;
 
     const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
             [] (typename TreeType::value_type & nv, std::ostream & out) {

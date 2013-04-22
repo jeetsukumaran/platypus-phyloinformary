@@ -22,6 +22,7 @@
 #ifndef PLATYPUS_TOKENIZER_HPP
 #define PLATYPUS_TOKENIZER_HPP
 
+#include <stdexcept>
 #include <cassert>
 #include <string>
 #include <fstream>
@@ -86,9 +87,31 @@ class Tokenizer {
                 pointer operator->();
                 bool operator==(const self_type& rhs) const;
                 bool operator!=(const self_type& rhs) const;
-                const self_type & operator++();
-                const self_type & require_next();
-                self_type operator++(int);
+
+                inline const self_type & operator++() {
+                    if (!this->src_ptr_->good()) {
+                        this->src_ptr_ = nullptr;
+                    }
+                    if (this->src_ptr_ != nullptr) {
+                        this->get_next_token();
+                    }
+                    return *this;
+                }
+
+                inline const self_type & require_next() {
+                    if (!this->src_ptr_->good()) {
+                        throw std::runtime_error("platypus::Tokenizer: Unexpected end of stream");
+                    }
+                    this->get_next_token();
+                    return *this;
+                }
+
+                inline self_type operator++(int) {
+                    self_type i = *this;
+                    ++(*this);
+                    return i;
+                }
+
                 bool eof();
                 bool token_is_quoted();
                 bool token_has_comments();

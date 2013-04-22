@@ -19,7 +19,6 @@
  *
  */
 
-#include <stdexcept>
 #include "tokenizer.hpp"
 
 namespace platypus {
@@ -161,30 +160,6 @@ bool Tokenizer::iterator::operator==(const Tokenizer::iterator::self_type& rhs) 
 
 bool Tokenizer::iterator::operator!=(const Tokenizer::iterator::self_type& rhs) const {
     return !(*this == rhs);
-}
-
-const Tokenizer::iterator::self_type & Tokenizer::iterator::operator++() {
-    if (!this->src_ptr_->good()) {
-        this->src_ptr_ = nullptr;
-    }
-    if (this->src_ptr_ != nullptr) {
-        this->get_next_token();
-    }
-    return *this;
-}
-
-const Tokenizer::iterator::self_type & Tokenizer::iterator::require_next() {
-    if (!this->src_ptr_->good()) {
-        throw std::runtime_error("platypus::Tokenizer: Unexpected end of stream");
-    }
-    this->get_next_token();
-    return *this;
-}
-
-Tokenizer::iterator::self_type Tokenizer::iterator::operator++(int) {
-    self_type i = *this;
-    ++(*this);
-    return i;
 }
 
 bool Tokenizer::iterator::eof() {
