@@ -156,6 +156,12 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     if (*src_iter == ",") {
                         // next child
                         src_iter.require_next();
+                        while (*src_iter == ",") {
+                            // empty name (as allowed by NEWICK standard)
+                            auto new_node = tree.create_leaf_node();
+                            current_node->add_child(new_node);
+                            src_iter.require_next();
+                        }
                     } else if (*src_iter == ")") {
                         // end of child nodes
                         src_iter.require_next();
@@ -255,8 +261,9 @@ int main () {
 
     tree_reader.read_from_string(tree_string, "newick");
     // tree_reader.read_from_string("(a b); ", "newick"); // test case: missing comma
-    // tree_reader.read_from_string("(a, b, ,,); ", "newick"); // test case: extra commas (should be treated as blank nodes); TODO: deal with this case!!
+    // tree_reader.read_from_string("(a, b, ,,); ", "newick"); // test case: extra commas (should be treated as blank nodes);
     // tree_reader.read_from_string("(a, (b, c)) ", "newick"); // test case: missing semi-colon;
+    // tree_reader.read_from_string("(a:0, b:0, :0, :0):0;", "newick"); // test case: extra commas (should be treated as blank nodes);
 
     const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
             [] (typename TreeType::value_type & nv, std::ostream & out) {
