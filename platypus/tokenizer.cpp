@@ -19,6 +19,7 @@
  *
  */
 
+#include <stdexcept>
 #include "tokenizer.hpp"
 
 namespace platypus {
@@ -169,6 +170,14 @@ const Tokenizer::iterator::self_type & Tokenizer::iterator::operator++() {
     if (this->src_ptr_ != nullptr) {
         this->get_next_token();
     }
+    return *this;
+}
+
+const Tokenizer::iterator::self_type & Tokenizer::iterator::require_next() {
+    if (!this->src_ptr_->good()) {
+        throw std::runtime_error("platypus::Tokenizer: Unexpected end of stream");
+    }
+    this->get_next_token();
     return *this;
 }
 

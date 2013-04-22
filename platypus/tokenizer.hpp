@@ -31,6 +31,8 @@
 
 namespace platypus {
 
+////////////////////////////////////////////////////////////////////////////////
+// Tokenizer
 class Tokenizer {
 
     public:
@@ -85,6 +87,7 @@ class Tokenizer {
                 bool operator==(const self_type& rhs) const;
                 bool operator!=(const self_type& rhs) const;
                 const self_type & operator++();
+                const self_type & require_next();
                 self_type operator++(int);
                 bool eof();
                 bool token_is_quoted();
@@ -146,6 +149,25 @@ class Tokenizer {
         bool            capture_comments_;
 
 }; // Tokenizer
+
+////////////////////////////////////////////////////////////////////////////////
+// NexusTokenizer
+
+class NexusTokenizer : public Tokenizer {
+    public:
+        NexusTokenizer()
+            : Tokenizer(
+                    " \t\n\r",      // uncaptured delimiters
+                    "(),;:",        // captured delimiters
+                    "\"'",          // quote_chars
+                    true,           // esc_quote_chars_by_doubling
+                    "",             // esc_chars
+                    "[",            // comment_begin
+                    "]",            // comment_end
+                    true            // capture_comments
+                    ) {
+        }
+}; // NewickTokenizer
 
 } // namespace platypus
 
