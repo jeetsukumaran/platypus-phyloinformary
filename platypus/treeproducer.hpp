@@ -41,9 +41,9 @@ class TreeProducer {
 
         // typedefs for functions used in construction
         typedef std::function<tree_type & ()>                                  tree_factory_fntype;
-        typedef std::function<void (tree_type &, bool)>                        tree_set_rooted_fntype;
-        typedef std::function<void (tree_value_type &, const std::string &)>   tree_value_set_label_fntype;
-        typedef std::function<void (tree_value_type &, double)>                tree_value_set_edge_length_fntype;
+        typedef std::function<void (tree_type &, bool)>                        tree_is_rooted_setter_fntype;
+        typedef std::function<void (tree_value_type &, const std::string &)>   node_value_label_setter_fntype;
+        typedef std::function<void (tree_value_type &, double)>                node_value_edge_length_setter_fntype;
 
     public:
 
@@ -75,9 +75,9 @@ class TreeProducer {
          */
         TreeProducer(
                 const tree_factory_fntype & tree_factory,
-                const tree_set_rooted_fntype & tree_is_rooted_func,
-                const tree_value_set_label_fntype & node_value_label_func,
-                const tree_value_set_edge_length_fntype & node_value_edge_length_func) {
+                const tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const node_value_label_setter_fntype & node_value_label_func,
+                const node_value_edge_length_setter_fntype & node_value_edge_length_func) {
             this->set_tree_factory(tree_factory);
             this->set_tree_is_rooted_func(tree_is_rooted_func);
             this->set_node_value_label_func(node_value_label_func);
@@ -103,21 +103,21 @@ class TreeProducer {
             this->tree_factory_ = tree_factory;
         }
 
-        virtual void set_tree_is_rooted_func(const tree_set_rooted_fntype & tree_is_rooted_func) {
+        virtual void set_tree_is_rooted_func(const tree_is_rooted_setter_fntype & tree_is_rooted_func) {
             this->set_tree_is_rooted_ = tree_is_rooted_func;
         }
         virtual void clear_tree_is_rooted_func() {
             this->set_tree_is_rooted_ = [] (tree_type&, bool) { };
         }
 
-        virtual void set_node_value_label_func(const tree_value_set_label_fntype & node_value_label_func) {
+        virtual void set_node_value_label_func(const node_value_label_setter_fntype & node_value_label_func) {
             this->set_node_value_label_ = node_value_label_func;
         }
         virtual void clear_node_value_label_func() {
             this->set_node_value_label_ = [] (tree_value_type&, const std::string&) { };
         }
 
-        virtual void set_node_value_edge_length_func(const tree_value_set_edge_length_fntype & node_value_edge_length_func) {
+        virtual void set_node_value_edge_length_func(const node_value_edge_length_setter_fntype & node_value_edge_length_func) {
             this->set_node_value_edge_length_ = node_value_edge_length_func;
         }
         virtual void clear_node_value_edge_length_func() {
@@ -126,9 +126,10 @@ class TreeProducer {
 
     protected:
         tree_factory_fntype                         tree_factory_;
-        tree_set_rooted_fntype                    set_tree_is_rooted_;
-        tree_value_set_label_fntype               set_node_value_label_;
-        tree_value_set_edge_length_fntype          set_node_value_edge_length_;
+        tree_is_rooted_setter_fntype                set_tree_is_rooted_;
+        node_value_label_setter_fntype              set_node_value_label_;
+        node_value_edge_length_setter_fntype        set_node_value_edge_length_;
+
 
 }; // TreeProducer
 

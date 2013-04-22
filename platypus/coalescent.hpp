@@ -129,9 +129,9 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
 
         BasicCoalescentSimulator(RngT & rng,
                 const typename TreeProducer<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeProducer<TreeT>::tree_set_rooted_fntype & tree_is_rooted_func,
-                const typename TreeProducer<TreeT>::tree_value_set_label_fntype & node_value_label_func,
-                const typename TreeProducer<TreeT>::tree_value_set_edge_length_fntype & node_value_edge_length_func)
+                const typename TreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename TreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
             : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
@@ -143,9 +143,9 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
 
         BasicCoalescentSimulator(
                 const typename TreeProducer<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeProducer<TreeT>::tree_set_rooted_fntype & tree_is_rooted_func,
-                const typename TreeProducer<TreeT>::tree_value_set_label_fntype & node_value_label_func,
-                const typename TreeProducer<TreeT>::tree_value_set_edge_length_fntype & node_value_edge_length_func)
+                const typename TreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename TreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
             : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,

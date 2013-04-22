@@ -31,7 +31,7 @@
 #include <vector>
 #include <functional>
 #include <map>
-#include "reader.hpp"
+#include "treereader\.hpp"
 #include <ncl/nxsmultiformat.h>
 
 namespace platypus {
@@ -46,9 +46,9 @@ class NclTreeReader : public TreeReader<TreeT> {
 
         NclTreeReader(
                 const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeReader<TreeT>::tree_set_rooted_fntype & tree_is_rooted_func,
-                const typename TreeReader<TreeT>::tree_value_set_label_fntype & node_value_label_func,
-                const typename TreeReader<TreeT>::tree_value_set_edge_length_fntype & node_value_edge_length_func)
+                const typename TreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename TreeReader<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename TreeReader<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
             : TreeReader<TreeT>(tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,

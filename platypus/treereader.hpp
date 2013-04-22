@@ -100,9 +100,9 @@ class TreeReader : public TreeProducer<TreeT> {
 
     public:
         typedef TreeProducer<TreeT>::tree_factory_fntype                tree_factory_fntype;
-        typedef TreeProducer<TreeT>::tree_set_rooted_fntype             tree_set_rooted_fntype;
-        typedef TreeProducer<TreeT>::tree_value_set_label_fntype        tree_value_set_label_fntype;
-        typedef TreeProducer<TreeT>::tree_value_set_edge_length_fntype  tree_value_set_edge_length_fntype;
+        typedef TreeProducer<TreeT>::tree_is_rooted_setter_fntype             tree_is_rooted_setter_fntype;
+        typedef TreeProducer<TreeT>::node_value_label_setter_fntype        node_value_label_setter_fntype;
+        typedef TreeProducer<TreeT>::node_value_edge_length_setter_fntype  node_value_edge_length_setter_fntype;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -142,9 +142,9 @@ class TreeReader : public TreeProducer<TreeT> {
          */
         TreeReader(
                 const tree_factory_fntype & tree_factory,
-                const tree_set_rooted_fntype & tree_is_rooted_func,
-                const tree_value_set_label_fntype & node_value_label_func,
-                const tree_value_set_edge_length_fntype & node_value_edge_length_func)
+                const tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const node_value_label_setter_fntype & node_value_label_func,
+                const node_value_edge_length_setter_fntype & node_value_edge_length_func)
             : TreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
@@ -215,6 +215,14 @@ class TreeReader : public TreeProducer<TreeT> {
             }
         }
 
+        /**
+         * To be implementad by derived classes.
+         *
+         * @param src
+         * @param format
+         *
+         * @return
+         */
         virtual int parse_from_stream(std::istream& src, const std::string& format) = 0;
 
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="nexus") {
