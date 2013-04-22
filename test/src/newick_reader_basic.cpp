@@ -263,7 +263,7 @@ int main () {
     // tree_reader.read_from_string("(a b); ", "newick"); // test case: missing comma
     // tree_reader.read_from_string("(a, b, ,,); ", "newick"); // test case: extra commas (should be treated as blank nodes);
     // tree_reader.read_from_string("(a, (b, c)) ", "newick"); // test case: missing semi-colon;
-    // tree_reader.read_from_string("(a:0, b:0, :0, :0):0;", "newick"); // test case: extra commas (should be treated as blank nodes);
+    // tree_reader.read_from_string("(a:0, b:0, :0, :0):0;", "newick"); // test case: empty nodes with brlens
 
     const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
             [] (typename TreeType::value_type & nv, std::ostream & out) {
