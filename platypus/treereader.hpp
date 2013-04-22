@@ -147,6 +147,23 @@ class TreeReader : public TreeProducer<TreeT> {
         }
 
         /**
+         * @brief Constructs a TreeReader object that can parse data sources
+         * and instantiate corresponding TreeT objects.
+         *
+         * @param tree_factory
+         *   A Function object that takes no arguments and returns a reference
+         *   to a new TreeT object. This function should take responsibility
+         *   for allocating memory, constructing, and initializing the TreeT
+         *   object. In addition, the function should also take responsibility
+         *   for storage ofthe object. Client code is responsible for the
+         *   management (including disposal) of the object.
+         *
+         */
+        TreeReader(const tree_factory_fntype & tree_factory)
+            : TreeProducer<TreeT>(tree_factory) {
+        }
+
+        /**
          * Default constructor.
          */
         TreeReader() {

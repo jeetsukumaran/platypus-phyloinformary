@@ -19,9 +19,6 @@
  *
  */
 
-#ifndef PLATYPUS_COALSCENT_HPP
-#define PLATYPUS_COALSCENT_HPP
-
 #include "tests.hpp"
 #include <platypus/treereader.hpp>
 
@@ -53,6 +50,7 @@ class NewickTreeReader : public TreeReader<TreeT> {
 
 }; // NewickTreeReader
 
+} // namespace platypus
 
 int main () {
 
@@ -61,6 +59,3 @@ int main () {
     return 1;
 }
 
-#endif
-
-} // namespace platypus

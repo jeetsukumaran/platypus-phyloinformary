@@ -31,7 +31,7 @@
 #include <vector>
 #include <functional>
 #include <map>
-#include "treereader\.hpp"
+#include "treereader.hpp"
 #include <ncl/nxsmultiformat.h>
 
 namespace platypus {
@@ -55,17 +55,12 @@ class NclTreeReader : public TreeReader<TreeT> {
                     node_value_edge_length_func) {
         }
 
-        NclTreeReader(
-                const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory,
-                typename TreeReader<TreeT>::TreeIsRootedFuncPtrType tree_is_rooted_setter=nullptr,
-                typename TreeReader<TreeT>::NodeValueLabelFuncPtrType node_value_label_setter=nullptr,
-                typename TreeReader<TreeT>::NodeValueEdgeLengthFuncPtrType node_value_edge_length_setter=nullptr)
-            : TreeReader<TreeT>(tree_factory,
-                    tree_is_rooted_setter,
-                    node_value_label_setter,
-                    node_value_edge_length_setter) {
+        NclTreeReader(const typename TreeReader<TreeT>::tree_factory_fntype & tree_factory)
+            : TreeReader<TreeT>(tree_factory) {
         }
 
+        NclTreeReader() {
+        }
 
         int parse_from_stream(std::istream& src, const std::string& format) override {
             MultiFormatReader reader(-1, NxsReader::IGNORE_WARNINGS);
@@ -90,7 +85,7 @@ class NclTreeReader : public TreeReader<TreeT> {
             unsigned int num_trees = trees_block->GetNumTrees();
             int tree_count = 0;
             for (unsigned int tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-                auto & tree = this->tree_factory_();
+                auto & tree = this->create_new_tree();
                 const NxsFullTreeDescription & ftd = trees_block->GetFullTreeDescription(tree_idx);
                 this->build_tree(tree, taxa_block, ftd);
                 ++tree_count;
@@ -98,16 +93,10 @@ class NclTreeReader : public TreeReader<TreeT> {
             return tree_count;
         }
 
-
     protected:
 
         int build_tree(TreeT& ttree, const NxsTaxaBlock * tb, const NxsFullTreeDescription & ftd) {
-            if (this->tree_factory_ == nullptr) {
-                throw std::runtime_error("platypus::NclTreeReader::build_tree(): Unbound tree factory");
-            }
-            if (this->set_tree_is_rooted_ != nullptr) {
-                this->set_tree_is_rooted_(ttree, ftd.IsRooted());
-            }
+            this->set_tree_is_rooted(ttree, ftd.IsRooted());
             NxsSimpleTree ncl_tree(ftd, -1, -1.0);
             auto * root = ttree.head_node();
             decltype(root) node_parent = nullptr;
@@ -141,12 +130,8 @@ class NclTreeReader : public TreeReader<TreeT> {
                         new_node = ttree.create_internal_node();
                     }
                 }
-                if (this->set_node_value_label_) {
-                    this->set_node_value_label_(new_node->data(), label);
-                }
-                if (this->set_node_value_edge_length_) {
-                    this->set_node_value_edge_length_(new_node->data(), edge_len);
-                }
+                this->set_node_value_label(new_node->data(), label);
+                this->set_node_value_edge_length(new_node->data(), edge_len);
                 ncl_to_native[ncl_node] = new_node;
                 if (ncl_par) {
                     if (ncl_to_native.find(ncl_par) == ncl_to_native.end()) {

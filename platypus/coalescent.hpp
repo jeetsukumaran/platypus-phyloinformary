@@ -199,8 +199,8 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                 iter leaf_values_end,
                 double haploid_pop_size,
                 bool use_expected_tmrca=false) {
-            auto & tree = this->tree_factory_();
-            this->set_tree_is_rooted_(tree, true);
+            auto & tree = this->create_new_tree();
+            this->set_tree_is_rooted(tree, true);
             std::map<typename TreeT::node_type *, double> nodes;
             for (auto & leaf_iter = leaf_values_begin; leaf_iter != leaf_values_end; ++leaf_iter) {
                 typename TreeT::node_type * new_node = tree.create_leaf_node(*leaf_iter);
@@ -227,7 +227,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                 auto label = "T" + std::to_string(i);
                 leaves.emplace_back();
                 auto & leaf = leaves.back();
-                this->set_node_value_label_(leaf, label);
+                this->set_node_value_label(leaf, label);
             }
             return this->generate_fixed_pop_size_tree(
                     leaves.begin(),
@@ -319,7 +319,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                         std::advance(nd_iter, idx);
                         assert(nd_iter != nodes.end());
                         ch = nd_iter->first;
-                        this->set_node_value_edge_length_(ch->data(), nodes[ch]);
+                        this->set_node_value_edge_length(ch->data(), nodes[ch]);
                         anc->add_child(ch);
                         nodes.erase(nd_iter);
                     }
@@ -327,7 +327,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                     anc = tree.head_node();
                     for (auto & chi : nodes) {
                         anc->add_child(chi.first);
-                        this->set_node_value_edge_length_(chi.first->data(), nodes[chi.first]);
+                        this->set_node_value_edge_length(chi.first->data(), nodes[chi.first]);
                     }
                     nodes.clear();
                 }

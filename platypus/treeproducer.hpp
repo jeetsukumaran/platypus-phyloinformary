@@ -35,7 +35,7 @@ class TreeProducer {
     public:
 
         // typdefs for data
-        typedef TreeT                           tree_type;
+        typedef TreeT                            tree_type;
         typedef typename tree_type::node_type    tree_node_type;
         typedef typename tree_type::value_type   tree_value_type;
 
@@ -84,6 +84,21 @@ class TreeProducer {
             this->set_node_value_edge_length_func(node_value_edge_length_func);
         }
 
+        /**
+         * Sets the service functions of the TreeProducer.
+         *
+         * @param tree_factory
+         *   A Function object that takes no arguments and returns a reference
+         *   to a new TreeT object. This function should take responsibility
+         *   for allocating memory, constructing, and initializing the TreeT
+         *   object. In addition, the function should also take responsibility
+         *   for storage ofthe object. Client code is responsible for the
+         *   management (including disposal) of the object.
+         */
+        TreeProducer(const tree_factory_fntype & tree_factory) {
+            this->set_tree_factory(tree_factory);
+        }
+
         TreeProducer() { }
 
         virtual ~TreeProducer() { }
@@ -104,49 +119,54 @@ class TreeProducer {
          *
          */
         virtual void set_tree_factory(const tree_factory_fntype & tree_factory) {
-            this->tree_factory_ = tree_factory;
+            this->tree_factory_fn_ = tree_factory;
         }
         virtual void set_tree_is_rooted_func(const tree_is_rooted_setter_fntype & tree_is_rooted_func) {
-            this->set_tree_is_rooted_ = tree_is_rooted_func;
+            this->set_tree_is_rooted_fn_ = tree_is_rooted_func;
         }
         virtual void clear_tree_is_rooted_func() {
-            this->set_tree_is_rooted_ = [] (tree_type&, bool) { };
+            this->set_tree_is_rooted_fn_ = [] (tree_type&, bool) { };
         }
 
         virtual void set_node_value_label_func(const node_value_label_setter_fntype & node_value_label_func) {
-            this->set_node_value_label_ = node_value_label_func;
+            this->set_node_value_label_fn_ = node_value_label_func;
         }
         virtual void clear_node_value_label_func() {
-            this->set_node_value_label_ = [] (tree_value_type&, const std::string&) { };
+            this->set_node_value_label_fn_ = [] (tree_value_type&, const std::string&) { };
         }
 
         virtual void set_node_value_edge_length_func(const node_value_edge_length_setter_fntype & node_value_edge_length_func) {
-            this->set_node_value_edge_length_ = node_value_edge_length_func;
+            this->set_node_value_edge_length_fn_ = node_value_edge_length_func;
         }
         virtual void clear_node_value_edge_length_func() {
-            this->set_node_value_edge_length_ = [] (tree_value_type&, double) { };
+            this->set_node_value_edge_length_fn_ = [] (tree_value_type&, double) { };
         }
 
         // Use of functions
-
+        virtual tree_type & create_new_tree() {
+            if (!this->tree_factory_fn_) {
+                throw std::runtime_error("platypus::TreeProducer::create_new_tree(): Unbound tree factory");
+            }
+            return this->tree_factory_fn_();
+        }
         virtual void set_tree_is_rooted(tree_type & tree, bool is_rooted) {
             if (this->set_tree_is_rooted_fn_) {
-                this->set_tree_is_rooted_fn_(tree);
+                this->set_tree_is_rooted_fn_(tree, is_rooted);
             }
         }
-        virtual void set_node_value_label(tree_type & tree, bool is_rooted) {
+        virtual void set_node_value_label(tree_value_type & nv, const std::string & label) {
             if (this->set_node_value_label_fn_) {
-                this->set_node_value_label_fn_(tree);
+                this->set_node_value_label_fn_(nv, label);
             }
         }
-        virtual void set_node_value_edge_length(tree_type & tree, bool is_rooted) {
+        virtual void set_node_value_edge_length(tree_value_type & nv, double length) {
             if (this->set_node_value_edge_length_fn_) {
-                this->set_node_value_edge_length_fn_(tree);
+                this->set_node_value_edge_length_fn_(nv, length);
             }
         }
 
     protected:
-        tree_factory_fntype                         tree_factory_;
+        tree_factory_fntype                         tree_factory_fn_;
         tree_is_rooted_setter_fntype                set_tree_is_rooted_fn_;
         node_value_label_setter_fntype              set_node_value_label_fn_;
         node_value_edge_length_setter_fntype        set_node_value_edge_length_fn_;
