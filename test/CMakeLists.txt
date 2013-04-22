@@ -4,12 +4,19 @@ SET(LIBDIR ${PROJECT_BINARY_DIR}/lib)
 FILE(MAKE_DIRECTORY ${LIBDIR})
 SET(TESTLIB platypustest)
 ADD_LIBRARY(${TESTLIB}
+    # STATIC
     src/tests.cpp
     )
 INSTALL(TARGETS
     ${TESTLIB}
     DESTINATION ${LIBDIR})
 LINK_DIRECTORIES(${LIBDIR})
+
+## ``make test`` will redirect all test output to "Testing/Temporary/LastTest.log"
+## ``CTEST_OUTPUT_ON_FAILURE=1 make test`` or ``ctest --output-on-failure``
+## will show output of failed tests.
+## We create a custom target, ``make check`` that wraps up the latter
+ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
 
 ## Build and install the test targets
 SET(TEST_TARGET_SOURCES
@@ -39,9 +46,6 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         )
     TARGET_LINK_LIBRARIES(${basename}
         ${TESTLIB})
-    # INSTALL(TARGETS
-    #     ${basename}
-    #     test)
     ADD_TEST(${basename} ${basename})
 ENDFOREACH()
 
