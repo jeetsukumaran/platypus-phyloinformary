@@ -39,6 +39,9 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         )
     TARGET_LINK_LIBRARIES(${basename}
         ${TESTLIB})
-ADD_TEST(${basename} ${basename})
+    # INSTALL(TARGETS
+    #     ${basename}
+    #     test)
+    ADD_TEST(${basename} ${basename})
 ENDFOREACH()
 
