@@ -19,6 +19,7 @@
  *
  */
 
+#include <iomanip>
 #include "tests.hpp"
 
 //--------------------------------------------------------------------------------
@@ -92,7 +93,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
             }
             NexusTokenizer::iterator src_iter = this->tokenizer_.begin(src);
             while (src_iter != this->tokenizer_.end()) {
-                auto tree = this->create_new_tree();
+                auto & tree = this->create_new_tree();
                 this->parse_tree_from_stream(tree, src_iter);
             }
             return 0;
@@ -231,7 +232,19 @@ int main () {
     tree_reader.set_tree_is_rooted_setter(is_rooted_f);
     tree_reader.set_node_label_setter(node_label_f);
     tree_reader.set_edge_length_setter(node_edge_f);
+
     tree_reader.read_from_string(tree_string, "newick");
     // tree_reader.read_from_string("(a, (b, c));", "newick");
+
+    const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
+            [] (typename TreeType::value_type & nv, std::ostream & out) {
+                if (!nv.label.empty()) {
+                    out << nv.label;
+                }
+                out << ":" << std::setprecision(4) << nv.edge_length;
+            });
+    for (auto & tree : trees) {
+        write_newick(tree, std::cout, write_node_f);
+    }
 }
 
