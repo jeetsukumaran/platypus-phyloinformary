@@ -47,9 +47,9 @@ namespace platypus {
  * node (it's "value") and the tree structure itself.
  *
  * @tparam NodeValueT
- *   Any assignable type an be used as the data -- a primitive type, or a
- *   struct or class provides an assignment operator method, ``NodeValueT &
- *   operator=(const NodeValueT &)``.
+ *   Any primitive type, or any struct or class that defines:
+ *      - an empty constructor: NodeValueT()
+ *      - an assignment operator: NodeValue T & operator=(const NodeValueT & nv)
  */
 template<class NodeValueT>
 class TreeNode {

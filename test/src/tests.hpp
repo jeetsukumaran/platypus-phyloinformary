@@ -27,30 +27,30 @@ class BasicTree : public platypus::Tree<std::string> {
 // DataTree
 
 class TestData {
-
     public:
-        TestData();
-        TestData(const std::string& label);
-        TestData(const TestData& other);
-        TestData(TestData&& other);
-        ~TestData();
-        const std::string& label() const {
-            return this->label_;
+        TestData & operator=(const TestData & nd) {
+            this->label_ = nd.label_;
+            this->edge_length_ = nd.edge_length_;
+            return *this;
         }
-
+        void set_label(const std::string & label) {
+            this->label_ = label;
+        }
+        void set_edge_length(double edge_length) {
+            this->edge_length_ = edge_length;
+        }
     protected:
-        std::string label_;
-
+        std::string     label_;
+        double          edge_length_;
+    friend std::ostream& operator<<(std::ostream& stream, const TestData& data);
 }; // TestData
-
-std::ostream& operator<<(std::ostream& stream, const TestData& data);
 
 class DataTree : public platypus::Tree<TestData> {
     public:
-        typedef platypus::TreeNode<std::string> TreeNodeType;
+        typedef platypus::TreeNode<TestData> TreeNodeType;
     public:
-        DataTree();
-        ~DataTree();
+        DataTree() { }
+        ~DataTree() { }
 }; // DataTree
 
 //////////////////////////////////////////////////////////////////////////////

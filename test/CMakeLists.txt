@@ -20,7 +20,7 @@ SET(TEST_TARGET_SOURCES
     src/basic_tree_postorder.cpp
     src/basic_tree_preorder.cpp
     src/basic_tree_sibling.cpp
-    src/data_tree.cpp
+    src/emplace_child.cpp
     src/heterogenous_tree_deep_copy.cpp
     src/heterogenous_tree_deep_copy2.cpp
     src/newick_reader_basic.cpp

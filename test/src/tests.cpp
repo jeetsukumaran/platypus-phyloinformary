@@ -1,4 +1,5 @@
 
+#include <iomanip>
 #include "tests.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -13,33 +14,12 @@ BasicTree::~BasicTree() {
 //////////////////////////////////////////////////////////////////////////////
 // DataTree
 
-TestData::TestData() {
-}
-
-TestData::TestData(const std::string& label)
-        : label_(label) {
-}
-
-TestData::TestData(const TestData& other)
-        : label_(other.label_) {
-}
-
-TestData::TestData(TestData&& other)
-        : label_(std::move(other.label_)) {
-}
-
-TestData::~TestData() {
-}
-
 std::ostream& operator<<(std::ostream& stream, const TestData& data) {
-    stream << data.label();
+    if (!data.label_.empty()) {
+        stream << data.label_;
+    }
+    stream << ":" << std::setprecision(4) << data.edge_length_;
     return stream;
-}
-
-DataTree::DataTree() {
-}
-
-DataTree::~DataTree() {
 }
 
 //////////////////////////////////////////////////////////////////////////////

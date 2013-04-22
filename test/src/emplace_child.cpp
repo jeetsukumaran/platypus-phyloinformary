@@ -3,9 +3,28 @@
 #include <iostream>
 #include "tests.hpp"
 
+
+class Value {
+
+    public:
+        Value() { }
+        Value(const char * v)
+            : label_(v) { }
+
+    private:
+        std::string label_;
+
+    friend std::ostream& operator<<(std::ostream& stream, const Value & v) ;
+};
+
+std::ostream& operator<<(std::ostream& stream, const Value & v) {
+    stream << v.label_;
+    return stream;
+}
+
 int main() {
 
-    DataTree tree;
+    platypus::Tree<Value> tree;
     auto root = tree.begin();
     auto i1 = tree.emplace_child(root, "i1");
     auto i2 = tree.emplace_child(root, "i2");

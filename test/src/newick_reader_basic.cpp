@@ -19,19 +19,8 @@
  *
  */
 
-#include <iomanip>
 #include <platypus/newick.hpp>
 #include "tests.hpp"
-
-struct NodeData {
-    std::string label;
-    double      edge_length;
-    NodeData & operator=(const NodeData & nd) {
-        this->label = nd.label;
-        this->edge_length = nd.edge_length;
-        return *this;
-    }
-};
 
 int main () {
 
@@ -43,12 +32,12 @@ int main () {
         "[&R] ((T2:0.075, T5:0.075):0.45, ((T3:0.31, (T4:0.078, T0:0.078):0.23):0.058, T1:0.36):0.16):0;"
         ;
 
-    typedef platypus::Tree<NodeData> TreeType;
+    typedef DataTree TreeType;
     std::vector<TreeType> trees;
     auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
     auto is_rooted_f = [] (TreeType& tree, bool) {}; // no-op
-    auto node_label_f = [] (NodeData& nd, const std::string& label) {nd.label = label;};
-    auto node_edge_f = [] (NodeData& nd, double len) {nd.edge_length = len;};
+    auto node_label_f = [] (TestData& value, const std::string& label) {value.set_label(label);};
+    auto node_edge_f = [] (TestData& value, double len) {value.set_edge_length(len);};
     platypus::NewickReader<TreeType> tree_reader;
     tree_reader.set_tree_factory(tree_factory);
     tree_reader.set_tree_is_rooted_setter(is_rooted_f);
@@ -61,15 +50,8 @@ int main () {
     // tree_reader.read_from_string("(a, (b, c)) ", "newick"); // test case: missing semi-colon;
     // tree_reader.read_from_string("(a:0, b:0, :0, :0):0;", "newick"); // test case: empty nodes with brlens
 
-    const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
-            [] (typename TreeType::value_type & nv, std::ostream & out) {
-                if (!nv.label.empty()) {
-                    out << nv.label;
-                }
-                out << ":" << std::setprecision(4) << nv.edge_length;
-            });
     for (auto & tree : trees) {
-        write_newick(tree, std::cout, write_node_f);
+        write_newick(tree, std::cout);
     }
 }
 
