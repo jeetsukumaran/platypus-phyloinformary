@@ -58,17 +58,17 @@ class TreeProducer {
          *   for storage ofthe object. Client code is responsible for the
          *   management (including disposal) of the object.
          *
-         * @param tree_is_rooted_setter
+         * @param tree_is_rooted_func
          *   A function object that takes a TreeT object and a boolean value
          *   representing whether or not the tree is rooted (true == rooted)
          *   as arguments and sets the rooted state of the tree accordingly.
          *
-         * @param node_value_label_setter
+         * @param node_value_label_func
          *   A function object that takes a reference to TreeT::value_type and
          *   a std::string value as arguments and sets the label of the
          *   node accordingly.
          *
-         * @param node_value_label_setter
+         * @param node_value_edge_length_func
          *   A function object that takes a reference to TreeT::value_type and
          *   a double value as arguments and sets the edge length of the node
          *   accordingly.
@@ -86,6 +86,10 @@ class TreeProducer {
 
         TreeProducer() { }
 
+        virtual ~TreeProducer() { }
+
+
+        // Setting/binding of functions
         /**
          * @brief Sets the function object that will be called to allocate,
          * construct and * return a new TreeT object.
@@ -102,7 +106,6 @@ class TreeProducer {
         virtual void set_tree_factory(const tree_factory_fntype & tree_factory) {
             this->tree_factory_ = tree_factory;
         }
-
         virtual void set_tree_is_rooted_func(const tree_is_rooted_setter_fntype & tree_is_rooted_func) {
             this->set_tree_is_rooted_ = tree_is_rooted_func;
         }
@@ -124,12 +127,29 @@ class TreeProducer {
             this->set_node_value_edge_length_ = [] (tree_value_type&, double) { };
         }
 
+        // Use of functions
+
+        virtual void set_tree_is_rooted(tree_type & tree, bool is_rooted) {
+            if (this->set_tree_is_rooted_fn_) {
+                this->set_tree_is_rooted_fn_(tree);
+            }
+        }
+        virtual void set_node_value_label(tree_type & tree, bool is_rooted) {
+            if (this->set_node_value_label_fn_) {
+                this->set_node_value_label_fn_(tree);
+            }
+        }
+        virtual void set_node_value_edge_length(tree_type & tree, bool is_rooted) {
+            if (this->set_node_value_edge_length_fn_) {
+                this->set_node_value_edge_length_fn_(tree);
+            }
+        }
+
     protected:
         tree_factory_fntype                         tree_factory_;
-        tree_is_rooted_setter_fntype                set_tree_is_rooted_;
-        node_value_label_setter_fntype              set_node_value_label_;
-        node_value_edge_length_setter_fntype        set_node_value_edge_length_;
-
+        tree_is_rooted_setter_fntype                set_tree_is_rooted_fn_;
+        node_value_label_setter_fntype              set_node_value_label_fn_;
+        node_value_edge_length_setter_fntype        set_node_value_edge_length_fn_;
 
 }; // TreeProducer
 

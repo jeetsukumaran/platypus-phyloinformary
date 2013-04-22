@@ -104,12 +104,6 @@ class TreeReader : public TreeProducer<TreeT> {
         typedef typename TreeProducer<TreeT>::node_value_label_setter_fntype         node_value_label_setter_fntype;
         typedef typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype   node_value_edge_length_setter_fntype;
 
-        // typdefs for pointers to member functions of various objects that can
-        // be used to create functions listed above
-        typedef void  (TreeT::*TreeIsRootedFuncPtrType)(bool);
-        typedef void  (TreeT::value_type::*NodeValueLabelFuncPtrType)(const std::string&);
-        typedef void  (TreeT::value_type::*NodeValueEdgeLengthFuncPtrType)(double);
-
     public:
 
         /**
@@ -153,66 +147,12 @@ class TreeReader : public TreeProducer<TreeT> {
         }
 
         /**
-         * @brief Overload of constructor that allows passing in pointers to
-         * member functions of TreeT and TreeT::value_type to set the rooted
-         * state (TreeT) and node labels and edge lengths (TreeT::value_type).
-         *
-         * @param tree_factory
-         *   A Function object that takes no arguments and returns a reference
-         *   to a new TreeT object. This function should take responsibility
-         *   for allocating memory, constructing, and initializing the TreeT
-         *   object. In addition, the function should also take responsibility
-         *   for storage ofthe object. Client code is responsible for the
-         *   management (including disposal) of the object.
-         *
-         * @param tree_is_rooted_setter
-         *   A pointer to a member function of TreeT that takes a single
-         *   boolean value as an argument and sets the rooted state of the
-         *   tree accordingly.
-         *
-         * @param node_value_label_setter
-         *   A pointer to a member function of TreeT::value_type that takes a
-         *   single std::string value as an argument and sets the label of the
-         *   node.
-         *
-         * @param node_value_edge_length_setter
-         *   A pointer to a member function of TreeT::value_type that takes a
-         *   single double value as an argument and sets the edge length of the
-         *   edge subtending thenode.
+         * Default constructor.
          */
-        TreeReader(
-                const tree_factory_fntype & tree_factory,
-                TreeIsRootedFuncPtrType tree_is_rooted_setter=nullptr,
-                NodeValueLabelFuncPtrType node_value_label_setter=nullptr,
-                NodeValueEdgeLengthFuncPtrType node_value_edge_length_setter=nullptr) {
-            this->set_tree_factory(tree_factory);
-            this->set_tree_is_rooted_func(tree_is_rooted_setter);
-            this->set_node_value_label_func(node_value_label_setter);
-            this->set_node_value_edge_length_func(node_value_edge_length_setter);
+        TreeReader() {
         }
 
-        void set_tree_is_rooted_func(TreeIsRootedFuncPtrType tree_is_rooted_func_ptr) {
-            if (tree_is_rooted_func_ptr != nullptr) {
-                this->set_tree_is_rooted_ = [tree_is_rooted_func_ptr] (tree_type& tree, bool is_rooted) { ((tree).*(tree_is_rooted_func_ptr))(is_rooted); };
-            } else {
-                this->clear_tree_is_rooted_func();
-            }
-        }
-
-        void set_node_value_label_func(NodeValueLabelFuncPtrType node_value_label_func_ptr) {
-            if (node_value_label_func_ptr != nullptr) {
-                this->set_node_value_label_ = [node_value_label_func_ptr] (tree_value_type& nd, const std::string label) { ((nd).*(node_value_label_func_ptr))(label); };
-            } else {
-                this->clear_node_value_label_func();
-            }
-        }
-
-        void set_node_value_edge_length_func(NodeValueEdgeLengthFuncPtrType node_value_edge_length_func_ptr) {
-            if (node_value_edge_length_func_ptr != nullptr) {
-                this->set_node_value_edge_length_ = [node_value_edge_length_func_ptr] (tree_value_type& nd, double len) { ((nd).*(node_value_edge_length_func_ptr))(len); };
-            } else {
-                this->clear_node_value_edge_length_func();
-            }
+        virtual ~TreeReader() {
         }
 
         /**
