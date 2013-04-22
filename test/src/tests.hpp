@@ -37,6 +37,9 @@ class TestData {
         void set_label(const std::string & label) {
             this->label_ = label;
         }
+        std::string & get_label() {
+            return this->label_;
+        }
         void set_edge_length(double edge_length) {
             this->edge_length_ = edge_length;
         }
