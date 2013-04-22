@@ -11,6 +11,7 @@
 #include <map>
 #include <platypus/tree.hpp>
 #include <platypus/tokenizer.hpp>
+#include <platypus/newick.hpp>
 
 //////////////////////////////////////////////////////////////////////////////
 // BasicTree
@@ -24,7 +25,7 @@ class BasicTree : public platypus::Tree<std::string> {
 }; // BasicTree
 
 //////////////////////////////////////////////////////////////////////////////
-// DataTree
+// TestDataTree
 
 class TestData {
     public:
@@ -45,13 +46,27 @@ class TestData {
     friend std::ostream& operator<<(std::ostream& stream, const TestData& data);
 }; // TestData
 
-class DataTree : public platypus::Tree<TestData> {
+class TestDataTree : public platypus::Tree<TestData> {
     public:
         typedef platypus::TreeNode<TestData> TreeNodeType;
     public:
-        DataTree() { }
-        ~DataTree() { }
-}; // DataTree
+        TestDataTree() { }
+        ~TestDataTree() { }
+}; // TestDataTree
+
+template <class TreeT>
+platypus::NewickReader<TreeT> get_test_data_tree_newick_reader(std::vector<TreeT> & trees) {
+    auto tree_factory = [&trees] () -> TreeT & { trees.emplace_back(); return trees.back(); };
+    auto is_rooted_f = [] (TreeT & tree, bool) {}; // no-op
+    auto node_label_f = [] (TestData & value, const std::string& label) {value.set_label(label);};
+    auto node_edge_f = [] (TestData & value, double len) {value.set_edge_length(len);};
+    platypus::NewickReader<TreeT> tree_reader;
+    tree_reader.set_tree_factory(tree_factory);
+    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
+    tree_reader.set_node_label_setter(node_label_f);
+    tree_reader.set_edge_length_setter(node_edge_f);
+    return tree_reader;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // General String Support/Utility

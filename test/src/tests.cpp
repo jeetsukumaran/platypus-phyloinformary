@@ -12,7 +12,7 @@ BasicTree::~BasicTree() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// DataTree
+// TestDataTree
 
 std::ostream& operator<<(std::ostream& stream, const TestData& data) {
     if (!data.label_.empty()) {
