@@ -57,6 +57,11 @@ namespace platypus {
  *    struct NodeData {
  *        std::string label;
  *        double      edge_length;
+ *        NodeData & operator=(const NodeData & nd) {
+ *            this->label = nd.label;
+ *            this->edge_length = nd.edge_length;
+ *            return *this;
+ *        }
  *    };
  *    typedef platypus::Tree<NodeData> TreeType;
  *    std::vector<TreeType> trees;

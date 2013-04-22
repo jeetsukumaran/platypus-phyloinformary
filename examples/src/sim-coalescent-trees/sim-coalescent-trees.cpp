@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -65,7 +66,8 @@ int main(int argc, const char * argv []) {
 
     unsigned long num_tips = 10;
     unsigned long num_trees = 1;
-    double population_size = 1.0;;
+    double population_size = 1.0;
+    unsigned long edge_len_prec = 4;
     platypus::OptionParser parser(
             "SimCoalescentTree v1.0.0",
             "Simulate basic coalescent trees using the platypus-phyloinformary library.",
@@ -74,8 +76,10 @@ int main(int argc, const char * argv []) {
     //                            "number of tips in each tree");
     parser.add_option<unsigned long>(&num_trees, "-t", "--num-trees",
                                "number of trees to simulate (default = %default)");
-    parser.add_option<double>(&num_trees, "-p", "--pop-size",
+    parser.add_option<double>(&population_size, "-N", "--pop-size",
                                "haploid population size (default = %default)");
+    parser.add_option<unsigned long>(&edge_len_prec, "-e", "--edge-length-precision",
+                               "precision for edge length (default = %default)");
     parser.parse(argc, argv);
 
     const auto & args = parser.get_args();
@@ -92,11 +96,11 @@ int main(int argc, const char * argv []) {
     auto node_label_f = [] (NodeData& nd, const std::string& label) {  nd.label = label; };
     auto node_edge_f = [] (NodeData& nd, double len) {nd.edge_length = len;};
     const std::function<void (typename TreeType::value_type &, std::ostream &)> write_node_f(
-            [] (typename TreeType::value_type & nv, std::ostream & out) {
+            [&edge_len_prec] (typename TreeType::value_type & nv, std::ostream & out) {
                 if (!nv.label.empty()) {
                     out << nv.label;
                 }
-                out << ":" << nv.edge_length;
+                out << ":" << std::setprecision(edge_len_prec) << nv.edge_length;
             });
     platypus::coalescent::BasicCoalescentSimulator<TreeType> sim(tree_factory, is_rooted_f, node_label_f, node_edge_f);
     for (unsigned long i = 0; i < num_trees; ++i) {

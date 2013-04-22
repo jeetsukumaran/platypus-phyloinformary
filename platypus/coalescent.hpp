@@ -330,6 +330,7 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
                         this->set_node_value_edge_length(chi.first->value(), nodes[chi.first]);
                     }
                     nodes.clear();
+                    this->set_node_value_edge_length(anc->value(), 0.0);
                 }
                 nodes[anc] = 0.0;
                 time_expended = tmrca;
