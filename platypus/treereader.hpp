@@ -94,15 +94,15 @@ template <typename TreeT>
 class TreeReader : public TreeProducer<TreeT> {
 
     public:
-        typedef TreeProducer<TreeT>::tree_type                       tree_type;
-        typedef TreeProducer<TreeT>::tree_node_type                  tree_node_type;
-        typedef TreeProducer<TreeT>::tree_value_type                 tree_value_type;
+        typedef typename TreeProducer<TreeT>::tree_type             tree_type;
+        typedef typename TreeProducer<TreeT>::tree_node_type        tree_node_type;
+        typedef typename TreeProducer<TreeT>::tree_value_type       tree_value_type;
 
     public:
-        typedef TreeProducer<TreeT>::tree_factory_fntype                tree_factory_fntype;
-        typedef TreeProducer<TreeT>::tree_is_rooted_setter_fntype             tree_is_rooted_setter_fntype;
-        typedef TreeProducer<TreeT>::node_value_label_setter_fntype        node_value_label_setter_fntype;
-        typedef TreeProducer<TreeT>::node_value_edge_length_setter_fntype  node_value_edge_length_setter_fntype;
+        typedef typename TreeProducer<TreeT>::tree_factory_fntype                    tree_factory_fntype;
+        typedef typename TreeProducer<TreeT>::tree_is_rooted_setter_fntype           tree_is_rooted_setter_fntype;
+        typedef typename TreeProducer<TreeT>::node_value_label_setter_fntype         node_value_label_setter_fntype;
+        typedef typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype   node_value_edge_length_setter_fntype;
 
         // typdefs for pointers to member functions of various objects that can
         // be used to create functions listed above
@@ -230,15 +230,16 @@ class TreeReader : public TreeProducer<TreeT> {
             if (!f.good()) {
                 throw std::runtime_error("platypus::TreeReader::read_from_filepath(): Error opening file for input");
             }
-            return this->parse_from_stream(s, format);
+            return this->parse_from_stream(f, format);
         }
 
         virtual int read_from_string(const std::string& str, const std::string& format="nexus") {
             std::istringstream s(str);
             return this->parse_from_stream(s, format);
+        }
 
         virtual int read_from_stream(std::istream& src, const std::string& format) {
-            return this->parse_from_stream(s, format);
+            return this->parse_from_stream(src, format);
         }
 
 }; // TreeReader
