@@ -42,12 +42,13 @@ namespace platypus {
  *   A class representing a specialization or a derived specialization of
  *   platypus::Tree.
  *
- * @detail This class serves as an adapter between the NCL data model and the
- * platypus data model. A function object that instantiates and returns new
- * TreeT objects must be provided; management of these objects' lifecycles is
- * the responsibility of the client code. Function objects or pointers to
- * member functions allow for the setting of tree's rooted state, as well as
- * node labels and edge lengths.
+ * @detail
+ *   This class serves as a base class for specializations to deal with data
+ *   formats of different kinds. A function object that instantiates and
+ *   returns new TreeT objects must be provided; management of these objects'
+ *   lifecycles is the responsibility of the client code. Function objects
+ *   allow for the setting of tree's rooted state, as well as node labels and
+ *   edge lengths.
  *
  * Example of setting object state using function objects (in this case,
  * lambda expressions):
@@ -60,32 +61,16 @@ namespace platypus {
  *    typedef platypus::Tree<NodeData> TreeType;
  *    std::vector<TreeType> trees;
  *    auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
+ *    platypus::SomeTreeReader<TreeType> tree_reader(tree_factory);
+ *    // or:
+ *    // platypus::SomeTreeReader<TreeType> tree_reader;
+ *    // tree_reader.set_tree_factory(tree_factory);
  *    auto is_rooted_f = [] (TreeType& tree, bool) {}; // no-op
+ *    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
  *    auto node_label_f = [] (NodeData& nd, const std::string& label) {nd.label = label;};
+ *    tree_reader.set_node_label_setter(node_label_f);
  *    auto node_edge_f = [] (NodeData& nd, double len) {nd.edge_length = len;};
- *    BaseTreeReader<TreeType> tree_reader(tree_factory, is_rooted_f, node_label_f, node_edge_f);
- *    tree_reader.read_from_string("[&R](A:1,(B:1,(D:1,(E:1,F:1):1):1):1):1;", "newick");
- *  @endcode@
- *
- * Example of setting object state using pointer to member functions:
- *
- *  @code@
- *    class NodeData {
- *        public:
- *            void set_label(const std::string label) {
- *                this->label_ = label;
- *            }
- *            void set_edge_length(double edge_length) {
- *                this->edge_length_ = edge_length;
- *            }
- *        private:
- *            std::string label_;
- *            double      edge_length_;
- *    };
- *    typedef platypus::Tree<NodeData> TreeType;
- *    std::vector<TreeType> trees;
- *    auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
- *    BaseTreeReader<TreeType> tree_reader(tree_factory, nullptr, &NodeData::set_label, &NodeData::set_edge_length);
+ *    tree_reader.set_edge_length_setter(node_edge_f);
  *    tree_reader.read_from_string("[&R](A:1,(B:1,(D:1,(E:1,F:1):1):1):1):1;", "newick");
  *  @endcode@
  *
