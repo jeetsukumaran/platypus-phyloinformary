@@ -45,7 +45,16 @@ class Tokenizer {
             const std::string & esc_chars,
             const std::string & comment_begin,
             const std::string & comment_end,
-            bool capture_comments);
+            bool capture_comments)
+            : uncaptured_delimiters_(uncaptured_delimiters)
+            , captured_delimiters_(captured_delimiters)
+            , quote_chars_(quote_chars)
+            , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
+            , esc_chars_(esc_chars)
+            , comment_begin_(comment_begin)
+            , comment_end_(comment_end)
+            , capture_comments_(capture_comments) {
+        }
 
         virtual ~Tokenizer() {}
 
@@ -69,7 +78,21 @@ class Tokenizer {
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
-                        bool capture_comments);
+                        bool capture_comments)
+                        : allocated_src_ptr_(nullptr)
+                            , src_ptr_(&src)
+                            , uncaptured_delimiters_(uncaptured_delimiters)
+                            , captured_delimiters_(captured_delimiters)
+                            , quote_chars_(quote_chars)
+                            , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
+                            , esc_chars_(esc_chars)
+                            , comment_begin_(comment_begin)
+                            , comment_end_(comment_end)
+                            , capture_comments_(capture_comments)
+                            , cur_char_(0) {
+                    this->get_next_token();
+                }
+
 			    iterator(const std::string & str,
                         const std::string & uncaptured_delimiters,
                         const std::string & captured_delimiters,
@@ -78,15 +101,56 @@ class Tokenizer {
                         const std::string & esc_chars,
                         const std::string & comment_begin,
                         const std::string & comment_end,
-                        bool capture_comments);
-                iterator();
-                ~iterator();
-                // const reference operator*() const;
-                // const pointer operator->() const;
-                reference operator*();
-                pointer operator->();
-                bool operator==(const self_type& rhs) const;
-                bool operator!=(const self_type& rhs) const;
+                        bool capture_comments)
+                        : src_string_copy_(str)
+                            , allocated_src_ptr_(new std::istringstream(src_string_copy_))
+                            , src_ptr_(this->allocated_src_ptr_)
+                            , uncaptured_delimiters_(uncaptured_delimiters)
+                            , captured_delimiters_(captured_delimiters)
+                            , quote_chars_(quote_chars)
+                            , esc_quote_chars_by_doubling_(esc_quote_chars_by_doubling)
+                            , esc_chars_(esc_chars)
+                            , comment_begin_(comment_begin)
+                            , comment_end_(comment_end)
+                            , capture_comments_(capture_comments)
+                            , cur_char_(0) {
+                    this->get_next_token();
+                }
+
+                iterator()
+                    : allocated_src_ptr_(nullptr)
+                        , src_ptr_(nullptr)
+                        , esc_quote_chars_by_doubling_(true) {
+                }
+
+                ~iterator() {
+                    if (this->allocated_src_ptr_ != nullptr) {
+                        delete this->allocated_src_ptr_;
+                        this->allocated_src_ptr_ = nullptr;
+                    }
+                }
+
+                inline reference operator*() {
+                    return this->token_;
+                }
+
+                inline pointer operator->() {
+                    return &(this->token_);
+                }
+
+                inline bool operator==(const self_type& rhs) const {
+                    if ( this->src_ptr_ == rhs.src_ptr_) {
+                        return true;
+                    } else if (this->src_ptr_ && rhs.src_ptr_) {
+                        return *(this->src_ptr_) == *(rhs.src_ptr_);
+                    } else {
+                        return false;
+                    }
+                }
+
+                inline bool operator!=(const self_type& rhs) const {
+                    return !(*this == rhs);
+                }
 
                 inline const self_type & operator++() {
                     if (!this->src_ptr_->good()) {
@@ -112,24 +176,176 @@ class Tokenizer {
                     return i;
                 }
 
-                bool eof();
-                bool token_is_quoted();
-                bool token_has_comments();
-                std::vector<std::string>& captured_comments();
-                void clear_captured_comments();
+                inline bool eof() {
+                    return (this->src_ptr_ == nullptr) || (!this->src_ptr_->good());
+                }
+
+                inline bool token_is_quoted() {
+                    return this->token_is_quoted_;
+                }
+
+                inline bool token_has_comments() {
+                    return !this->captured_comments_.empty();
+                }
+
+                inline std::vector<std::string>& captured_comments() {
+                    return this->captured_comments_;
+                }
+
+                inline void clear_captured_comments() {
+                    this->captured_comments_.clear();
+                }
 
             protected:
 
-                value_type & get_next_token();
-                void skip_to_next_significant_char();
-                void handle_comment();
-                bool is_uncaptured_delimiter();
-                bool is_captured_delimiter(const std::string & s);
-                bool is_captured_delimiter();
-                bool is_quote_char();
-                bool is_comment_begin();
-                bool is_comment_end();
-                int get_next_char();
+                inline value_type & get_next_token() {
+                    assert(this->src_ptr_ != nullptr);
+                    this->token_is_quoted_ = false;
+                    auto & src = *(this->src_ptr_);
+                    this->skip_to_next_significant_char();
+                    if (this->cur_char_ == EOF && !src.good()) {
+                        this->src_ptr_ = nullptr;
+                        this->token_.clear();
+                        return this->token_;
+                    }
+                    if (this->is_captured_delimiter()) {
+                        this->token_ = this->cur_char_;
+                        this->get_next_char();
+                        return this->token_;
+                    } else if (this->is_quote_char()) {
+                        this->token_is_quoted_ = true;
+                        std::ostringstream dest;
+                        int cur_quote_char = this->cur_char_;
+                        if (!src.good()) {
+                            // TODO! unterminated quote
+                            this->src_ptr_ = nullptr;
+                            this->token_.clear();
+                            return this->token_;
+                        }
+                        this->get_next_char();
+                        while (true) {
+                            if (!src.good()) {
+                                // TODO! unterminated quote
+                                this->src_ptr_ = nullptr;
+                                this->token_.clear();
+                                return this->token_;
+                            }
+                            if (this->cur_char_ == cur_quote_char) {
+                                this->get_next_char();
+                                if (this->esc_quote_chars_by_doubling_) {
+                                    if (this->cur_char_ == cur_quote_char) {
+                                        dest.put(cur_quote_char);
+                                        this->get_next_char();
+                                    } else {
+                                        this->get_next_char();
+                                        break;
+                                    }
+                                } else {
+                                    this->get_next_char();
+                                    break;
+                                }
+                            } else {
+                                dest.put(this->cur_char_);
+                                this->get_next_char();
+                            }
+                        }
+                        this->token_ = dest.str();
+                        return this->token_;
+                    } else {
+                        std::ostringstream dest;
+                        this->token_is_quoted_ = false;
+                        while (src.good() && this->cur_char_ != EOF) {
+                            if (this->is_uncaptured_delimiter() ) {
+                                this->get_next_char();
+                                break;
+                            } else if (this->is_captured_delimiter()) {
+                                break;
+                            } else if (this->is_comment_begin()) {
+                                this->handle_comment();
+                                if (!src.good()) {
+                                    this->src_ptr_ = nullptr;
+                                    break;
+                                }
+                            } else {
+                                dest.put(this->cur_char_);
+                                this->get_next_char();
+                            }
+                        }
+                        this->token_ = dest.str();
+                        if (this->token_.empty() && src.good()) {
+                            this->get_next_token();
+                        }
+                        return this->token_;
+                    }
+                }
+
+                inline void skip_to_next_significant_char() {
+                    auto & src = *(this->src_ptr_);
+                    if (! src.good() ) {
+                        return;
+                    }
+                    if (this->cur_char_ == 0) {
+                        this->get_next_char();
+                    }
+                    if ( !this->is_uncaptured_delimiter() ) {
+                        return;
+                    }
+                    while ( src.good() && this->is_uncaptured_delimiter() ) {
+                        this->get_next_char();
+                    }
+                }
+
+                inline void handle_comment() {
+                    auto & src = *(this->src_ptr_);
+                    std::ostringstream dest;
+                    unsigned int nesting = 0;
+                    while (src.good()) {
+                        if ( this->is_comment_end() ) {
+                            nesting -= 1;
+                            if (nesting <= 0) {
+                                this->get_next_char();
+                                break;
+                            }
+                        } else if ( this->is_comment_begin() ) {
+                            nesting += 1;
+                        } else if (this->capture_comments_) {
+                            dest.put(this->cur_char_);
+                        }
+                        this->get_next_char();
+                    }
+                    if (this->capture_comments_) {
+                        this->captured_comments_.push_back(dest.str());
+                    }
+                }
+
+                inline bool is_uncaptured_delimiter() {
+                    return this->uncaptured_delimiters_.find(this->cur_char_) != std::string::npos;
+                }
+
+                inline bool is_captured_delimiter(const std::string & s) {
+                    return this->captured_delimiters_.find(s) != std::string::npos;
+                }
+
+                inline bool is_captured_delimiter() {
+                    return this->captured_delimiters_.find(this->cur_char_) != std::string::npos;
+                }
+
+                inline bool is_quote_char() {
+                    return this->quote_chars_.find(this->cur_char_) != std::string::npos;
+                }
+
+                inline bool is_comment_begin() {
+                    return this->comment_begin_.find(this->cur_char_) != std::string::npos;
+                }
+
+                inline bool is_comment_end() {
+                    return this->comment_end_.find(this->cur_char_) != std::string::npos;
+                }
+
+                inline int get_next_char() {
+                    this->cur_char_ = this->src_ptr_->get();
+                    return this->cur_char_;
+                }
 
             protected:
                 //  copy of source over lifespan
@@ -157,9 +373,31 @@ class Tokenizer {
 
         }; // iterator
 
-        iterator begin(std::istream & src);
-        iterator begin(const std::string & str);
-        iterator end();
+        iterator begin(std::istream & src) {
+            return Tokenizer::iterator(src,
+                this->uncaptured_delimiters_,
+                this->captured_delimiters_,
+                this->quote_chars_,
+                this->esc_quote_chars_by_doubling_,
+                this->esc_chars_,
+                this->comment_begin_,
+                this->comment_end_,
+                this->capture_comments_);
+        }
+        iterator begin(const std::string & str) {
+            return Tokenizer::iterator(str,
+                this->uncaptured_delimiters_,
+                this->captured_delimiters_,
+                this->quote_chars_,
+                this->esc_quote_chars_by_doubling_,
+                this->esc_chars_,
+                this->comment_begin_,
+                this->comment_end_,
+                this->capture_comments_);
+        }
+        iterator end() {
+            return Tokenizer::iterator();
+        }
 
     private:
         std::string     uncaptured_delimiters_;

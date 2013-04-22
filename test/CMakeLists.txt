@@ -4,7 +4,6 @@ SET(LIBDIR ${PROJECT_BINARY_DIR}/lib)
 FILE(MAKE_DIRECTORY ${LIBDIR})
 SET(TESTLIB platypustest)
 ADD_LIBRARY(${TESTLIB}
-    ../platypus/tokenizer.cpp
     src/tests.cpp
     )
 INSTALL(TARGETS
