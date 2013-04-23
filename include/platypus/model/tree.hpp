@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef PLATYPUS_TREE_HPP
-#define PLATYPUS_TREE_HPP
+#ifndef PLATYPUS_MODEL_TREE_HPP
+#define PLATYPUS_MODEL_TREE_HPP
 
 #include <cassert>
 #include <limits>

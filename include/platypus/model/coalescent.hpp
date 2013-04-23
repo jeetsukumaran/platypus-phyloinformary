@@ -19,13 +19,14 @@
  *
  */
 
-#ifndef PLATYPUS_COALSCENT_HPP
-#define PLATYPUS_COALSCENT_HPP
+#ifndef PLATYPUS_MODEL_COALSCENT_HPP
+#define PLATYPUS_MODEL_COALSCENT_HPP
 
+#include <cassert>
 #include <map>
-#include "base/base_producer.hpp"
-#include "numeric/function.hpp"
-#include "numeric/rng.hpp"
+#include "../base/base_producer.hpp"
+#include "../numeric/function.hpp"
+#include "../numeric/rng.hpp"
 
 namespace platypus {
 namespace coalescent {
