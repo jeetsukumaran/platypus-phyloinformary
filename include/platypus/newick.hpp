@@ -97,6 +97,13 @@ class NewickReader : public BaseTreeReader<TreeT> {
             }
             NexusTokenizer::iterator src_iter = this->tokenizer_.begin(src);
             int tree_count = 0;
+            // skip over leading semi-colons
+            while (!src_iter.eof() && *src_iter == ";") {
+                ++src_iter;
+            }
+            if (src_iter.eof()) {
+                return 0;
+            }
             while (src_iter != this->tokenizer_.end()) {
                 auto & tree = this->create_new_tree();
                 this->parse_tree_from_stream(tree, src_iter);
@@ -124,6 +131,10 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 throw NewickReaderInvalidTokenException(*src_iter);
             }
             this->parse_node_from_stream(tree, tree.head_node(), src_iter);
+            // skip over multiple consecutive trailing semi-colons
+            while (!src_iter.eof() && *src_iter == ";") {
+                ++src_iter;
+            }
             return tree;
         }
 

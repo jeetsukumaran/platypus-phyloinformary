@@ -41,6 +41,8 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_edge_lengths.cpp
     src/newick_reader_multitrees.cpp
     src/newick_reader_missing_commas.cpp
+    src/newick_reader_missing_semicolon.cpp
+    src/newick_reader_multi_semicolons.cpp
     src/tokenizer_captured_delimiters.cpp
     src/tokenizer_comment_capture.cpp
     src/tokenizer_comments.cpp

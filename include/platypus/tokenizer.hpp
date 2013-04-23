@@ -177,7 +177,11 @@ class Tokenizer {
                 }
 
                 inline bool eof() {
-                    return (this->src_ptr_ == nullptr) || (!this->src_ptr_->good());
+                    if (this->src_ptr_ && !this->src_ptr_->good()) {
+                        this->src_ptr_ = nullptr;
+                    }
+                    // return (this->src_ptr_ == nullptr) || (!this->src_ptr_->good());
+                    return (this->src_ptr_ == nullptr);
                 }
 
                 inline bool token_is_quoted() {
