@@ -31,6 +31,7 @@ SET(TEST_TARGET_SOURCES
     src/heterogenous_tree_deep_copy.cpp
     src/heterogenous_tree_deep_copy2.cpp
     src/newick_reader_basic.cpp
+    src/newick_reader_edge_lengths.cpp
     src/tokenizer_captured_delimiters.cpp
     src/tokenizer_comment_capture.cpp
     src/tokenizer_comments.cpp

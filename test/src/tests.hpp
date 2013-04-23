@@ -43,6 +43,9 @@ class TestData {
         void set_edge_length(double edge_length) {
             this->edge_length_ = edge_length;
         }
+        double get_edge_length() {
+            return this->edge_length_;
+        }
     protected:
         std::string     label_;
         double          edge_length_;
