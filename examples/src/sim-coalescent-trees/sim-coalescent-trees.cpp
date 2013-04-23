@@ -2,8 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <platypus/tree.hpp>
-#include <platypus/coalescent.hpp>
+#include <platypus/platypus.hpp>
 #include "../include/cmdopt.hpp"
 
 template <class TreeT, class iter>

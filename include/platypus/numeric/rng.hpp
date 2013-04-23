@@ -22,8 +22,8 @@
 #include <ctime>
 #include <random>
 
-#ifndef PLATYPUS_RNG_HPP_
-#define PLATYPUS_RNG_HPP_
+#ifndef PLATYPUS_NUMERIC_RNG_HPP
+#define PLATYPUS_NUMERIC_RNG_HPP
 
 namespace platypus {
 namespace numeric {

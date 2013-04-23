@@ -3,7 +3,6 @@
 #include <vector>
 #include <iterator>
 #include <map>
-#include <platypus/tokenizer.hpp>
 #include "tests.hpp"
 
 int main() {

@@ -51,8 +51,8 @@ endif()
 ##############################################################################
 ## Include directories
 INCLUDE_DIRECTORIES(
-  "${PROJECT_SOURCE_DIR}/../include"
-  "${PROJECT_BINARY_DIR}"   # to find foo/config.h
+  "${PROJECT_SOURCE_DIR}/../include" # for <platypus/platypus.hpp>
+  "${PROJECT_BINARY_DIR}"            # to find foo/config.h
     )
 
 ##############################################################################

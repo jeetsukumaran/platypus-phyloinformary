@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef PLATYPUS_NUMERIC_HPP
-#define PLATYPUS_NUMERIC_HPP
+#ifndef PLATYPUS_NUMERIC_FUNCTION_HPP
+#define PLATYPUS_NUMERIC_FUNCTION_HPP
 
 namespace platypus {
 namespace numeric {

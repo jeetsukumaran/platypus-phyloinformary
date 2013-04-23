@@ -19,8 +19,8 @@
  *              <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PLATYPUS_NCL_READER_HPP
-#define PLATYPUS_NCL_READER_HPP
+#ifndef PLATYPUS_PARSE_NCLREADER_HPP
+#define PLATYPUS_PARSE_NCLREADER_HPP
 
 #include <stdexcept>
 #include <iostream>
@@ -32,7 +32,7 @@
 #include <functional>
 #include <map>
 #include <ncl/nxsmultiformat.h>
-#include "treebuilder.hpp"
+#include "../base/base_reader.hpp"
 
 namespace platypus {
 

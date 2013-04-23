@@ -9,9 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
-#include <platypus/tree.hpp>
-#include <platypus/tokenizer.hpp>
-#include <platypus/newick.hpp>
+#include <platypus/platypus.hpp>
 
 //////////////////////////////////////////////////////////////////////////////
 // BasicTree

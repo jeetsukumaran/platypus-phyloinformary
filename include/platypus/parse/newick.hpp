@@ -19,14 +19,14 @@
  *
  */
 
-#ifndef PLATYPUS_NEWICK_HPP
-#define PLATYPUS_NEWICK_HPP
+#ifndef PLATYPUS_PARSE_NEWICK_HPP
+#define PLATYPUS_PARSE_NEWICK_HPP
 
 #include <stdlib.h>
 #include <exception>
 #include <string>
-#include "tokenizer.hpp"
-#include "treebuilder.hpp"
+#include "../utility/tokenizer.hpp"
+#include "../base/base_reader.hpp"
 
 namespace platypus {
 
@@ -36,10 +36,10 @@ namespace platypus {
 /**
  * Exception thrown when encountering a non-recognized NEWICK token.
  */
-class NewickReaderException : public TreeReaderException {
+class NewickReaderException : public ReaderException {
 public:
     NewickReaderException(const std::string& message)
-        : TreeReaderException(message) { }
+        : ReaderException(message) { }
 };
 
 /**

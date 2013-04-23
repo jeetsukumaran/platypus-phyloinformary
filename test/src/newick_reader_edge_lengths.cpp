@@ -1,6 +1,5 @@
 #include <sstream>
 #include <map>
-#include <platypus/newick.hpp>
 #include "tests.hpp"
 
 int main () {

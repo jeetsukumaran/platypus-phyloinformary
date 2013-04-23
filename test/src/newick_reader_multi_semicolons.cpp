@@ -1,4 +1,3 @@
-#include <platypus/newick.hpp>
 #include "tests.hpp"
 
 int main () {

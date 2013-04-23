@@ -23,9 +23,9 @@
 #define PLATYPUS_COALSCENT_HPP
 
 #include <map>
-#include "numeric.hpp"
-#include "rng.hpp"
-#include "treebuilder.hpp"
+#include "base/base_producer.hpp"
+#include "numeric/function.hpp"
+#include "numeric/rng.hpp"
 
 namespace platypus {
 namespace coalescent {
@@ -106,7 +106,7 @@ double random_time_to_coalescence(
  *   The expected or mean time to coalescence of `num_lineages` gene lineages
  *   evolving in a population with haploid size `haploid_pop_size`.
  */
-double expected_time_to_coalescence(
+inline double expected_time_to_coalescence(
         unsigned long num_lineages,
         double haploid_pop_size=1.0,
         unsigned long num_to_coalesce=2) {
@@ -123,16 +123,16 @@ double expected_time_to_coalescence(
  *   Random number generator type.
  */
 template <typename TreeT, typename RngT=platypus::numeric::RandomNumberGenerator>
-class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
+class BasicCoalescentSimulator : public platypus::BaseTreeProducer<TreeT> {
 
     public:
 
         BasicCoalescentSimulator(RngT & rng,
-                const typename TreeProducer<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const typename TreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
-                const typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
-            : TreeProducer<TreeT>(
+                const typename BaseTreeProducer<TreeT>::tree_factory_fntype & tree_factory,
+                const typename BaseTreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename BaseTreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename BaseTreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
+            : BaseTreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
@@ -142,11 +142,11 @@ class BasicCoalescentSimulator : public platypus::TreeProducer<TreeT> {
         }
 
         BasicCoalescentSimulator(
-                const typename TreeProducer<TreeT>::tree_factory_fntype & tree_factory,
-                const typename TreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const typename TreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
-                const typename TreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
-            : TreeProducer<TreeT>(
+                const typename BaseTreeProducer<TreeT>::tree_factory_fntype & tree_factory,
+                const typename BaseTreeProducer<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
+                const typename BaseTreeProducer<TreeT>::node_value_label_setter_fntype & node_value_label_func,
+                const typename BaseTreeProducer<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
+            : BaseTreeProducer<TreeT>(
                     tree_factory,
                     tree_is_rooted_func,
                     node_value_label_func,
