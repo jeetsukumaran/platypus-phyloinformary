@@ -202,6 +202,10 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 } else if (*src_iter == ",") {
                     // end of this node
                     return current_node;
+                } else if (*src_iter == "(") {
+                    // start of another node or tree without finishing this
+                    // node
+                        throw NewickReaderMalformedStatement("platypus::NewickReader: malformed tree statement");
                 } else {
                     // label
                     if (label_parsed) {

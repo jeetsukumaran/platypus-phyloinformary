@@ -40,6 +40,7 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_basic.cpp
     src/newick_reader_edge_lengths.cpp
     src/newick_reader_multitrees.cpp
+    src/newick_reader_missing_commas.cpp
     src/tokenizer_captured_delimiters.cpp
     src/tokenizer_comment_capture.cpp
     src/tokenizer_comments.cpp
