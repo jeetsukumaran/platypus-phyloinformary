@@ -24,16 +24,7 @@ int main () {
 
     bool fail = 0;
     for (auto & tree : trees) {
-        std::vector<std::string> postorder_visits;
-        for (auto ndi = tree.postorder_begin(); ndi != tree.postorder_end(); ++ndi) {
-            postorder_visits.push_back(ndi->get_label());
-        }
-        if (postorder_visits != STANDARD_TEST_TREE_POSTORDER) {
-            fail = 1;
-            fail_test(__FILE__,
-                STANDARD_TEST_TREE_POSTORDER,
-                postorder_visits);
-        }
+        fail += validate_standard_test_tree(tree);
     }
 
     return fail;
