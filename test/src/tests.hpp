@@ -372,6 +372,9 @@ int check_newick(TreeT& tree,
     }
 }
 
+int validate_standard_test_tree(TestDataTree & tree);
+
+
 bool compare_token_vectors(const std::string & test_title,
         const std::vector<std::string> & expected,
         const std::vector<std::string> & observed);
