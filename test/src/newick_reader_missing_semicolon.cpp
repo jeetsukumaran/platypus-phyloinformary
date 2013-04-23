@@ -14,7 +14,5 @@ int main () {
         return 0;
     }
     return 1;
-    // tree_reader.read_from_string("(a, b, ,,); ", "newick"); // test case: extra commas (should be treated as blank nodes);
-    // tree_reader.read_from_string("(a:0, b:0, :0, :0):0;", "newick"); // test case: empty nodes with brlens
 }
 
