@@ -48,20 +48,10 @@ ENDIF()
 
 ##############################################################################
 ## Include directories
-# Set include-directories
 INCLUDE_DIRECTORIES(
-  "${PROJECT_SOURCE_DIR}"   # to find foo/foo.h
+  "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_BINARY_DIR}"   # to find foo/config.h
     )
-
-##############################################################################
-## Sources
-# Set library source directory variable
-SET(MAIN_PLATYPUS_SOURCE_DIR ${PROJECT_SOURCE_DIR}/platypus CACHE PATH "Directory of main library source code")
-# Set library source files
-# NOTE: cmake will have to be run again to repopulate this list
-# if files are added
-FILE(GLOB MAIN_PLATYPUS_SOURCE_FILES ${MAIN_PLATYPUS_SOURCE_DIR}/*.cpp ${MAIN_PLATYPUS_SOURCE_DIR}/*.hpp)
 
 ##############################################################################
 ## Testing

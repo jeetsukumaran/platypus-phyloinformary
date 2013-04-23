@@ -16,7 +16,14 @@ LINK_DIRECTORIES(${LIBDIR})
 ## ``CTEST_OUTPUT_ON_FAILURE=1 make test`` or ``ctest --output-on-failure``
 ## will show output of failed tests.
 ## We create a custom target, ``make check`` that wraps up the latter
-ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+IF(CMAKE_CONFIGURATION_TYPES)
+    ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND}
+        --force-new-ctest-process --output-on-failure
+        --build-config "$<CONFIGURATION>")
+ELSE()
+    ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND}
+        --force-new-ctest-process --output-on-failure)
+ENDIF()
 
 ## Build and install the test targets
 SET(TEST_TARGET_SOURCES

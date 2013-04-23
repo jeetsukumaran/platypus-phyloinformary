@@ -23,9 +23,9 @@
 #define PLATYPUS_COALSCENT_HPP
 
 #include <map>
-#include "numeric/rng.hpp"
-#include "numeric/functions.hpp"
-#include "treeproducer.hpp"
+#include "numeric.hpp"
+#include "rng.hpp"
+#include "treebuilder.hpp"
 
 namespace platypus {
 namespace coalescent {

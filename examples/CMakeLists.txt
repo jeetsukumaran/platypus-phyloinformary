@@ -49,5 +49,12 @@ else()
 endif()
 
 ##############################################################################
+## Include directories
+INCLUDE_DIRECTORIES(
+  "${PROJECT_SOURCE_DIR}/../include"
+  "${PROJECT_BINARY_DIR}"   # to find foo/config.h
+    )
+
+##############################################################################
 ## Sources
 add_subdirectory(src/sim-coalescent-trees)

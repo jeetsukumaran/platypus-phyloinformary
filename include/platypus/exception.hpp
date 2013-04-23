@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef PLATYPUS_EXCEPTION_HPP_
-#define PLATYPUS_EXCEPTION_HPP_
+#ifndef PLATYPUS_EXCEPTION_HPP
+#define PLATYPUS_EXCEPTION_HPP
 
 namespace platypus {
 

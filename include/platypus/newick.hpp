@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <exception>
 #include <string>
-#include <platypus/datareader.hpp>
-#include <platypus/tokenizer.hpp>
+#include "tokenizer.hpp"
+#include "treebuilder.hpp"
 
 namespace platypus {
 

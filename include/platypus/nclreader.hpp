@@ -31,8 +31,8 @@
 #include <vector>
 #include <functional>
 #include <map>
-#include "datareader.hpp"
 #include <ncl/nxsmultiformat.h>
+#include "treebuilder.hpp"
 
 namespace platypus {
 

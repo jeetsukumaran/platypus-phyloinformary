@@ -2,9 +2,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <platypus/tree.hpp>
+#include <platypus/coalescent.hpp>
 #include "../include/cmdopt.hpp"
-#include "../../../platypus/tree.hpp"
-#include "../../../platypus/coalescent.hpp"
 
 template <class TreeT, class iter>
 void write_newick_node(const TreeT& tree,
