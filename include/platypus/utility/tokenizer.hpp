@@ -48,6 +48,24 @@ class TokenizerException : public PlatypusException {
             : PlatypusException(filename, line_num, message) { }
 };
 
+class TokenizerUnterminatedQuoteException : public TokenizerException {
+    public:
+        TokenizerUnterminatedQuoteException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : TokenizerException(filename, line_num, message) { }
+};
+
+class TokenizerUnexpectedEndOfStream : public TokenizerException {
+    public:
+        TokenizerUnexpectedEndOfStream(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : TokenizerException(filename, line_num, message) { }
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Tokenizer
 class Tokenizer {
@@ -184,7 +202,7 @@ class Tokenizer {
 
                 inline const self_type & require_next() {
                     if (!this->src_ptr_->good()) {
-                        throw TokenizerException(__FILE__, __LINE__, "Unexpected end of stream");
+                        throw TokenizerUnexpectedEndOfStream(__FILE__, __LINE__, "Unexpected end of stream");
                     }
                     this->get_next_token();
                     return *this;
@@ -247,7 +265,7 @@ class Tokenizer {
                         std::ostringstream dest;
                         int cur_quote_char = this->cur_char_;
                         if (!src.good()) {
-                            throw TokenizerException(__FILE__, __LINE__, "Unterminated quote");
+                            throw TokenizerUnterminatedQuoteException(__FILE__, __LINE__, "Unterminated quote");
                             // // TODO! unterminated quote
                             // this->set_eof();
                             // return this->token_;
@@ -255,7 +273,7 @@ class Tokenizer {
                         this->get_next_char();
                         while (true) {
                             if (!src.good()) {
-                                throw TokenizerException(__FILE__, __LINE__, "Unterminated quote");
+                                throw TokenizerUnterminatedQuoteException(__FILE__, __LINE__, "Unterminated quote");
                                 // // TODO! unterminated quote
                                 // this->set_eof();
                                 // return this->token_;

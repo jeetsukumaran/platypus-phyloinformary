@@ -223,7 +223,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
             bool label_parsed = false;
             while (true) {
                 if (*src_iter == ":") {
-                    ++src_iter;
+                    src_iter.require_next();
                     double edge_len = std::atof(src_iter->c_str());
                     this->set_node_value_edge_length(current_node->value(), edge_len);
                     src_iter.require_next();
