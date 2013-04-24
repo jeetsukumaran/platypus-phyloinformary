@@ -1,4 +1,4 @@
-#include <sstream>
+#include <vector>
 #include "tests.hpp"
 
 int main () {
@@ -9,7 +9,5 @@ int main () {
     std::string tree_string = "(a,(b,(c,d)));";
     tree_reader.read_from_string(tree_string, "newick");
     assert(trees.size() == 1);
-    auto tree = trees[0];
-    return 1;
 }
 

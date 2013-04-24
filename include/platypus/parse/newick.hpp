@@ -168,18 +168,28 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                 }
                 src_iter.require_next();
+                bool node_created = false;
                 while (true) {
                     if (src_iter.eof()) {
                         throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                     }
                     if (*src_iter == ",") {
                         // next child
+                        if (!node_created) {
+                            current_node->add_child(tree.create_leaf_node());
+                            node_created = true;
+                        }
                         src_iter.require_next();
                         while (*src_iter == ",") {
                             // empty name (as allowed by NEWICK standard)
                             auto new_node = tree.create_leaf_node();
                             current_node->add_child(new_node);
                             src_iter.require_next();
+                            node_created = true;
+                        }
+                        if (*src_iter == ")") {
+                            current_node->add_child(tree.create_leaf_node());
+                            node_created = true;
                         }
                     } else if (*src_iter == ")") {
                         // end of child nodes
@@ -193,18 +203,21 @@ class NewickReader : public BaseTreeReader<TreeT> {
                             auto new_node = tree.create_internal_node();
                             this->parse_node_from_stream(tree, new_node, src_iter);
                             current_node->add_child(new_node);
+                            node_created = true;
                         } else {
                             // assume a label token, i.e. a leaf node
                             auto new_node = tree.create_leaf_node();
                             this->parse_node_from_stream(tree, new_node, src_iter);
                             current_node->add_child(new_node);
+                            node_created = true;
                         }
                     }
                 }
             }
-            if (src_iter.eof()) {
-                throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
-            }
+            // std::cout << "{" << *src_iter << "}" << std::endl;
+            // if (src_iter.eof()) {
+            //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+            // }
             bool label_parsed = false;
             while (true) {
                 if (*src_iter == ":") {

@@ -6,7 +6,7 @@ int main () {
     typedef TestDataTree TreeType;
     std::vector<TreeType> trees;
     auto tree_reader = get_test_data_tree_newick_reader(trees);
-    std::string tree_string = "(a,(b,(c,d)));";
+    std::string tree_string = "(,(,(,)));";
     tree_reader.read_from_string(tree_string, "newick");
     assert(trees.size() == 1);
     auto tree = trees[0];
@@ -30,14 +30,15 @@ int main () {
         fail = 1;
         std::cerr << "Expecting 4 leaves but found: " << leaf_count << std::endl;
     }
-    if (internal_count != 4) {
+    if (internal_count != 3) {
         fail = 1;
-        std::cerr << "Expecting internal nodes but found: " << internal_count << std::endl;
+        std::cerr << "Expecting 3 internal nodes but found: " << internal_count << std::endl;
     }
-    std::ostringstream o;
-    write_newick(tree, o);
-    std::cout << o.str() << std::endl;
-    return 1;
+    if (fail > 0) {
+        std::ostringstream o;
+        write_newick(tree, o);
+        std::cerr << o.str() << std::endl;
+    }
     return fail;
 
 }
