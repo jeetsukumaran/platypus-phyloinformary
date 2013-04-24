@@ -37,9 +37,12 @@ namespace platypus {
  * Exception thrown when encountering a non-recognized NEWICK token.
  */
 class NewickReaderException : public ReaderException {
-public:
-    NewickReaderException(const std::string& message)
-        : ReaderException(message) { }
+    public:
+        NewickReaderException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : ReaderException(filename, line_num, message) { }
 };
 
 /**
@@ -47,8 +50,11 @@ public:
  */
 class NewickReaderInvalidTokenException : public NewickReaderException {
     public:
-        NewickReaderInvalidTokenException(const std::string& message)
-            : NewickReaderException(message) { }
+        NewickReaderInvalidTokenException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : NewickReaderException(filename, line_num, message) { }
 };
 
 /**
@@ -56,8 +62,11 @@ class NewickReaderInvalidTokenException : public NewickReaderException {
  */
 class NewickReaderMalformedStatement : public NewickReaderException {
     public:
-        NewickReaderMalformedStatement(const std::string& message)
-            : NewickReaderException(message) { }
+        NewickReaderMalformedStatement(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : NewickReaderException(filename, line_num, message) { }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +137,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
         tree_type & parse_tree_from_stream(TreeT & tree,
                 NexusTokenizer::iterator & src_iter) {
             if (*src_iter != "(") {
-                throw NewickReaderInvalidTokenException(*src_iter);
+                throw NewickReaderInvalidTokenException(__FILE__, __LINE__, *src_iter);
             }
             this->parse_node_from_stream(tree, tree.head_node(), src_iter);
             // skip over multiple consecutive trailing semi-colons
@@ -156,12 +165,12 @@ class NewickReader : public BaseTreeReader<TreeT> {
             if (*src_iter == "(") {
                 // begin processing of child nodes
                 if (src_iter.eof()) {
-                    throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                    throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                 }
                 src_iter.require_next();
                 while (true) {
                     if (src_iter.eof()) {
-                        throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                     }
                     if (*src_iter == ",") {
                         // next child
@@ -194,7 +203,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 }
             }
             if (src_iter.eof()) {
-                throw NewickReaderMalformedStatement("platypus::NewickReader: premature end of stream");
+                throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
             }
             bool label_parsed = false;
             while (true) {
@@ -216,11 +225,11 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 } else if (*src_iter == "(") {
                     // start of another node or tree without finishing this
                     // node
-                        throw NewickReaderMalformedStatement("platypus::NewickReader: malformed tree statement");
+                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: malformed tree statement");
                 } else {
                     // label
                     if (label_parsed) {
-                        throw NewickReaderMalformedStatement("platypus::NewickReader: Expecting ':', ')', ',' or ';' after reading label");
+                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: Expecting ':', ')', ',' or ';' after reading label");
                     } else {
                         this->set_node_value_label(current_node->value(), *src_iter);
                         label_parsed = true;

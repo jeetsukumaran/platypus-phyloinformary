@@ -22,6 +22,8 @@
 #ifndef PLATYPUS_EXCEPTION_HPP
 #define PLATYPUS_EXCEPTION_HPP
 
+#include <sstream>
+
 namespace platypus {
 
 /**
@@ -29,19 +31,27 @@ namespace platypus {
  */
 class PlatypusException : public std::exception {
     public:
-        PlatypusException(const std::string& message)
-            : message_(message) {
-        }
-        PlatypusException(const char * message)
-            : message_(message) {
+        PlatypusException(
+                const std::string & filename,
+                unsigned long line_num,
+                const std::string & message)
+            : filename_(filename)
+            , line_num_(line_num)
+            , message_(message) {
         }
         virtual ~PlatypusException() throw() { }
         virtual const char * what() const throw() {
-            return this->message_.c_str();
+            std::ostringstream o;
+            o << "File: " << this->filename_ << std::endl;
+            o << "Line: " << this->line_num_ << std::endl;
+            o << "Error: " << this->message_ << std::endl;
+            return o.str().c_str();
         }
 
     private:
-        std::string message_;
+        std::string     filename_;
+        unsigned long   line_num_;
+        std::string     message_;
 };
 
 } // namespace platypus

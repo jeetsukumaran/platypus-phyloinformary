@@ -56,4 +56,4 @@ INCLUDE_DIRECTORIES(
 ##############################################################################
 ## Testing
 ENABLE_TESTING ()
-ADD_SUBDIRECTORY(test)
+ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)

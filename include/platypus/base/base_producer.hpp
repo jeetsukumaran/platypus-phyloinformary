@@ -37,9 +37,12 @@ namespace platypus {
 // ProducerException
 
 class ProducerException : public PlatypusException {
-public:
-    ProducerException(const std::string& message)
-        : PlatypusException(message) { }
+    public:
+        ProducerException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : PlatypusException(filename, line_num, message) { }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
