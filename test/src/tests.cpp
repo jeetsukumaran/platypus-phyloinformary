@@ -48,6 +48,11 @@ std::string& trim(std::string& str, const std::string& chars) {
     return rtrim(ltrim(str, chars), chars);
 }
 
+std::string& stripspaces(std::string& str) {
+    str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+    return str;
+}
+
 std::string& uppercase(std::string& str) {
     std::transform(str.begin(), str.end(),str.begin(), ::toupper);
     return str;

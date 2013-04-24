@@ -29,8 +29,24 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include "exception.hpp"
 
 namespace platypus {
+
+////////////////////////////////////////////////////////////////////////////////
+// Tokenizer Exceptions
+
+/**
+ * Exception thrown when encountering a non-recognized NEWICK token.
+ */
+class TokenizerException : public PlatypusException {
+    public:
+        TokenizerException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : PlatypusException(filename, line_num, message) { }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Tokenizer
@@ -89,7 +105,8 @@ class Tokenizer {
                             , comment_begin_(comment_begin)
                             , comment_end_(comment_end)
                             , capture_comments_(capture_comments)
-                            , cur_char_(0) {
+                            , cur_char_(0)
+                            , eof_flag_(false) {
                     this->get_next_token();
                 }
 
@@ -113,14 +130,16 @@ class Tokenizer {
                             , comment_begin_(comment_begin)
                             , comment_end_(comment_end)
                             , capture_comments_(capture_comments)
-                            , cur_char_(0) {
+                            , cur_char_(0)
+                            , eof_flag_(false) {
                     this->get_next_token();
                 }
 
                 iterator()
                     : allocated_src_ptr_(nullptr)
                         , src_ptr_(nullptr)
-                        , esc_quote_chars_by_doubling_(true) {
+                        , esc_quote_chars_by_doubling_(true)
+                        , eof_flag_(true) {
                 }
 
                 ~iterator() {
@@ -139,7 +158,9 @@ class Tokenizer {
                 }
 
                 inline bool operator==(const self_type& rhs) const {
-                    if ( this->src_ptr_ == rhs.src_ptr_) {
+                    if (this->eof_flag_ == false && rhs.eof_flag_ == false) {
+                        return true;
+                    } else if ( this->src_ptr_ == rhs.src_ptr_) {
                         return true;
                     } else if (this->src_ptr_ && rhs.src_ptr_) {
                         return *(this->src_ptr_) == *(rhs.src_ptr_);
@@ -153,10 +174,9 @@ class Tokenizer {
                 }
 
                 inline const self_type & operator++() {
-                    if (!this->src_ptr_->good()) {
-                        this->src_ptr_ = nullptr;
-                    }
-                    if (this->src_ptr_ != nullptr) {
+                    if (!this->src_ptr_ || !this->src_ptr_->good()) {
+                        this->set_eof();
+                    } else if (this->src_ptr_ != nullptr) {
                         this->get_next_token();
                     }
                     return *this;
@@ -164,7 +184,7 @@ class Tokenizer {
 
                 inline const self_type & require_next() {
                     if (!this->src_ptr_->good()) {
-                        throw std::runtime_error("platypus::Tokenizer: Unexpected end of stream");
+                        throw TokenizerException(__FILE__, __LINE__, "Unexpected end of stream");
                     }
                     this->get_next_token();
                     return *this;
@@ -177,11 +197,18 @@ class Tokenizer {
                 }
 
                 inline bool eof() {
+                    return this->eof_flag_;
                     if (this->src_ptr_ && !this->src_ptr_->good()) {
                         this->src_ptr_ = nullptr;
                     }
                     // return (this->src_ptr_ == nullptr) || (!this->src_ptr_->good());
                     return (this->src_ptr_ == nullptr);
+                }
+
+                inline void set_eof() {
+                    this->src_ptr_ = nullptr;
+                    this->token_.clear();
+                    this->eof_flag_ = true;
                 }
 
                 inline bool token_is_quoted() {
@@ -208,8 +235,7 @@ class Tokenizer {
                     auto & src = *(this->src_ptr_);
                     this->skip_to_next_significant_char();
                     if (this->cur_char_ == EOF && !src.good()) {
-                        this->src_ptr_ = nullptr;
-                        this->token_.clear();
+                        this->set_eof();
                         return this->token_;
                     }
                     if (this->is_captured_delimiter()) {
@@ -221,18 +247,18 @@ class Tokenizer {
                         std::ostringstream dest;
                         int cur_quote_char = this->cur_char_;
                         if (!src.good()) {
-                            // TODO! unterminated quote
-                            this->src_ptr_ = nullptr;
-                            this->token_.clear();
-                            return this->token_;
+                            throw TokenizerException(__FILE__, __LINE__, "Unterminated quote");
+                            // // TODO! unterminated quote
+                            // this->set_eof();
+                            // return this->token_;
                         }
                         this->get_next_char();
                         while (true) {
                             if (!src.good()) {
-                                // TODO! unterminated quote
-                                this->src_ptr_ = nullptr;
-                                this->token_.clear();
-                                return this->token_;
+                                throw TokenizerException(__FILE__, __LINE__, "Unterminated quote");
+                                // // TODO! unterminated quote
+                                // this->set_eof();
+                                // return this->token_;
                             }
                             if (this->cur_char_ == cur_quote_char) {
                                 this->get_next_char();
@@ -276,8 +302,12 @@ class Tokenizer {
                             }
                         }
                         this->token_ = dest.str();
-                        if (this->token_.empty() && src.good()) {
-                            this->get_next_token();
+                        if (this->token_.empty()) {
+                            if (src.good()) {
+                                this->get_next_token();
+                            } else {
+                                this->set_eof();
+                            }
                         }
                         return this->token_;
                     }
@@ -286,6 +316,7 @@ class Tokenizer {
                 inline void skip_to_next_significant_char() {
                     auto & src = *(this->src_ptr_);
                     if (! src.good() ) {
+                        this->set_eof();
                         return;
                     }
                     if (this->cur_char_ == 0) {
@@ -297,16 +328,21 @@ class Tokenizer {
                     while ( src.good() && this->is_uncaptured_delimiter() ) {
                         this->get_next_char();
                     }
+                    if (!src.good() && this->is_uncaptured_delimiter()) {
+                        this->set_eof();
+                    }
                 }
 
                 inline void handle_comment() {
                     auto & src = *(this->src_ptr_);
                     std::ostringstream dest;
                     unsigned int nesting = 0;
+                    bool comment_complete = false;
                     while (src.good()) {
                         if ( this->is_comment_end() ) {
                             nesting -= 1;
                             if (nesting <= 0) {
+                                comment_complete = true;
                                 this->get_next_char();
                                 break;
                             }
@@ -316,6 +352,9 @@ class Tokenizer {
                             dest.put(this->cur_char_);
                         }
                         this->get_next_char();
+                    }
+                    if (!src.good() && !comment_complete) {
+                        this->set_eof();
                     }
                     if (this->capture_comments_) {
                         this->captured_comments_.push_back(dest.str());
@@ -374,6 +413,7 @@ class Tokenizer {
                 int                         cur_char_;
                 bool                        token_is_quoted_;
                 std::vector<std::string>    captured_comments_;
+                bool                        eof_flag_;
 
         }; // iterator
 

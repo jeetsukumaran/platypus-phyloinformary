@@ -74,12 +74,28 @@ platypus::NewickReader<TreeT> get_test_data_tree_newick_reader(std::vector<TreeT
     return tree_reader;
 }
 
+template <class TreeT>
+platypus::NewickReader<TreeT> get_single_tree_newick_reader(TreeT & tree) {
+    auto tree_factory = [&tree] () -> TreeT & { return tree; };
+    auto is_rooted_f = [] (TreeT & tree, bool) {}; // no-op
+    auto node_label_f = [] (TestData & value, const std::string& label) {value.set_label(label);};
+    auto node_edge_f = [] (TestData & value, double len) {value.set_edge_length(len);};
+    platypus::NewickReader<TreeT> tree_reader;
+    tree_reader.set_tree_factory(tree_factory);
+    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
+    tree_reader.set_node_label_setter(node_label_f);
+    tree_reader.set_edge_length_setter(node_edge_f);
+    return tree_reader;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // General String Support/Utility
 
 std::string& ltrim(std::string& str, const std::string& chars=" \t");
 std::string& rtrim(std::string& str, const std::string& chars=" \t");
 std::string& trim(std::string& str, const std::string& chars=" \t");
+std::string& stripspaces(std::string& str);
 std::string& uppercase(std::string& str);
 std::string& lowercase(std::string& str);
 

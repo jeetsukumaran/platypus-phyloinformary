@@ -184,9 +184,9 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
          *
          * @return
          */
-        virtual int parse_from_stream(std::istream& src, const std::string& format) = 0;
+        virtual int parse_from_stream(std::istream& src, const std::string& format="") = 0;
 
-        virtual int read_from_filepath(const std::string& filepath, const std::string& format="nexus") {
+        virtual int read_from_filepath(const std::string& filepath, const std::string& format="") {
             std::ifstream f(filepath);
             if (!f.good()) {
                 throw ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
@@ -194,14 +194,17 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
             return this->parse_from_stream(f, format);
         }
 
-        virtual int read_from_string(const std::string& str, const std::string& format="nexus") {
+        virtual int read_from_string(const std::string& str, const std::string& format="") {
             std::istringstream s(str);
             return this->parse_from_stream(s, format);
         }
 
-        virtual int read_from_stream(std::istream& src, const std::string& format) {
+        virtual int read_from_stream(std::istream& src, const std::string& format="") {
             return this->parse_from_stream(src, format);
         }
+
+    // protected:
+    //     static constexpr const char * default_format_ = "nexus";
 
 }; // BaseTreeReader
 

@@ -99,10 +99,9 @@ class NewickReader : public BaseTreeReader<TreeT> {
         NewickReader() {
         }
 
-        int parse_from_stream(std::istream& src, const std::string&
-                format="newick") override {
-            if (format != "newick") {
-                throw std::logic_error("platypus::NewickReader only supports 'newick' formatted sources");
+        int parse_from_stream(std::istream& src, const std::string& format="") override {
+            if (!format.empty() && format != "newick") {
+                throw NewickReaderException(__FILE__, __LINE__, "platypus::NewickReader only supports 'newick' formatted sources");
             }
             NexusTokenizer::iterator src_iter = this->tokenizer_.begin(src);
             int tree_count = 0;
@@ -164,30 +163,33 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 NexusTokenizer::iterator & src_iter) {
             if (*src_iter == "(") {
                 // begin processing of child nodes
-                if (src_iter.eof()) {
-                    throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
-                }
+                // if (src_iter.eof()) {
+                //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+                // }
                 src_iter.require_next();
                 bool node_created = false;
                 while (true) {
-                    if (src_iter.eof()) {
-                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
-                    }
+                    // if (src_iter.eof()) {
+                    //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+                    // }
                     if (*src_iter == ",") {
                         // next child
                         if (!node_created) {
+                            // no node has been created yet: ',' designates a
+                            // preceding blank node
                             current_node->add_child(tree.create_leaf_node());
-                            node_created = true;
+                            // do not flag node as created
                         }
                         src_iter.require_next();
                         while (*src_iter == ",") {
-                            // empty name (as allowed by NEWICK standard)
+                            // another blank node
                             auto new_node = tree.create_leaf_node();
                             current_node->add_child(new_node);
                             src_iter.require_next();
                             node_created = true;
                         }
-                        if (*src_iter == ")") {
+                        if (!node_created && *src_iter == ")") {
+                            // end of node
                             current_node->add_child(tree.create_leaf_node());
                             node_created = true;
                         }
@@ -253,6 +255,8 @@ class NewickReader : public BaseTreeReader<TreeT> {
             return current_node;
         }
 
+    // protected:
+    //     static constexpr const char * default_format_ = "newick";
 
     private:
         NexusTokenizer      tokenizer_;
