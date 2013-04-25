@@ -25,6 +25,7 @@
 #include "model/tree.hpp"
 #include "numeric/rng.hpp"
 #include "parse/newick.hpp"
+#include "simulate/archetypaltree.hpp"
 #include "serialize/newick.hpp"
 #include "utility/exception.hpp"
 

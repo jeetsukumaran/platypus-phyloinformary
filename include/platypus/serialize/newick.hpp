@@ -46,7 +46,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
             : suppress_rooting_(false)
               , suppress_internal_node_labels_(false)
               , suppress_edge_lengths_(false)
-              , compact_(false) {
+              , compact_spaces_(false) {
         }
 
         ~NewickWriter() {
@@ -56,6 +56,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         void write(IterT trees_begin, IterT trees_end, std::ostream & out) {
             for (auto trees_iter = trees_begin; trees_iter != trees_end; ++trees_iter) {
                 this->write_tree(*trees_iter, out);
+                out << "\n";
             }
         }
 
@@ -66,12 +67,28 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
                 } else {
                     out << "[&U]";
                 }
-                if (this->compact_) {
+                if (!this->compact_spaces_) {
                     out << " ";
                 }
-                this->write_node(tree, tree.begin(), out);
             }
-            out << ";\n";
+            this->write_node(tree, tree.begin(), out);
+            out << ";";
+        }
+
+        void set_suppress_rooting(bool suppress) {
+            this->suppress_rooting_ = suppress;
+        }
+
+        void set_suppress_internal_node_labels(bool suppress) {
+            this->suppress_internal_node_labels_ = suppress;
+        }
+
+        void set_suppress_edge_lengths(bool suppress) {
+            this->suppress_edge_lengths_ = suppress;
+        }
+
+        void set_compact_spaces(bool compact) {
+            this->compact_spaces_ = compact;
         }
 
     protected:
@@ -88,9 +105,9 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
                         ++chi, ++ch_count) {
                     if (ch_count > 0) {
                         out << ",";
-                    }
-                    if (this->compact_) {
-                        out << " ";
+                        if (!this->compact_spaces_) {
+                            out << " ";
+                        }
                     }
                     this->write_node(tree, chi, out);
                 }
@@ -108,7 +125,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         bool    suppress_rooting_;
         bool    suppress_internal_node_labels_;
         bool    suppress_edge_lengths_;
-        bool    compact_;
+        bool    compact_spaces_;
 
 
 

@@ -57,6 +57,7 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_multi_semicolons.cpp
     src/newick_reader_blank_nodes.cpp
     src/newick_writer_basic.cpp
+    src/max_unbalanced_tree_right.cpp
    )
 FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)

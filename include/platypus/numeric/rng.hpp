@@ -94,19 +94,19 @@ class RandomNumberGeneratorTemplate {
         }
 
         // returns integer value uniformly distributed in [a, b]
-        inline double uniform_int(long a, long b) {
+        inline long uniform_int(long a, long b) {
             return this->uniform_int_(this->engine_,
                     typename decltype(this->uniform_int_rng_)::param_type (a, b));
         }
 
         // returns integer value uniformly distributed in [0, b], where a >= 0.
-        inline double uniform_pos_int(unsigned long b) {
+        inline unsigned long uniform_pos_int(unsigned long b) {
             return this->uniform_pos_int_rng_(this->engine_,
                     typename decltype(this->uniform_pos_int_rng_)::param_type (0, b));
         }
 
         // returns integer value uniformly distributed in [a, b], where a >= 0
-        inline double uniform_pos_int(unsigned long a, unsigned long b) {
+        inline unsigned long uniform_pos_int(unsigned long a, unsigned long b) {
             return this->uniform_pos_int_rng_(this->engine_,
                     typename decltype(this->uniform_pos_int_rng_)::param_type (a, b));
         }
