@@ -1,6 +1,6 @@
 /**
  * @package     platypus-phyloinformary
- * @brief       Newick-format data input/output.
+ * @brief       Newick-format data parsing.
  * @author      Jeet Sukumaran
  * @copyright   Copyright (C) 2013 Jeet Sukumaran.
  *              This file is part of "platypus-phyloinformary".

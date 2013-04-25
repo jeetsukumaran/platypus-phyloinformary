@@ -155,10 +155,10 @@ class BaseTreeProducer {
         }
 
         virtual void set_edge_length_setter(const node_value_edge_length_setter_fntype & node_value_edge_length_func) {
-            this->node_value_edge_label_setter_ = node_value_edge_length_func;
+            this->node_value_edge_length_setter_ = node_value_edge_length_func;
         }
         virtual void clear_edge_length_setter() {
-            this->node_value_edge_label_setter_ = [] (tree_value_type&, double) { };
+            this->node_value_edge_length_setter_ = [] (tree_value_type&, double) { };
         }
 
         // Use of functions
@@ -179,8 +179,8 @@ class BaseTreeProducer {
             }
         }
         virtual void set_node_value_edge_length(tree_value_type & nv, double length) {
-            if (this->node_value_edge_label_setter_) {
-                this->node_value_edge_label_setter_(nv, length);
+            if (this->node_value_edge_length_setter_) {
+                this->node_value_edge_length_setter_(nv, length);
             }
         }
 
@@ -188,7 +188,7 @@ class BaseTreeProducer {
         tree_factory_fntype                         tree_factory_fn_;
         tree_is_rooted_setter_fntype                tree_is_rooted_setter_;
         node_value_label_setter_fntype              node_value_label_setter_;
-        node_value_edge_length_setter_fntype        node_value_edge_label_setter_;
+        node_value_edge_length_setter_fntype        node_value_edge_length_setter_;
 
 }; // BaseTreeProducer
 

@@ -41,6 +41,13 @@ SET(TEST_TARGET_SOURCES
     src/emplace_child.cpp
     src/heterogenous_tree_deep_copy.cpp
     src/heterogenous_tree_deep_copy2.cpp
+    src/tokenizer_captured_delimiters.cpp
+    src/tokenizer_comment_capture.cpp
+    src/tokenizer_comments.cpp
+    src/tokenizer_empty.cpp
+    src/tokenizer_padded_quoted_str.cpp
+    src/tokenizer_simple_quoted_str.cpp
+    src/tokenizer_simple_str.cpp
     src/newick_reader_basic.cpp
     src/newick_reader_basic2.cpp
     src/newick_reader_edge_lengths.cpp
@@ -49,13 +56,7 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_missing_semicolon.cpp
     src/newick_reader_multi_semicolons.cpp
     src/newick_reader_blank_nodes.cpp
-    src/tokenizer_captured_delimiters.cpp
-    src/tokenizer_comment_capture.cpp
-    src/tokenizer_comments.cpp
-    src/tokenizer_empty.cpp
-    src/tokenizer_padded_quoted_str.cpp
-    src/tokenizer_simple_quoted_str.cpp
-    src/tokenizer_simple_str.cpp
+    src/newick_writer_basic.cpp
    )
 FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)

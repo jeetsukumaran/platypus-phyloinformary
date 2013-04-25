@@ -28,7 +28,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <functional>
 #include "base_producer.hpp"
 
 namespace platypus {
@@ -50,7 +49,7 @@ class ReaderException : public ProducerException {
 
 /**
  * @brief Encapsulates creation and population of TreeT objects from data
- * sources using the NEXUS Class Library (NCL).
+ * sources.
  *
  * @tparam TreeT
  *   A class representing a specialization or a derived specialization of

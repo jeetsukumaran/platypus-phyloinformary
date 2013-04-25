@@ -40,10 +40,13 @@ class TestData {
         std::string & get_label() {
             return this->label_;
         }
+        const std::string get_label() const {
+            return this->label_;
+        }
         void set_edge_length(double edge_length) {
             this->edge_length_ = edge_length;
         }
-        double get_edge_length() {
+        double get_edge_length() const {
             return this->edge_length_;
         }
     protected:
@@ -56,8 +59,17 @@ class TestDataTree : public platypus::Tree<TestData> {
     public:
         typedef platypus::TreeNode<TestData> TreeNodeType;
     public:
-        TestDataTree() { }
+        TestDataTree()
+            : is_rooted_(true) { }
         ~TestDataTree() { }
+        void set_is_rooted(bool rooted) {
+            this->is_rooted_ = rooted;
+        }
+        bool is_rooted() const {
+            return this->is_rooted_;
+        }
+    private:
+        bool is_rooted_;
 }; // TestDataTree
 
 template <class TreeT>
