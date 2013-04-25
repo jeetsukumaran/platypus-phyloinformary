@@ -20,7 +20,7 @@ void write_newick_no_brlens(const TreeT& tree, std::ostream& out) {
 int main () {
     typedef TestDataTree TreeType;
     // std::string tree_string = "(a,(b,(c,d)));";
-    std::map<std::string, std::string> tree_strings({
+    std::map<std::string, std::string> tree_strings{
             {"(t01,(t02,(t03,t04)));", "(t01,(t02,(t03,t04)));"},
             {"((t01,t02),(t03,t04));", "((t01,t02),(t03,t04));"},
             {"(t01,(t02,(t03,(t04,(t05,(t06,(t07,t08)))))));", "(t01,(t02,(t03,(t04,(t05,(t06,(t07,t08)))))));"},
@@ -72,7 +72,7 @@ int main () {
             {"(((t01,t02),(t03,t04)),(t05,((t06,((t07,t08),(t09,t10))),((t11,t12),(t13,(t14,t15))))));", "(((t01,t02),(t03,t04)),(t05,((t06,((t07,t08),(t09,t10))),((t11,t12),(t13,(t14,t15))))));"},
             {"(((t01,t02),(t03,t04)),(t05,(((t06,t07),(t08,(t09,t10))),((t11,t12),(t13,(t14,t15))))));", "(((t01,t02),(t03,t04)),(t05,(((t06,t07),(t08,(t09,t10))),((t11,t12),(t13,(t14,t15))))));"},
             {"(a,(b,(c,d)));",  "(a,(b,(c,d)));"}
-    });
+    };
     int fail = 0;
     for (auto & si : tree_strings) {
         auto & src = si.first;

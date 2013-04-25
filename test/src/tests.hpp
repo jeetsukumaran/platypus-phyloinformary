@@ -29,6 +29,9 @@ class TestData {
     public:
         TestData()
             : edge_length_(0.0) { }
+        TestData(const std::string & label)
+            : label_(label)
+              , edge_length_(0.0) { }
         TestData & operator=(const TestData & nd) {
             this->label_ = nd.label_;
             this->edge_length_ = nd.edge_length_;

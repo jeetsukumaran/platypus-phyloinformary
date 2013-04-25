@@ -15,7 +15,7 @@ int main() {
         // std::cout << "'" << *iter << "'" << std::endl;
         observed.push_back(*iter);
     }
-    std::vector<std::string> expected({
+    std::vector<std::string> expected{
             "(",
             "aaa",
             ":",
@@ -47,7 +47,7 @@ int main() {
             ":",
             "0.0",
             ";"
-            });
+            };
     auto success = compare_token_vectors(__FILE__, expected, observed);
     if (!success) {
         return 1;
