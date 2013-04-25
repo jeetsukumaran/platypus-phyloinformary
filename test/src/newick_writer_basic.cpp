@@ -9,7 +9,7 @@ int main () {
     std::string tree_string = STANDARD_TEST_TREE_NEWICK;
     tree_reader.read_from_string(tree_string, "newick");
 
-    platypus::NewickWriter<TreeType>  newick_writer = get_standard_newick_writer();
+    platypus::NewickWriter<TreeType>  newick_writer = get_standard_newick_writer<TreeType>();
 
     std::ostringstream o1;
     newick_writer.write(trees.cbegin(), trees.cend(), o1);

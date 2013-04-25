@@ -50,18 +50,35 @@ void build_maximally_unbalanced_tree(
         leaf_nodes.push(node);
     }
     auto apical_node = tree.head_node();
-    while (!leaf_nodes.empty()) {
-        auto & leaf = leaf_nodes.front();
-        apical_node->add_child(leaf);
+    auto insert_leaf_node = [&leaf_nodes, &apical_node] () {
+        apical_node->add_child(leaf_nodes.front());
         leaf_nodes.pop();
-        if (leaf_nodes.size() > 1) {
-            typename TreeT::node_type * node = tree.create_internal_node();
-            apical_node->add_child(node);
-            apical_node = node;
-        } else {
-            auto & leaf = leaf_nodes.front();
-            apical_node->add_child(leaf);
-            leaf_nodes.pop();
+    };
+    if (ladderize_right) {
+        auto insert_internal_node = [&apical_node, &tree] () {
+                typename TreeT::node_type * node = tree.create_internal_node();
+                apical_node->add_child(node);
+                apical_node = node;
+        };
+        while (!leaf_nodes.empty()) {
+            insert_leaf_node();
+            if (leaf_nodes.size() > 1) {
+                insert_internal_node();
+            } else {
+                insert_leaf_node();
+            }
+        }
+    } else {
+        while (!leaf_nodes.empty()) {
+            if (leaf_nodes.size() > 2) {
+                typename TreeT::node_type * node = tree.create_internal_node();
+                apical_node->add_child(node);
+                insert_leaf_node();
+                apical_node = node;
+            } else {
+                insert_leaf_node();
+                insert_leaf_node();
+            }
         }
     }
 }
