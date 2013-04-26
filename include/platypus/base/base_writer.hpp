@@ -57,7 +57,7 @@ class WriterException : public PlatypusException {
  *
  */
 template <typename TreeT>
-class BaseTreeWriter : public BaseTreeProducer<TreeT> {
+class BaseTreeWriter {
 
     public:
 
