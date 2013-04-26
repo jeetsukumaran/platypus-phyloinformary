@@ -21,6 +21,9 @@
 #ifndef PLATYPUS_SIMULATE_ARCHETYPALTREE_HPP
 #define PLATYPUS_SIMULATE_ARCHETYPALTREE_HPP
 
+#include <stdexcept>
+#include <stack>
+#include <set>
 #include <queue>
 
 namespace platypus {
@@ -81,6 +84,54 @@ void build_maximally_unbalanced_tree(
             }
         }
     }
+}
+
+
+/**
+ * Generates a balanced or symmetric tree.
+ *
+ * @tparam TreeT
+ * @tparam LeafIterT
+ * @param tree
+ * @param leaf_values_begin
+ *   Iterator to beginning of sequence of leaf values that will
+ *   become attached to leaf nodes.
+ * @param leaf_values_begin
+ *   Iterator to one past the end of sequence of leaf values that will
+ *   become attached to leaf nodes.
+ */
+template <typename TreeT, typename LeafIterT>
+void build_maximally_balanced_tree(
+        TreeT & tree,
+        LeafIterT leaf_values_begin,
+        LeafIterT leaf_values_end) {
+    std::stack<typename TreeT::node_type *> node_pool;
+    for (auto & leaf_iter = leaf_values_begin; leaf_iter != leaf_values_end; ++leaf_iter) {
+        typename TreeT::node_type * node = tree.create_leaf_node(*leaf_iter);
+        node_pool.push(node);
+    }
+    while (node_pool.size() > 2) {
+        std::set<typename TreeT::node_type *> nodes_to_add;
+        while (node_pool.size() > 1) {
+            if (node_pool.size() > 1) {
+                typename TreeT::node_type * node = tree.create_internal_node();
+                node->add_child(node_pool.top());
+                node_pool.pop();
+                node->add_child(node_pool.top());
+                node_pool.pop();
+                nodes_to_add.insert(node);
+            } else {
+                break;
+            }
+        }
+        for (auto & nd : nodes_to_add) {
+            node_pool.push(nd);
+        }
+    }
+    tree.head_node()->add_child(node_pool.top());
+    node_pool.pop();
+    tree.head_node()->add_child(node_pool.top());
+    node_pool.pop();
 }
 
 

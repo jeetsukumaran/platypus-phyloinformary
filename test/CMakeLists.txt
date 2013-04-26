@@ -59,6 +59,9 @@ SET(TEST_TARGET_SOURCES
     src/newick_writer_basic.cpp
     src/max_unbalanced_tree_right.cpp
     src/max_unbalanced_tree_left.cpp
+    src/max_balanced_tree_even_power_of_two.cpp
+    src/max_balanced_tree_even_non_power_of_two.cpp
+    src/max_balanced_tree_odd.cpp
    )
 FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)
