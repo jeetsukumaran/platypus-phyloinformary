@@ -42,6 +42,9 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
 
     public:
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Life-cycle
+
         NewickWriter()
             : suppress_rooting_(false)
               , suppress_internal_node_labels_(false)
@@ -52,6 +55,9 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         ~NewickWriter() {
         }
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Main interface
+
         template <typename IterT>
         void write(IterT trees_begin, IterT trees_end, std::ostream & out) {
             for (auto trees_iter = trees_begin; trees_iter != trees_end; ++trees_iter) {
@@ -60,6 +66,10 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
             }
         }
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Support
+
+        // workhorse
         void write_tree(const tree_type & tree, std::ostream & out) {
             if (this->tree_is_rooted_getter_ && !this->suppress_rooting_) {
                 if (this->tree_is_rooted_getter_(tree)) {
@@ -74,6 +84,14 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
             this->write_node(tree, tree.begin(), out);
             out << ";";
         }
+
+        // support pointers
+        void write_tree(const tree_type * tree, std::ostream & out) {
+            this->write_tree(*tree, out);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Customization
 
         void set_suppress_rooting(bool suppress) {
             this->suppress_rooting_ = suppress;

@@ -96,6 +96,10 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     node_value_edge_length_func) {
         }
 
+        NewickReader(const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory)
+            : BaseTreeReader<TreeT>(tree_factory) {
+        }
+
         NewickReader() {
         }
 

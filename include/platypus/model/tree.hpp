@@ -69,15 +69,16 @@ class TreeNode {
             : parent_(nullptr)
               , first_child_(nullptr)
               , last_child_(nullptr)
-              , next_sibling_(nullptr)
-              , value_(value) { }
+              , next_sibling_(nullptr) {
+            this->value_ = value;
+        }
 
         TreeNode(TreeNode&& other)
             : parent_(other.parent_)
               , first_child_(other.first_child_)
               , last_child_(other.last_child_)
-              , next_sibling_(other.next_sibling_)
-              , value_(std::move(other.value_)) {
+              , next_sibling_(other.next_sibling_) {
+            this->value_ = std::move(other.value_);
             other.parent_ = nullptr;
             other.first_child_ = nullptr;
             other.last_child_ = nullptr;
@@ -89,8 +90,8 @@ class TreeNode {
             : parent_(other.parent_)
               , first_child_(other.first_child_)
               , last_child_(other.last_child_)
-              , next_sibling_(other.next_sibling_)
-              , value_(other.value_) {
+              , next_sibling_(other.next_sibling_) {
+            this->value_ = other.value_;
         }
 
         // note: shallow copy!
