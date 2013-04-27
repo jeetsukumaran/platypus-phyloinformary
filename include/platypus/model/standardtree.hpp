@@ -67,6 +67,10 @@ class StandardNodeValue {
         virtual double get_edge_length() const {
             return this->edge_length_;
         }
+        virtual void clear() {
+            this->label_.clear();
+            this->edge_length_ = 0.0;
+        }
     protected:
         std::string     label_;
         double          edge_length_;
