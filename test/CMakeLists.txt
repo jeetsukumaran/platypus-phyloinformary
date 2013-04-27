@@ -57,6 +57,7 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_multi_semicolons.cpp
     src/newick_reader_blank_nodes.cpp
     src/newick_writer_basic.cpp
+    src/default_interface.cpp
     src/max_unbalanced_tree_right.cpp
     src/max_unbalanced_tree_left.cpp
     src/max_balanced_tree_even_power_of_two.cpp

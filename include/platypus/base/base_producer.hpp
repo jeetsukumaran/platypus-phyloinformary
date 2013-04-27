@@ -122,7 +122,6 @@ class BaseTreeProducer {
 
         virtual ~BaseTreeProducer() { }
 
-
         // Setting/binding of functions
         /**
          * @brief Sets the function object that will be called to allocate,
