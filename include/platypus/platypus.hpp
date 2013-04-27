@@ -24,6 +24,7 @@
 #include "model/archetypaltree.hpp"
 #include "model/coalescent.hpp"
 #include "model/tree.hpp"
+#include "model/standardtree.hpp"
 #include "numeric/rng.hpp"
 #include "parse/newick.hpp"
 #include "serialize/newick.hpp"
