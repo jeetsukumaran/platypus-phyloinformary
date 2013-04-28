@@ -59,12 +59,12 @@ class BaseTreeProducer {
         typedef typename tree_type::value_type   tree_value_type;
 
         // typedefs for functions used in construction
-        typedef std::function<tree_type & ()>                                  tree_factory_fntype;
-        typedef std::function<void (tree_type &, bool)>                        tree_is_rooted_setter_fntype;
-        typedef std::function<void (tree_value_type &, const std::string &)>   node_value_label_setter_fntype;
-        typedef std::function<void (tree_value_type &, double)>                node_value_edge_length_setter_fntype;
-        typedef std::function<void (tree_value_type &, double)>                tree_stats_numeric_setter_fntype;
-        typedef std::function<void (tree_value_type &, unsigned long)>         tree_stats_count_setter_fntype;
+        typedef std::function<tree_type & ()>                                   tree_factory_fntype;
+        typedef std::function<void (tree_type &, bool)>                         tree_is_rooted_setter_fntype;
+        typedef std::function<void (tree_value_type &, const std::string &)>    node_value_label_setter_fntype;
+        typedef std::function<void (tree_value_type &, double)>                 node_value_edge_length_setter_fntype;
+        typedef std::function<void (tree_type &, double)>                       tree_stats_numeric_setter_fntype;
+        typedef std::function<void (tree_type &, unsigned long)>                tree_stats_count_setter_fntype;
 
     public:
 
@@ -193,17 +193,17 @@ class BaseTreeProducer {
                 this->node_value_edge_length_setter_(nv, length);
             }
         }
-        void set_tree_stats_num_leaf_nodes(tree_value_type & tree, unsigned long v) {
+        void set_tree_stats_num_leaf_nodes(tree_type & tree, unsigned long v) {
             if (this->tree_stats_num_leaf_nodes_setter_) {
                 this->tree_stats_num_leaf_nodes_setter_(tree, v);
             }
         }
-        void set_tree_stats_num_internal_nodes(tree_value_type & tree, unsigned long v) {
+        void set_tree_stats_num_internal_nodes(tree_type & tree, unsigned long v) {
             if (this->tree_stats_num_internal_nodes_setter_) {
                 this->tree_stats_num_internal_nodes_setter_(tree, v);
             }
         }
-        void set_tree_stats_num_leaf_nodes(tree_value_type & tree, double v) {
+        void set_tree_stats_num_leaf_nodes(tree_type & tree, double v) {
             if (this->tree_stats_tree_length_setter_) {
                 this->tree_stats_tree_length_setter_(tree, v);
             }
