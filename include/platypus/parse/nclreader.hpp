@@ -95,7 +95,7 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
 
     protected:
 
-        int build_tree(TreeT& ttree, const NxsTaxaBlock * tb, const NxsFullTreeDescription & ftd) {
+        void build_tree(TreeT& ttree, const NxsTaxaBlock * tb, const NxsFullTreeDescription & ftd) {
             this->set_tree_is_rooted(ttree, ftd.IsRooted());
             NxsSimpleTree ncl_tree(ftd, -1, -1.0);
             auto * root = ttree.head_node();
@@ -103,7 +103,9 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
             decltype(root) new_node = nullptr;
             std::vector<const NxsSimpleNode *> ncl_nodes = ncl_tree.GetPreorderTraversal();
             std::map<const NxsSimpleNode *, decltype(root)> ncl_to_native;
-            int size = 0;
+            unsigned long num_leaf_nodes = 0;
+            unsigned long num_internal_nodes = 1; // start at one to count root
+            double tree_length = 0.0;
             for (auto & ncl_node : ncl_nodes) {
                 const NxsSimpleEdge & ncl_edge = ncl_node->GetEdgeToParentRef();
                 const NxsSimpleNode * ncl_par = ncl_edge.GetParent();
@@ -112,6 +114,8 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                 double edge_len = ncl_edge.GetDblEdgeLen();
                 if (edge_len < 0) {
                     edge_len = 0.0;
+                } else {
+                    tree_length += edge_len;
                 }
                 std::string label;
                 if (nchildren == 1) {
@@ -121,6 +125,7 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                     label = tb->GetTaxonLabel(ncl_taxon_idx).c_str();
                     // new_node = &this->tree_leaf_node_factory(ttree);
                     new_node = ttree.create_leaf_node();
+                    ++num_leaf_nodes;
                 } else {
                     label = NxsString::GetEscaped(ncl_node->GetName()).c_str();
                     if (!ncl_par) {
@@ -128,6 +133,7 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                     } else {
                         // new_node = &this->tree_internal_node_factory(ttree);
                         new_node = ttree.create_internal_node();
+                        ++num_internal_nodes;
                     }
                 }
                 this->set_node_value_label(new_node->value(), label);
@@ -143,9 +149,10 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                     }
                     node_parent->add_child(new_node);
                 }
-                ++size;
             }
-            return size;
+            this->set_tree_stats_num_leaf_nodes(ttree, num_leaf_nodes);
+            this->set_tree_stats_num_internal_nodes(ttree, num_internal_nodes);
+            this->set_tree_stats_tree_length(ttree, tree_length);
         }
 
 }; // NclTreeReader
