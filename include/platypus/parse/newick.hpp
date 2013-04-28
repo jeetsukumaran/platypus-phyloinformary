@@ -103,7 +103,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
         NewickReader() {
         }
 
-        int parse_from_stream(std::istream& src, const std::string& format="") override {
+        int parse_stream(std::istream& src, const std::string& format="") override {
             if (!format.empty() && format != "newick") {
                 throw NewickReaderException(__FILE__, __LINE__, "platypus::NewickReader only supports 'newick' formatted sources");
             }
@@ -142,7 +142,15 @@ class NewickReader : public BaseTreeReader<TreeT> {
             if (*src_iter != "(") {
                 throw NewickReaderInvalidTokenException(__FILE__, __LINE__, *src_iter);
             }
-            this->parse_node_from_stream(tree, tree.head_node(), src_iter);
+            unsigned long num_leaf_nodes = 0;
+            unsigned long num_internal_nodes = 0;
+            double tree_length = 0.0;
+            this->parse_node_from_stream(tree,
+                    tree.head_node(),
+                    src_iter,
+                    num_leaf_nodes,
+                    num_internal_nodes,
+                    tree_length);
             // skip over multiple consecutive trailing semi-colons
             while (!src_iter.eof() && *src_iter == ";") {
                 ++src_iter;
@@ -164,7 +172,10 @@ class NewickReader : public BaseTreeReader<TreeT> {
         tree_node_type * parse_node_from_stream(
                 tree_type & tree,
                 tree_node_type * current_node,
-                NexusTokenizer::iterator & src_iter) {
+                NexusTokenizer::iterator & src_iter,
+                unsigned long & num_leaf_nodes,
+                unsigned long & num_internal_nodes,
+                double & tree_length) {
             if (*src_iter == "(") {
                 // begin processing of child nodes
                 // if (src_iter.eof()) {
@@ -182,12 +193,14 @@ class NewickReader : public BaseTreeReader<TreeT> {
                             // no node has been created yet: ',' designates a
                             // preceding blank node
                             current_node->add_child(tree.create_leaf_node());
-                            // do not flag node as created
+                            ++num_leaf_nodes;
+                            // do not flag node as created to allow for an extra node to be created in the event of (..,)
                         }
                         src_iter.require_next();
                         while (*src_iter == ",") {
                             // another blank node
                             auto new_node = tree.create_leaf_node();
+                            ++num_leaf_nodes;
                             current_node->add_child(new_node);
                             src_iter.require_next();
                             node_created = true;
@@ -195,6 +208,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                         if (!node_created && *src_iter == ")") {
                             // end of node
                             current_node->add_child(tree.create_leaf_node());
+                            ++num_leaf_nodes;
                             node_created = true;
                         }
                     } else if (*src_iter == ")") {
@@ -207,13 +221,25 @@ class NewickReader : public BaseTreeReader<TreeT> {
                         if (*src_iter == "(") {
                             // internal nodes
                             auto new_node = tree.create_internal_node();
-                            this->parse_node_from_stream(tree, new_node, src_iter);
+                            ++num_internal_nodes;
+                            this->parse_node_from_stream(tree,
+                                    new_node,
+                                    src_iter,
+                                    num_leaf_nodes,
+                                    num_internal_nodes,
+                                    tree_length);
                             current_node->add_child(new_node);
                             node_created = true;
                         } else {
                             // assume a label token, i.e. a leaf node
                             auto new_node = tree.create_leaf_node();
-                            this->parse_node_from_stream(tree, new_node, src_iter);
+                            ++num_leaf_nodes;
+                            this->parse_node_from_stream(tree,
+                                    new_node,
+                                    src_iter,
+                                    num_leaf_nodes,
+                                    num_internal_nodes,
+                                    tree_length);
                             current_node->add_child(new_node);
                             node_created = true;
                         }
@@ -230,6 +256,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     src_iter.require_next();
                     double edge_len = std::atof(src_iter->c_str());
                     this->set_node_value_edge_length(current_node->value(), edge_len);
+                    tree_length += edge_len;
                     src_iter.require_next();
                 } else if (*src_iter == ")") {
                     // closing of parent token

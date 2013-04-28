@@ -106,8 +106,13 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
         typedef typename BaseTreeProducer<TreeT>::tree_is_rooted_setter_fntype           tree_is_rooted_setter_fntype;
         typedef typename BaseTreeProducer<TreeT>::node_value_label_setter_fntype         node_value_label_setter_fntype;
         typedef typename BaseTreeProducer<TreeT>::node_value_edge_length_setter_fntype   node_value_edge_length_setter_fntype;
+        typedef std::function<void (tree_value_type &, double)>                          tree_stats_numeric_setter_fntype;
+        typedef std::function<void (tree_value_type &, unsigned long)>                   tree_stats_count_setter_fntype;
 
     public:
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Life-cycle
 
         /**
          * @brief Constructs a BaseTreeReader object that can parse data sources
@@ -175,35 +180,72 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
         virtual ~BaseTreeReader() {
         }
 
-        /**
-         * To be implementad by derived classes.
-         *
-         * @param src
-         * @param format
-         *
-         * @return
-         */
-        virtual int parse_from_stream(std::istream& src, const std::string& format="") = 0;
+        //////////////////////////////////////////////////////////////////////////////
+        // Reading interface
+
+        // To be implementad by derived classes.
+        virtual int parse_stream(std::istream& src, const std::string& format="") = 0;
 
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="") {
             std::ifstream f(filepath);
             if (!f.good()) {
                 throw ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
             }
-            return this->parse_from_stream(f, format);
+            return this->parse_stream(f, format);
         }
 
         virtual int read_from_string(const std::string& str, const std::string& format="") {
             std::istringstream s(str);
-            return this->parse_from_stream(s, format);
+            return this->parse_stream(s, format);
         }
 
         virtual int read_from_stream(std::istream& src, const std::string& format="") {
-            return this->parse_from_stream(src, format);
+            return this->parse_stream(src, format);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Configuration of stats/metric collection
+
+        virtual void set_tree_stats_num_leaf_nodes_setter(const tree_stats_count_setter_fntype & f) {
+            this->tree_stats_num_leaf_nodes_setter_ = f;
+        }
+
+        virtual void set_tree_stats_num_internal_nodes_setter(const tree_stats_count_setter_fntype & f) {
+            this->tree_stats_num_internal_nodes_setter_ = f;
+        }
+
+        virtual void set_tree_stats_tree_length_setter(const tree_stats_numeric_setter_fntype & f) {
+            this->tree_stats_tree_length_setter_ = f;
+        }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Using stats/metric collection
+
+        void set_tree_stats_num_leaf_nodes(tree_value_type & tree, unsigned long v) {
+            if (this->tree_stats_num_leaf_nodes_setter_) {
+                this->tree_stats_num_leaf_nodes_setter_(tree, v);
+            }
+        }
+
+        void set_tree_stats_num_internal_nodes(tree_value_type & tree, unsigned long v) {
+            if (this->tree_stats_num_internal_nodes_setter_) {
+                this->tree_stats_num_internal_nodes_setter_(tree, v);
+            }
+        }
+
+        void set_tree_stats_num_leaf_nodes(tree_value_type & tree, double v) {
+            if (this->tree_stats_tree_length_setter_) {
+                this->tree_stats_tree_length_setter_(tree, v);
+            }
         }
 
     // protected:
     //     static constexpr const char * default_format_ = "nexus";
+    private:
+        bool                                track_tree_stats_;
+        tree_stats_count_setter_fntype      tree_stats_num_leaf_nodes_setter_;
+        tree_stats_count_setter_fntype      tree_stats_num_internal_nodes_setter_;
+        tree_stats_numeric_setter_fntype    tree_stats_tree_length_setter_;
 
 }; // BaseTreeReader
 

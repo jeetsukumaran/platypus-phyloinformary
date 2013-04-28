@@ -161,23 +161,23 @@ class BaseTreeProducer {
         }
 
         // Use of functions
-        virtual tree_type & create_new_tree() {
+        tree_type & create_new_tree() {
             if (!this->tree_factory_fn_) {
                 throw std::runtime_error("platypus::BaseTreeProducer::create_new_tree(): Unbound tree factory");
             }
             return this->tree_factory_fn_();
         }
-        virtual void set_tree_is_rooted(tree_type & tree, bool is_rooted) {
+        void set_tree_is_rooted(tree_type & tree, bool is_rooted) {
             if (this->tree_is_rooted_setter_) {
                 this->tree_is_rooted_setter_(tree, is_rooted);
             }
         }
-        virtual void set_node_value_label(tree_value_type & nv, const std::string & label) {
+        void set_node_value_label(tree_value_type & nv, const std::string & label) {
             if (this->node_value_label_setter_) {
                 this->node_value_label_setter_(nv, label);
             }
         }
-        virtual void set_node_value_edge_length(tree_value_type & nv, double length) {
+        void set_node_value_edge_length(tree_value_type & nv, double length) {
             if (this->node_value_edge_length_setter_) {
                 this->node_value_edge_length_setter_(nv, length);
             }
