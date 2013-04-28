@@ -143,7 +143,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 throw NewickReaderInvalidTokenException(__FILE__, __LINE__, *src_iter);
             }
             unsigned long num_leaf_nodes = 0;
-            unsigned long num_internal_nodes = 0;
+            unsigned long num_internal_nodes = 1; // start at one to count root
             double tree_length = 0.0;
             this->parse_node_from_stream(tree,
                     tree.head_node(),
@@ -151,6 +151,9 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     num_leaf_nodes,
                     num_internal_nodes,
                     tree_length);
+            this->set_tree_stats_num_leaf_nodes(tree, num_leaf_nodes);
+            this->set_tree_stats_num_internal_nodes(tree, num_internal_nodes);
+            this->set_tree_stats_tree_length(tree, tree_length);
             // skip over multiple consecutive trailing semi-colons
             while (!src_iter.eof() && *src_iter == ";") {
                 ++src_iter;

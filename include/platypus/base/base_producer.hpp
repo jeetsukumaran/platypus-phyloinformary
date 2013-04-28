@@ -203,7 +203,7 @@ class BaseTreeProducer {
                 this->tree_stats_num_internal_nodes_setter_(tree, v);
             }
         }
-        void set_tree_stats_num_leaf_nodes(tree_type & tree, double v) {
+        void set_tree_stats_tree_length(tree_type & tree, double v) {
             if (this->tree_stats_tree_length_setter_) {
                 this->tree_stats_tree_length_setter_(tree, v);
             }
