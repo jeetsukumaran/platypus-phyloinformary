@@ -39,18 +39,12 @@ int main() {
 
     int fail = 0;
     fail += check_equal(num_trees, trees.size(), __FILE__, __LINE__, "(number of trees)");
-
     for (auto & tree : trees) {
-        if (tree.num_leaves != 8) {
-            fail += check_equal(8, tree.num_leaves, __FILE__, __LINE__, "(number of leaves)");
-        }
-        if (tree.num_internal_nodes != 7) {
-            fail += check_equal(7, tree.num_internal_nodes, __FILE__, __LINE__, "(number of internal nodes)");
-        }
-        if (tree.tree_length != 0) {
-            fail += check_equal(0, tree.tree_length, __FILE__, __LINE__, "(total tree length)");
-        }
+        fail += check_equal(8UL, tree.num_leaves, __FILE__, __LINE__, "(number of leaves)");
+        fail += check_equal(7UL, tree.num_internal_nodes, __FILE__, __LINE__, "(number of internal nodes)");
+        fail += check_equal(0, tree.tree_length, __FILE__, __LINE__, "(total tree length)");
     }
+
     if (fail > 0) {
         return EXIT_FAILURE;
     } else {
