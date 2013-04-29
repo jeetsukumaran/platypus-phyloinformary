@@ -2,7 +2,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 using namespace platypus::test;
 

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 using namespace platypus::test;
 

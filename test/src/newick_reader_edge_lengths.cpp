@@ -1,6 +1,6 @@
 #include <sstream>
 #include <map>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 using namespace platypus::test;
 

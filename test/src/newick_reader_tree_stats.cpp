@@ -3,7 +3,7 @@
 #include <vector>
 #include <platypus/parse/newick.hpp>
 #include <platypus/model/tree.hpp>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 using namespace platypus::test;
 

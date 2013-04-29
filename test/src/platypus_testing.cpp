@@ -1,5 +1,5 @@
 #include <iomanip>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 namespace platypus { namespace test {
 

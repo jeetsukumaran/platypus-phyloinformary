@@ -17,10 +17,10 @@ ENDIF()
 ## Build and install the library for the test code base
 SET(LIBDIR ${PROJECT_BINARY_DIR}/lib)
 FILE(MAKE_DIRECTORY ${LIBDIR})
-SET(TESTLIB platypustest)
+SET(TESTLIB platypustesting)
 ADD_LIBRARY(${TESTLIB}
     # STATIC
-    src/tests.cpp
+    src/platypus_testing.cpp
     )
 ADD_DEPENDENCIES(check ${TESTLIB})
 INSTALL(TARGETS

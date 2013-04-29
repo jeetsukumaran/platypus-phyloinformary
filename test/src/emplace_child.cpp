@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <iostream>
-#include "tests.hpp"
+#include "platypus_testing.hpp"
 
 using namespace platypus::test;
 

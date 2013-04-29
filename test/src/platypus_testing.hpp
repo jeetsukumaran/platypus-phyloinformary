@@ -1,5 +1,5 @@
-#ifndef TESTS_HPP
-#define TESTS_HPP
+#ifndef PLATYPUS_TESTING_HPP
+#define PLATYPUS_TESTING_HPP
 
 #include <algorithm>
 #include <iterator>
