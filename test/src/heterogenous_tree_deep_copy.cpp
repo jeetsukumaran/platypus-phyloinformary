@@ -4,6 +4,8 @@
 #include <iostream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 class X {
     public:
         X () { }

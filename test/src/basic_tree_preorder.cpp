@@ -5,6 +5,8 @@
 #include <vector>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     BasicTree tree;
     build_tree(tree, STANDARD_TEST_TREE_STRING);
@@ -12,11 +14,9 @@ int main() {
     for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
         visits.push_back(*ndi);
     }
-    if (visits == STANDARD_TEST_TREE_PREORDER) {
-        return 0;
-    } else {
-        return fail_test(__FILE__,
+    return check_equal(
             STANDARD_TEST_TREE_PREORDER,
-            visits);
-    }
+            visits,
+            __FILE__,
+            __LINE__);
 }

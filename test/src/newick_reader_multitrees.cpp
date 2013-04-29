@@ -1,5 +1,7 @@
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -26,6 +28,10 @@ int main () {
         fail += validate_standard_test_tree(tree);
     }
 
-    return fail;
+    if (fail > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 

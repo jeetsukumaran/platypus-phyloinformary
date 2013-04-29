@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     BasicTree tree;
     build_tree(tree, STANDARD_TEST_TREE_STRING);
@@ -16,13 +18,12 @@ int main() {
         auto expected_iter = STANDARD_TEST_TREE_CHILDREN.find(*ndi);
         assert(expected_iter != STANDARD_TEST_TREE_CHILDREN.end());
         auto expected_children = expected_iter->second;
-        if (children[*ndi] != expected_children) {
-            return fail_test(__FILE__,
+        return check_equal(
                 expected_children,
                 children[*ndi],
-                "Parent node: ", *ndi);
-        } else {
-            return 0;
-        }
+                __FILE__,
+                __LINE__,
+                "parent node: ",
+                *ndi);
     }
 }

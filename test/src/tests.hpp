@@ -11,6 +11,8 @@
 #include <map>
 #include <platypus/platypus.hpp>
 
+namespace platypus { namespace test {
+
 //////////////////////////////////////////////////////////////////////////////
 // BasicTree
 
@@ -136,18 +138,19 @@ std::vector<std::string> split(const std::string& str,
         bool trim_tokens=true,
         bool include_empty=true);
 
+
 //////////////////////////////////////////////////////////////////////////////
-// Logging/Reporting
+// Logging and printing
 
 template<class T>
-void write_container(const T& container, std::ostream& out, const std::string& separator=", ") {
+void write_container(std::ostream& out, const T& container, const std::string& separator=", ") {
     std::copy(container.cbegin(), container.cend(), std::ostream_iterator<typename T::value_type>(out, separator.c_str()));
 }
 
 template<class T>
 std::string join_container(const T& container, const std::string& separator=", ") {
     std::ostringstream out;
-    write_container(container, out, separator);
+    write_container(out, container, separator);
     return out.str();
 }
 
@@ -161,13 +164,13 @@ void log(S& stream, const T& arg1) {
 
 template <typename S, typename T>
 void log(S& stream, const std::vector<T>& arg1) {
-    write_container(arg1, stream, ", ");
+    write_container(stream, arg1, ", ");
     log(stream);
 }
 
 template <typename S, typename T, typename... Types>
 void log(S& stream, const std::vector<T>& arg1, const Types&... args) {
-    write_container(arg1, stream, ", ");
+    write_container(stream, arg1, ", ");
     log(stream, args...);
 }
 
@@ -177,18 +180,41 @@ void log(S& stream, const T& arg1, const Types&... args) {
     log(stream, args...);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Testing
+
 template <typename T, typename U, typename... Types>
 int fail_test(const std::string& test_name,
+        unsigned long line_num,
         const T& expected,
         const U& observed,
         const Types&... args) {
-    std::cerr << "\n||[[ FAIL ]]]";
-    std::cerr << "\n||     Test: " << test_name;
-    log(std::cerr, "\n|| Expected: ", expected);
-    log(std::cerr, "\n|| Observed: ", observed);
-    log(std::cerr, "\n||  Remarks: ", args...);
+    std::cerr << "\n||| FAIL |||";
+    std::cerr << "\n|     Test: " << test_name;
+    std::cerr << "\n|     Line: " << line_num;
+    log(std::cerr, "\n| Expected: ", expected);
+    log(std::cerr, "\n| Observed: ", observed);
+    log(std::cerr, "\n|  Remarks: ", args...);
     std::cerr << std::endl;
-    return 1;
+    return EXIT_FAILURE;
+}
+
+template <typename T, typename U, typename... Types>
+int check_equal(
+        const T& expected,
+        const U& observed,
+        const std::string& test_name,
+        unsigned long line_num,
+        const Types&... args) {
+    if (expected != observed) {
+        return fail_test(test_name,
+                line_num,
+                expected,
+                observed,
+                args...);
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -407,18 +433,23 @@ int check_newick(TreeT& tree,
     trim(result, " \t\n\r");
     if ( (fail_if_equal && result == compare_str) || (!fail_if_equal && result != compare_str) ) {
         return fail_test(__FILE__,
+                __LINE__,
                 STANDARD_TEST_TREE_NEWICK,
                 result,
                 remarks);
     } else {
-        return 0;
+        return EXIT_SUCCESS;
     }
 }
 
 int validate_standard_test_tree(TestDataTree & tree);
 
 
-bool compare_token_vectors(const std::string & test_title,
+int compare_token_vectors(
         const std::vector<std::string> & expected,
-        const std::vector<std::string> & observed);
+        const std::vector<std::string> & observed,
+        const std::string & test_title,
+        unsigned long line_num);
+
+} } // namespace platypus::test
 #endif

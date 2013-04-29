@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     std::string str = "(aaa:1.00,     (b:2.18e-1,      (ccc:11, d:1e-1)   k:  3)  u:   7)    rrr:0.0;";
     // std::cout << "\n[" << str << "]" << std::endl;
@@ -48,10 +50,5 @@ int main() {
             "0.0",
             ";"
             };
-    auto success = compare_token_vectors(__FILE__, expected, observed);
-    if (!success) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
 }

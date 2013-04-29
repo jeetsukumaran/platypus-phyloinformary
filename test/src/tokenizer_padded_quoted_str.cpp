@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     std::string str = "the quick 'brown fox''s friend' jumps over the 'lazy dog''s colleague'";
     platypus::Tokenizer tokenizer = get_nexus_tokenizer();
@@ -13,10 +15,5 @@ int main() {
         observed.push_back(*iter);
     }
     std::vector<std::string> expected{"the", "quick", "brown fox's friend", "jumps", "over", "the", "lazy dog's colleague"};
-    auto success = compare_token_vectors(__FILE__, expected, observed);
-    if (!success) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
 }

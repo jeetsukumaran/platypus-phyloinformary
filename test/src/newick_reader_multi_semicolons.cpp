@@ -1,5 +1,7 @@
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -25,6 +27,10 @@ int main () {
     // } catch (const platypus::NewickReaderMalformedStatement & e) {
     //     return 0;
     // }
-    return fail;
+    if (fail > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 

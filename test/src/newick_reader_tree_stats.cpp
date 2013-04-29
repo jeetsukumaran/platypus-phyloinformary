@@ -5,6 +5,8 @@
 #include <platypus/model/tree.hpp>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 class STree : public platypus::StandardTree<platypus::StandardNodeValue> {
 
     public:
@@ -36,21 +38,23 @@ int main() {
     reader.read_from_string(tree_string);
 
     int fail = 0;
-    if (trees.size() != num_trees) {
-        fail += fail_test(__FILE__, trees.size(), num_trees, "(number of trees)");
-    }
+    fail += check_equal(num_trees, trees.size(), __FILE__, __LINE__, "(number of trees)");
 
     for (auto & tree : trees) {
         if (tree.num_leaves != 8) {
-            fail += fail_test(__FILE__, 8, tree.num_leaves, "(number of leaves)");
+            fail += check_equal(8, tree.num_leaves, __FILE__, __LINE__, "(number of leaves)");
         }
         if (tree.num_internal_nodes != 7) {
-            fail += fail_test(__FILE__, 7, tree.num_internal_nodes, "(number of internal nodes)");
+            fail += check_equal(7, tree.num_internal_nodes, __FILE__, __LINE__, "(number of internal nodes)");
         }
         if (tree.tree_length != 0) {
-            fail += fail_test(__FILE__, 0, tree.tree_length, "(tree length)");
+            fail += check_equal(0, tree.tree_length, __FILE__, __LINE__, "(total tree length)");
         }
     }
-    return fail;
+    if (fail > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 
 }

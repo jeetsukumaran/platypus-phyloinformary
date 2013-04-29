@@ -1,6 +1,8 @@
 #include <sstream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -20,12 +22,6 @@ int main () {
     newick_writer.write_tree(tree, o);
     std::string result = o.str();
     std::string expected =  "(((f,e),(h,g)),((b,a),(d,c)));";
-    if (result != expected) {
-        return fail_test(__FILE__,
-            expected,
-            result);
-    } else {
-        return 0;
-    }
+    return check_equal(expected, result, __FILE__, __LINE__);
 }
 

@@ -1,6 +1,8 @@
 #include <sstream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -21,12 +23,6 @@ int main () {
     std::ostringstream o2;
     newick_writer.write(trees2.cbegin(), trees2.cend(), o2);
     std::string tree_string3 = o2.str();
-    if (tree_string2 != tree_string2) {
-        return fail_test(__FILE__,
-                tree_string2,
-                tree_string3);
-    } else {
-        return 0;
-    }
+    return check_equal( tree_string2, tree_string3, __FILE__, __LINE__);
 }
 

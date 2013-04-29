@@ -3,6 +3,8 @@
 #include <iostream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
 
     BasicTree tree_original;
@@ -23,10 +25,10 @@ int main() {
         *ndi = s;
     }
     if (check_newick(tree_copy, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
-        return 1;
+        return EXIT_FAILURE;
     };
     if (check_newick(tree_original, "original tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
-        return 1;
+        return EXIT_FAILURE;
     }
     // Restore labels on original tree and make sure it is valid
     for (auto ndi = tree_original.preorder_begin(); ndi != tree_original.preorder_end(); ++ndi) {
@@ -40,10 +42,10 @@ int main() {
         *ndi = s;
     }
     if (check_newick(tree_original, "original tree with restored labels failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
-        return 1;
+        return EXIT_FAILURE;
     }
     if (check_newick(tree_copy, "cloned tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
-        return 1;
+        return EXIT_FAILURE;
     }
     return 0;
 }

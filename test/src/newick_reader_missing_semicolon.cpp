@@ -1,5 +1,7 @@
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -10,8 +12,8 @@ int main () {
     try {
         tree_reader.read_from_string(tree_string, "newick");
     } catch (const platypus::TokenizerUnexpectedEndOfStream & e) {
-        return 0;
+        return EXIT_SUCCESS;
     }
-    return 1;
+    return EXIT_FAILURE;
 }
 

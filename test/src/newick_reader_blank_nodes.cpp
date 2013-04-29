@@ -1,6 +1,8 @@
 #include <sstream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
 
     typedef TestDataTree TreeType;
@@ -39,7 +41,10 @@ int main () {
         write_newick(tree, o);
         std::cerr << o.str() << std::endl;
     }
-    return fail;
-
+    if (fail > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 

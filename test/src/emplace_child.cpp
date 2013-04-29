@@ -3,6 +3,7 @@
 #include <iostream>
 #include "tests.hpp"
 
+using namespace platypus::test;
 
 class Value {
 
@@ -46,9 +47,9 @@ int main() {
     std::string result = out.str();
     trim(result, " \t\n\r");
     std::string expected = "(((i7, i8)i3, (i9, i10)i4)i1, ((i11, i12)i5, (i13, i14)i6)i2);";
-    if (result == expected) {
-        return 0;
-    } else {
-        return fail_test(__FILE__, expected, result);
-    }
+    return check_equal(
+            expected,
+            result,
+            __FILE__,
+            __LINE__);
 }

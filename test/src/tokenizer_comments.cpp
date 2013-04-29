@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     std::string str = "[&R] (foo:1 [a foo object], [start of subgroup](bar:2, c:2)[end of group][][][";
     // std::cout << "\n[" << str << "]" << std::endl;
@@ -18,10 +20,5 @@ int main() {
     std::vector<std::string> expected{
             "(", "foo", ":","1", ",", "(", "bar", ":", "2",  ",", "c", ":", "2", ")"
             };
-    auto success = compare_token_vectors(__FILE__, expected, observed);
-    if (!success) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
 }

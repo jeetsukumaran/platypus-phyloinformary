@@ -3,6 +3,8 @@
 #include <iostream>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     BasicTree tree;
     build_tree(tree, STANDARD_TEST_TREE_STRING);
@@ -10,9 +12,5 @@ int main() {
     write_newick(tree, out);
     std::string result = out.str();
     trim(result, " \t\n\r");
-    if (result == STANDARD_TEST_TREE_NEWICK) {
-        return 0;
-    } else {
-        return fail_test(__FILE__, STANDARD_TEST_TREE_NEWICK, result);
-    }
+    return check_equal(STANDARD_TEST_TREE_NEWICK, result, __FILE__, __LINE__);
 }

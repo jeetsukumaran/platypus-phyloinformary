@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     std::string str = "";
     std::istringstream s(str);
@@ -14,10 +16,5 @@ int main() {
         observed.push_back(*iter);
     }
     std::vector<std::string> expected;
-    auto success = compare_token_vectors(__FILE__, expected, observed);
-    if (!success) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
 }

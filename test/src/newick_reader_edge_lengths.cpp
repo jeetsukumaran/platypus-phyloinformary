@@ -2,6 +2,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main () {
     std::map<char, std::string> exp_edges_as_str = {
         {'a', "1"},
@@ -53,6 +55,10 @@ int main () {
             std::cerr << ", but found " << edge_length << std::endl;
         }
     }
-    return fail;
+    if (fail > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 

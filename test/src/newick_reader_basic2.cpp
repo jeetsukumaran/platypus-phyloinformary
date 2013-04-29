@@ -3,6 +3,8 @@
 #include <string>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 // import sys
 // import dendropy
 // trees = dendropy.TreeList.get_from_path(sys.argv[1], "nexus")
@@ -84,13 +86,7 @@ int main () {
         write_newick_no_brlens(tree, o);
         std::string observed = o.str();
         stripspaces(observed);
-        if (observed != expected) {
-            fail += 1;
-            fail_test(__FILE__,
-                expected,
-                observed,
-                "Input tree string: '", src, "'");
-        }
+        fail += check_equal(expected, observed, __FILE__, __LINE__, "Input tree string: '", src, "'");
     }
     return fail;
 }

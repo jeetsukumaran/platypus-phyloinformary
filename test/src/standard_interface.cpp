@@ -5,6 +5,8 @@
 #include <platypus/model/tree.hpp>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     // tree source
     std::string tree_string;
@@ -41,11 +43,5 @@ int main() {
         "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
         "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n";
 
-    if (result != expected) {
-        return fail_test(__FILE__,
-                expected,
-                result);
-    } else {
-        return 0;
-    }
+    return check_equal(expected, result, __FILE__, __LINE__);
 }

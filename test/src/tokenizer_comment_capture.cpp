@@ -5,6 +5,8 @@
 #include <map>
 #include "tests.hpp"
 
+using namespace platypus::test;
+
 int main() {
     std::string str = "([the quick]apple[brown],([fox]banjo,([jumps]cucumber[over the],[really]dogwood)[lazy]eggplant)) rhubarb[dog];";
     platypus::Tokenizer tokenizer = get_nexus_tokenizer();
@@ -17,7 +19,7 @@ int main() {
             { "eggplant",       {"lazy"},},
             { "rhubarb",        {"dog"},},
             };
-    bool success = true;
+    int fail = 0;
     for (auto iter = tokenizer.begin(str); iter != tokenizer.end(); ++iter) {
         observed.push_back(*iter);
         auto & comments = iter.captured_comments();
@@ -40,7 +42,7 @@ int main() {
                 std::cerr << "'" << c << "', ";
             }
             std::cerr << "\n";
-            success = false;
+            fail += 1;
         }
         iter.clear_captured_comments();
     }
@@ -62,10 +64,10 @@ int main() {
             "rhubarb",
             ";"
             };
-    auto success2 = compare_token_vectors(__FILE__, expected, observed);
-    if (!success || !success2) {
-        return 1;
+    fail += compare_token_vectors(expected, observed, __FILE__, __LINE__);
+    if (fail > 0) {
+        return EXIT_FAILURE;
     } else {
-        return 0;
+        return EXIT_SUCCESS;
     }
 }
