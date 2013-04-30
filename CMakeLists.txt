@@ -41,9 +41,9 @@ SET(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation director
 ## Compiler Setup
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 IF (CMAKE_BUILD_TYPE MATCHES debug)
-    ADD_DEFINITIONS(-O0 -Wall -g)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb3 -g3")
 ELSE()
-    ADD_DEFINITIONS(-O3 -Wall)
+    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 ENDIF()
 
 ##############################################################################
