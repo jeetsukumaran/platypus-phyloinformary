@@ -49,6 +49,7 @@ SET(TEST_TARGET_SOURCES
     src/tokenizer_simple_quoted_str.cpp
     src/tokenizer_simple_str.cpp
     src/newick_reader_basic.cpp
+    src/datatable_basic.cpp
     src/newick_reader_basic2.cpp
     src/newick_reader_edge_lengths.cpp
     src/newick_reader_multitrees.cpp
