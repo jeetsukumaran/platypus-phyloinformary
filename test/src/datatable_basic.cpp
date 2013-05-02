@@ -68,6 +68,8 @@ class DataTableTester {
                 col_count = 0;
                 for (auto citer = row.begin<std::string>(); citer != row.end<std::string>(); ++ citer) {
                     std::cout << *citer << std::endl;
+                    // citer.set(0);
+                    std::cout << " -> " << *citer << std::endl;
                     col_count += 1;
                 }
                 std::cout << "--" << std::endl;
@@ -86,6 +88,7 @@ class DataTableTester {
                     __LINE__,
                     "default row iteration row count");
 
+            fails += this->verify_data_table(table, false, true);
             return fails;
         }
 

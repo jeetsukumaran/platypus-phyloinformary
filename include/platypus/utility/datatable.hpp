@@ -264,6 +264,21 @@ class Row {
         }
 
         template <class T>
+        const T get(unsigned long column_idx) const {
+            auto * base_cell = this->cells_.at(column_idx);
+            return Row::get_cell_value<T>(base_cell);
+        }
+
+        template <class T> T get(const std::string & col_name) const {
+            auto citer = this->column_label_cell_map_.find(col_name);
+            if (citer == this->column_label_cell_map_.end()) {
+                throw std::runtime_error("Unrecognized column name");
+            }
+            auto * cell = citer->second;
+            return Row::get_cell_value<T>(cell);
+        }
+
+        template <class T>
         Row & operator<<(const T & val) {
             auto * cell = this->cells_.at(this->current_entry_cell_idx_);
             this->set_cell_value(cell, val);
@@ -272,48 +287,19 @@ class Row {
         }
 
         template <class T>
-        const T get(unsigned long column_idx) {
-            auto * base_cell = this->cells_[column_idx];
-            return Row::get_cell_value<T>(base_cell);
+        void set(unsigned long column_idx, const T & val) {
+            auto * cell = this->cells_.at(column_idx);
+            this->set_cell_value(cell, val);
         }
 
-        template <class T> T get(const std::string & col_name) {
+        template <class T>
+        void set(const std::string & col_name, const T & val) {
             auto citer = this->column_label_cell_map_.find(col_name);
             if (citer == this->column_label_cell_map_.end()) {
                 throw std::runtime_error("Unrecognized column name");
             }
-            auto * base_cell = citer->second;
-            return Row::get_cell_value<T>(base_cell);
-        }
-
-        void write_row(
-                std::ostream & out,
-                std::string separator="\t") {
-            unsigned long column_idx = 0;
-            for (auto * base_cell : this->cells_) {
-                auto & column_definition = *(this->aggregated_columns_.at(column_idx));
-                auto cell_value_type = column_definition.get_value_type();
-                if (column_idx > 0) {
-                    out << separator;
-                }
-                if (cell_value_type == Column::ValueType::SignedInteger) {
-                    SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(base_cell);
-                    out << t->get<SignedIntegerCell::value_implementation_type>();
-                } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
-                    UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(base_cell);
-                    out << t->get<UnsignedIntegerCell::value_implementation_type>();
-                } else if (cell_value_type == Column::ValueType::Real) {
-                    RealCell * t = dynamic_cast<RealCell *>(base_cell);
-                    out << t->get<RealCell::value_implementation_type>();
-                } else if (cell_value_type == Column::ValueType::String) {
-                    StringCell * t = dynamic_cast<StringCell *>(base_cell);
-                    out << t->get<StringCell::value_implementation_type>();
-                } else {
-                    throw std::runtime_error("Unrecognized column type");
-                }
-                ++column_idx;
-            }
-            out << std::endl;
+            auto * cell = citer->second;
+            this->set_cell_value(cell, val);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -325,22 +311,23 @@ class Row {
 				typedef iterator                     self_type;
 				typedef ValueT                       value_type;
 				typedef value_type *                 pointer;
+				typedef const value_type *           const_pointer;
 				typedef value_type &                 reference;
+				typedef const value_type &           const_reference;
 				typedef unsigned long                size_type;
 				typedef int                          difference_type;
 				typedef std::forward_iterator_tag    iterator_category;
 			public:
-                iterator(Row & row, IterT cell_iter)
-                    : row_(row)
-                    , cell_iter_(cell_iter) {
+                iterator(IterT cell_iter, IterT cell_end)
+                    : cell_iter_(cell_iter)
+                    , cell_end_(cell_end) {
                 }
                 virtual ~iterator() {
                 }
-                inline reference operator*() {
-                    this->current_value_ = Row::get_cell_value<ValueT>(*this->cell_iter_);
+                inline const_reference operator*() {
                     return this->current_value_;
                 }
-                inline pointer operator->() {
+                inline const_pointer operator->() {
                     return &(this->current_value_);
                 }
                 inline bool operator==(const self_type& rhs) const {
@@ -351,7 +338,12 @@ class Row {
                 }
                 inline const self_type & operator++() {
                 // inline self_type operator++() {
-                    ++this->cell_iter_;
+                    if (this->cell_iter_ != this->cell_end_) {
+                        ++this->cell_iter_;
+                        if (this->cell_iter_ != this->cell_end_) {
+                            this->current_value_ = Row::get_cell_value<ValueT>(*this->cell_iter_);
+                        }
+                    }
                     return *this;
                 }
                 inline self_type operator++(int) {
@@ -359,21 +351,48 @@ class Row {
                     ++(*this);
                     return i;
                 }
+                template <class U>
+                inline void set(const U & val) {
+                    if (this->cell_iter_ != this->cell_end_) {
+                        Row::set_cell_value(*this->cell_iter_, val);
+                        this->current_value_ = Row::get_cell_value<ValueT>(*this->cell_iter_);
+                    } else {
+                        throw std::runtime_error("Invalid iterator");
+                    }
+                }
             protected:
-                Row &   row_;
                 IterT   cell_iter_;
+                IterT   cell_end_;
                 ValueT  current_value_;
         }; // iterator
 
-        template <class ValueT>
-        iterator<ValueT, std::vector<BaseCell *>::iterator> begin(){
-            return iterator<ValueT, std::vector<BaseCell *>::iterator>(*this, this->cells_.begin());
+        template <class ValueT=std::string>
+        iterator<ValueT, std::vector<BaseCell *>::iterator> begin() {
+            return iterator<ValueT, std::vector<BaseCell *>::iterator>(this->cells_.begin(), this->cells_.end());
         }
 
-        template <class ValueT>
-        iterator<ValueT, std::vector<BaseCell *>::iterator> end(){
-            return iterator<ValueT, std::vector<BaseCell *>::iterator>(*this, this->cells_.end());
+        template <class ValueT=std::string>
+        iterator<ValueT, std::vector<BaseCell *>::iterator> end() {
+            return iterator<ValueT, std::vector<BaseCell *>::iterator>(this->cells_.end(), this->cells_.end());
         }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Output
+
+        void write_row(
+                std::ostream & out,
+                std::string separator="\t") {
+            unsigned long column_idx = 0;
+            for (auto & val : *this) {
+                if (column_idx > 0) {
+                    out << separator;
+                }
+                out << val;
+                ++column_idx;
+            }
+            out << std::endl;
+        }
+
 
     public:
         template <class T>
