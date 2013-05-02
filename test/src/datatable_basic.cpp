@@ -5,11 +5,12 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <functional>
 #include <platypus/utility/datatable.hpp>
 #include "platypus_testing.hpp"
 
-class TestReference {
+class DataTableTester {
 
     public:
         typedef platypus::Column::signed_integer_implementation_type    signed_int_type;
@@ -19,11 +20,7 @@ class TestReference {
 
     public:
 
-        TestReference(
-                bool build_local_table=false,
-                bool verify_local_table=false,
-                bool exit_on_local_table_failure=false,
-                bool verify_local_table_using_access_by_col_name=false) {
+        DataTableTester() {
             this->num_cols_ = 10;
             this->num_rows_ = this->col0_.size();
             assert(this->col0_.size() == this->num_rows_);
@@ -36,12 +33,25 @@ class TestReference {
             assert(this->col7_.size() == this->num_rows_);
             assert(this->col8_.size() == this->num_rows_);
             assert(this->col9_.size() == this->num_rows_);
-            if (build_local_table) {
-                this->build_data_table(this->reference_table_);
-                if (verify_local_table) {
-                    this->verify_data_table(this->reference_table_, exit_on_local_table_failure, verify_local_table_using_access_by_col_name);
-                }
-            }
+        }
+
+        int run_tests() {
+            int fails = 0;
+            fails += test_basic_data_table_construction1();
+            fails += test_basic_data_table_construction2();
+            return fails;
+        }
+
+        int test_basic_data_table_construction1() {
+            platypus::DataTable table;
+            this->build_data_table(table);
+            return this->verify_data_table(table, false, false);
+        }
+
+        int test_basic_data_table_construction2() {
+            platypus::DataTable table;
+            this->build_data_table(table);
+            return this->verify_data_table(table, false, true);
         }
 
         void build_data_table(platypus::DataTable & table) {
@@ -300,17 +310,11 @@ class TestReference {
                 "&&2",
                 "\n",
                 ""};
-        platypus::DataTable           reference_table_;
-}; // TestReference
-
-void validate_test_reference() {
-    TestReference ref1(true, true, true, false);
-    TestReference ref2(true, true, true, true);
-}
+}; // DataTableTester
 
 int main() {
-    validate_test_reference();
-    int fails = 0;
+    DataTableTester dtt;
+    int fails = dtt.run_tests();
     if (fails > 0) {
         return EXIT_FAILURE;
     } else {
