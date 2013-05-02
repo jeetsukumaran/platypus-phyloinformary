@@ -144,7 +144,7 @@ template<> long long int SignedIntegerCell::get() const { return static_cast<lon
 template<> unsigned long long int SignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
 template<> float SignedIntegerCell::get() const { return static_cast<float>(this->value_); }
 template<> double SignedIntegerCell::get() const { return static_cast<double>(this->value_); }
-template<> long double SignedIntegerCell::get() const { return static_cast<double>(this->value_); }
+template<> long double SignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
 
 class UnsignedIntegerCell : public TypedCell<Column::unsigned_integer_implementation_type> {
     public:
@@ -178,7 +178,7 @@ template<> long long int UnsignedIntegerCell::get() const { return static_cast<l
 template<> unsigned long long int UnsignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
 template<> float UnsignedIntegerCell::get() const { return static_cast<float>(this->value_); }
 template<> double UnsignedIntegerCell::get() const { return static_cast<double>(this->value_); }
-template<> long double UnsignedIntegerCell::get() const { return static_cast<double>(this->value_); }
+template<> long double UnsignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
 
 class RealCell : public TypedCell<Column::real_implementation_type> {
     public:
@@ -212,7 +212,7 @@ template<> long long int RealCell::get() const { return static_cast<long long in
 template<> unsigned long long int RealCell::get() const { return static_cast<unsigned long long int>(this->value_); }
 template<> float RealCell::get() const { return static_cast<float>(this->value_); }
 template<> double RealCell::get() const { return static_cast<double>(this->value_); }
-template<> long double RealCell::get() const { return static_cast<double>(this->value_); }
+template<> long double RealCell::get() const { return static_cast<long double>(this->value_); }
 
 class StringCell : public TypedCell<Column::string_implementation_type> {
     public:

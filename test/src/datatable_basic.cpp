@@ -167,6 +167,7 @@ class TestReference {
                         __LINE__,
                         "Record: ", ridx, ", Column: 9");
             }
+            return fails;
         }
 
     private:
