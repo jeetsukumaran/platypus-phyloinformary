@@ -19,7 +19,11 @@ class TestReference {
 
     public:
 
-        TestReference() {
+        TestReference(
+                bool build_local_table=false,
+                bool verify_local_table=false,
+                bool exit_on_local_table_failure=false,
+                bool verify_local_table_using_access_by_col_name=false) {
             this->num_cols_ = 10;
             this->num_rows_ = this->col0_.size();
             assert(this->col0_.size() == this->num_rows_);
@@ -32,8 +36,12 @@ class TestReference {
             assert(this->col7_.size() == this->num_rows_);
             assert(this->col8_.size() == this->num_rows_);
             assert(this->col9_.size() == this->num_rows_);
-            this->build_data_table(this->reference_table_);
-            this->verify_data_table(this->reference_table_, true);
+            if (build_local_table) {
+                this->build_data_table(this->reference_table_);
+                if (verify_local_table) {
+                    this->verify_data_table(this->reference_table_, exit_on_local_table_failure, verify_local_table_using_access_by_col_name);
+                }
+            }
         }
 
         void build_data_table(platypus::DataTable & table) {
@@ -295,9 +303,17 @@ class TestReference {
         platypus::DataTable           reference_table_;
 }; // TestReference
 
+void validate_test_reference() {
+    TestReference ref1(true, true, true, false);
+    TestReference ref2(true, true, true, true);
+}
+
 int main() {
-    TestReference ref;
-    platypus::DataTable table;
-    ref.build_data_table(table);
-    table.dump();
+    validate_test_reference();
+    int fails = 0;
+    if (fails > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
