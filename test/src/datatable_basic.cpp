@@ -13,12 +13,15 @@
 class DataTableTester {
 
     public:
-        typedef platypus::DataTable::Column::signed_integer_implementation_type    signed_int_type;
-        typedef platypus::DataTable::Column::unsigned_integer_implementation_type  unsigned_int_type;
-        typedef platypus::DataTable::Column::real_implementation_type              real_type;
-        typedef platypus::DataTable::Column::string_implementation_type            str_type;
+        typedef platypus::DataTable::Column::signed_integer_implementation_type      signed_int_type;
+        typedef platypus::DataTable::Column::unsigned_integer_implementation_type    unsigned_int_type;
+        typedef platypus::DataTable::Column::real_implementation_type                real_type;
+        typedef platypus::DataTable::Column::string_implementation_type              str_type;
 
     public:
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Lifecycle
 
         DataTableTester() {
             this->num_cols_ = 10;
@@ -35,24 +38,59 @@ class DataTableTester {
             assert(this->col9_.size() == this->num_rows_);
         }
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Tests
+
         int run_tests() {
             int fails = 0;
-            fails += test_basic_data_table_construction1();
-            fails += test_basic_data_table_construction2();
+            fails += this->test_basic_data_table_construction();
+            fails += this->test_iteration();
             return fails;
         }
 
-        int test_basic_data_table_construction1() {
+        int test_basic_data_table_construction() {
+            int fails = 0;
             platypus::DataTable table;
             this->build_data_table(table);
-            return this->verify_data_table(table, false, false);
+            fails += this->verify_data_table(table, false, false);
+            fails += this->verify_data_table(table, false, true);
+            return fails;
         }
 
-        int test_basic_data_table_construction2() {
+        int test_iteration() {
+            int fails = 0;
             platypus::DataTable table;
             this->build_data_table(table);
-            return this->verify_data_table(table, false, true);
+
+            unsigned long row_count = 0;
+            unsigned long col_count = 0;
+            for (auto & row : table) {
+                col_count = 0;
+                for (auto citer = row.begin<std::string>(); citer != row.end<std::string>(); ++ citer) {
+                    std::cout << *citer << std::endl;
+                    col_count += 1;
+                }
+                std::cout << "--" << std::endl;
+                fails += platypus::test::check_equal(
+                        this->num_cols_,
+                        col_count,
+                        __FILE__,
+                        __LINE__,
+                        "default column iteration column count");
+                row_count += 1;
+            }
+            fails += platypus::test::check_equal(
+                    this->num_rows_,
+                    row_count,
+                    __FILE__,
+                    __LINE__,
+                    "default row iteration row count");
+
+            return fails;
         }
+
+        //////////////////////////////////////////////////////////////////////////////
+        // Support
 
         void build_data_table(platypus::DataTable & table) {
             this->define_data_table_columns(table);

@@ -321,6 +321,76 @@ class Row {
             out << std::endl;
         }
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Iteration
+
+        template <class ValueT, class IterT>
+        class iterator {
+            public:
+				typedef iterator                     self_type;
+				typedef ValueT                       value_type;
+				typedef value_type *                 pointer;
+				typedef value_type &                 reference;
+				typedef unsigned long                size_type;
+				typedef int                          difference_type;
+				typedef std::forward_iterator_tag    iterator_category;
+
+			public:
+
+                iterator(Row & row, IterT col_iter)
+                    : row_(row)
+                    , col_iter_(col_iter) {
+                }
+
+                virtual ~iterator() {
+                }
+
+                inline reference operator*() {
+                    this->current_value_ = this->row_.get<ValueT>((*(this->col_iter_))->get_label());
+                    return this->current_value_;
+                }
+
+                inline pointer operator->() {
+                    return &(this->current_value_);
+                }
+
+                inline bool operator==(const self_type& rhs) const {
+                    return this->col_iter_ == rhs.col_iter_;
+                }
+
+                inline bool operator!=(const self_type& rhs) const {
+                    return !(*this == rhs);
+                }
+
+                inline const self_type & operator++() {
+                // inline self_type operator++() {
+                    ++this->col_iter_;
+                    return *this;
+                }
+
+                inline self_type operator++(int) {
+                    self_type i = *this;
+                    ++(*this);
+                    return i;
+                }
+
+            protected:
+                Row &   row_;
+                IterT   col_iter_;
+                ValueT  current_value_;
+
+        }; // iterator
+
+        template <class ValueT>
+        iterator<ValueT, std::vector<Column *>::iterator> begin(){
+            return iterator<ValueT, std::vector<Column *>::iterator>(*this, this->aggregated_columns_.begin());
+        }
+
+        template <class ValueT>
+        iterator<ValueT, std::vector<Column *>::iterator> end(){
+            return iterator<ValueT, std::vector<Column *>::iterator>(*this, this->aggregated_columns_.end());
+        }
+
     private:
         void create_cells() {
             this->cells_.reserve(this->total_columns_size_);
