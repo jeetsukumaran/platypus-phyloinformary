@@ -276,22 +276,17 @@ class Record {
         const T get(unsigned long column_idx) {
             auto & column_definition = *(this->aggregated_columns_.at(column_idx));
             auto * base_cell = this->cells_[column_idx];
-            auto cell_value_type = column_definition.get_value_type();
-            if (cell_value_type == Column::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::Real) {
-                RealCell * t = dynamic_cast<RealCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(base_cell);
-                return t->get<T>();
-            } else {
-                throw std::runtime_error("Unrecognized column type");
+            return this->get_cell_value<T>(base_cell, column_definition);
+        }
+
+        template <class T> T get(const std::string & col_name) {
+            auto citer = this->column_label_cell_map_.find(col_name);
+            if (citer == this->column_label_cell_map_.end()) {
+                throw std::runtime_error("Unrecognized column name");
             }
+            auto * base_cell = citer->second;
+            auto & column_definition = *(this->column_label_definition_map_[col_name]);
+            return this->get_cell_value<T>(base_cell, column_definition);
         }
 
         void write_row(
@@ -356,17 +351,37 @@ class Record {
             this->aggregated_columns_.push_back(&column);
         }
 
+        template <class T>
+        const T get_cell_value(BaseCell * base_cell, Column & column_definition) {
+            auto cell_value_type = column_definition.get_value_type();
+            if (cell_value_type == Column::ValueType::SignedInteger) {
+                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(base_cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
+                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(base_cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::Real) {
+                RealCell * t = dynamic_cast<RealCell *>(base_cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::String) {
+                StringCell * t = dynamic_cast<StringCell *>(base_cell);
+                return t->get<T>();
+            } else {
+                throw std::runtime_error("Unrecognized column type");
+            }
+        }
+
     private:
-        std::vector<Column> &              key_columns_;
-        std::vector<Column> &              data_columns_;
-        std::vector<BaseCell *>                     cells_;
-        unsigned long                               current_entry_cell_idx_;
-        unsigned long                               key_columns_size_;
-        unsigned long                               data_columns_size_;
-        unsigned long                               total_columns_size_;
-        std::map<std::string, BaseCell *>           column_label_cell_map_;
-        std::map<std::string, Column *>    column_label_definition_map_;
-        std::vector<Column *>              aggregated_columns_;
+        std::vector<Column> &             key_columns_;
+        std::vector<Column> &             data_columns_;
+        std::vector<BaseCell *>           cells_;
+        unsigned long                     current_entry_cell_idx_;
+        unsigned long                     key_columns_size_;
+        unsigned long                     data_columns_size_;
+        unsigned long                     total_columns_size_;
+        std::map<std::string, BaseCell *> column_label_cell_map_;
+        std::map<std::string, Column *>   column_label_definition_map_;
+        std::vector<Column *>             aggregated_columns_;
 
 }; // Record
 
@@ -409,6 +424,9 @@ class DataTable {
         }
         Record & operator[](unsigned long ridx) {
             return this->records_.at(ridx);
+        }
+        template <class T> T get(unsigned long ridx, const std::string & col_name) {
+            return this->records_.at(ridx).get<T>(col_name);
         }
         template <class T> T get(unsigned long ridx, unsigned long fidx) {
             return this->records_.at(ridx).get<T>(fidx);
