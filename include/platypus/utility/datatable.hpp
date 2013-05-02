@@ -80,8 +80,14 @@ class Column {
 
 class BaseCell {
     public:
-        BaseCell() { }
+        BaseCell(const Column & column)
+            : column_(column) { }
         virtual ~BaseCell() { }
+        const Column & get_column() const {
+            return this->column_;
+        }
+    protected:
+        const Column &    column_;
 }; // BaseCell
 
 //////////////////////////////////////////////////////////////////////////////
@@ -90,8 +96,11 @@ class BaseCell {
 template <class T>
 class TypedCell : public BaseCell {
     public:
-        TypedCell() { }
-        TypedCell(const T & val) : value_(val) { }
+        TypedCell(const Column & column)
+            : BaseCell(column) { }
+        TypedCell(const Column & column, const T & val)
+            : BaseCell(column)
+            , value_(val) { }
         virtual ~TypedCell() {}
         template <class U> void set(const U & val) {
             std::ostringstream o;
@@ -114,7 +123,8 @@ class TypedCell : public BaseCell {
 class SignedIntegerCell : public TypedCell<Column::signed_integer_implementation_type> {
     public:
         typedef Column::signed_integer_implementation_type value_implementation_type;
-        SignedIntegerCell() : TypedCell<Column::signed_integer_implementation_type>(0) { }
+        SignedIntegerCell(const Column & column)
+            : TypedCell<value_implementation_type>(column, 0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -151,7 +161,8 @@ template<> long double SignedIntegerCell::get() const { return static_cast<long 
 class UnsignedIntegerCell : public TypedCell<Column::unsigned_integer_implementation_type> {
     public:
         typedef Column::unsigned_integer_implementation_type value_implementation_type;
-        UnsignedIntegerCell() : TypedCell<Column::unsigned_integer_implementation_type>(0) { }
+        UnsignedIntegerCell(const Column & column)
+            : TypedCell<value_implementation_type>(column, 0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -185,7 +196,8 @@ template<> long double UnsignedIntegerCell::get() const { return static_cast<lon
 class RealCell : public TypedCell<Column::real_implementation_type> {
     public:
         typedef Column::real_implementation_type value_implementation_type;
-        RealCell() : TypedCell<Column::real_implementation_type>(0.0) { }
+        RealCell(const Column & column)
+            : TypedCell<value_implementation_type>(column, 0.0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -219,6 +231,8 @@ template<> long double RealCell::get() const { return static_cast<long double>(t
 class StringCell : public TypedCell<Column::string_implementation_type> {
     public:
         typedef Column::string_implementation_type value_implementation_type;
+        StringCell(const Column & column)
+            : TypedCell<value_implementation_type>(column) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -246,39 +260,21 @@ class Row {
                 , current_entry_cell_idx_(0) {
             this->key_columns_size_ = this->key_columns_.size();
             this->data_columns_size_ = this->data_columns_.size();
-            this->total_columns_size_ = this->key_columns_size_ + this->data_columns_size_;
             this->create_cells();
         }
 
         template <class T>
         Row & operator<<(const T & val) {
-            auto & column_definition = *(this->aggregated_columns_.at(this->current_entry_cell_idx_));
-            auto * base_cell = this->cells_[this->current_entry_cell_idx_];
-            auto cell_value_type = column_definition.get_value_type();
-            if (cell_value_type == Column::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(base_cell);
-                t->set(val);
-            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(base_cell);
-                t->set(val);
-            } else if (cell_value_type == Column::ValueType::Real) {
-                RealCell * t = dynamic_cast<RealCell *>(base_cell);
-                t->set(val);
-            } else if (cell_value_type == Column::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(base_cell);
-                t->set(val);
-            } else {
-                throw std::runtime_error("Unrecognized column type");
-            }
+            auto * cell = this->cells_.at(this->current_entry_cell_idx_);
+            this->set_cell_value(cell, val);
             ++this->current_entry_cell_idx_;
             return * this;
         }
 
         template <class T>
         const T get(unsigned long column_idx) {
-            auto & column_definition = *(this->aggregated_columns_.at(column_idx));
             auto * base_cell = this->cells_[column_idx];
-            return this->get_cell_value<T>(base_cell, column_definition);
+            return Row::get_cell_value<T>(base_cell);
         }
 
         template <class T> T get(const std::string & col_name) {
@@ -287,8 +283,7 @@ class Row {
                 throw std::runtime_error("Unrecognized column name");
             }
             auto * base_cell = citer->second;
-            auto & column_definition = *(this->column_label_definition_map_[col_name]);
-            return this->get_cell_value<T>(base_cell, column_definition);
+            return Row::get_cell_value<T>(base_cell);
         }
 
         void write_row(
@@ -334,67 +329,100 @@ class Row {
 				typedef unsigned long                size_type;
 				typedef int                          difference_type;
 				typedef std::forward_iterator_tag    iterator_category;
-
 			public:
-
-                iterator(Row & row, IterT col_iter)
+                iterator(Row & row, IterT cell_iter)
                     : row_(row)
-                    , col_iter_(col_iter) {
+                    , cell_iter_(cell_iter) {
                 }
-
                 virtual ~iterator() {
                 }
-
                 inline reference operator*() {
-                    this->current_value_ = this->row_.get<ValueT>((*(this->col_iter_))->get_label());
+                    this->current_value_ = Row::get_cell_value<ValueT>(*this->cell_iter_);
                     return this->current_value_;
                 }
-
                 inline pointer operator->() {
                     return &(this->current_value_);
                 }
-
                 inline bool operator==(const self_type& rhs) const {
-                    return this->col_iter_ == rhs.col_iter_;
+                    return this->cell_iter_ == rhs.cell_iter_;
                 }
-
                 inline bool operator!=(const self_type& rhs) const {
                     return !(*this == rhs);
                 }
-
                 inline const self_type & operator++() {
                 // inline self_type operator++() {
-                    ++this->col_iter_;
+                    ++this->cell_iter_;
                     return *this;
                 }
-
                 inline self_type operator++(int) {
                     self_type i = *this;
                     ++(*this);
                     return i;
                 }
-
             protected:
                 Row &   row_;
-                IterT   col_iter_;
+                IterT   cell_iter_;
                 ValueT  current_value_;
-
         }; // iterator
 
         template <class ValueT>
-        iterator<ValueT, std::vector<Column *>::iterator> begin(){
-            return iterator<ValueT, std::vector<Column *>::iterator>(*this, this->aggregated_columns_.begin());
+        iterator<ValueT, std::vector<BaseCell *>::iterator> begin(){
+            return iterator<ValueT, std::vector<BaseCell *>::iterator>(*this, this->cells_.begin());
         }
 
         template <class ValueT>
-        iterator<ValueT, std::vector<Column *>::iterator> end(){
-            return iterator<ValueT, std::vector<Column *>::iterator>(*this, this->aggregated_columns_.end());
+        iterator<ValueT, std::vector<BaseCell *>::iterator> end(){
+            return iterator<ValueT, std::vector<BaseCell *>::iterator>(*this, this->cells_.end());
         }
 
-    private:
+    public:
+        template <class T>
+        static const T get_cell_value(BaseCell * cell) {
+            auto & column_definition = cell->get_column();
+            auto cell_value_type = column_definition.get_value_type();
+            if (cell_value_type == Column::ValueType::SignedInteger) {
+                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
+                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::Real) {
+                RealCell * t = dynamic_cast<RealCell *>(cell);
+                return t->get<T>();
+            } else if (cell_value_type == Column::ValueType::String) {
+                StringCell * t = dynamic_cast<StringCell *>(cell);
+                return t->get<T>();
+            } else {
+                throw std::runtime_error("Unrecognized column type");
+            }
+        }
+
+        template <class T>
+        static void set_cell_value(BaseCell * cell, const T & val) {
+            auto & column_definition = cell->get_column();
+            auto cell_value_type = column_definition.get_value_type();
+            if (cell_value_type == Column::ValueType::SignedInteger) {
+                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                t->set(val);
+            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
+                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                t->set(val);
+            } else if (cell_value_type == Column::ValueType::Real) {
+                RealCell * t = dynamic_cast<RealCell *>(cell);
+                t->set(val);
+            } else if (cell_value_type == Column::ValueType::String) {
+                StringCell * t = dynamic_cast<StringCell *>(cell);
+                t->set(val);
+            } else {
+                throw std::runtime_error("Unrecognized column type");
+            }
+        }
+
+    protected:
         void create_cells() {
-            this->cells_.reserve(this->total_columns_size_);
-            this->aggregated_columns_.reserve(this->total_columns_size_);
+            unsigned long total_columns_size = this->key_columns_.size() + this->data_columns_.size();
+            this->cells_.reserve(total_columns_size);
+            this->aggregated_columns_.reserve(total_columns_size);
             for (auto & key_column : this->key_columns_) {
                 this->insert_cell(key_column);
             }
@@ -407,40 +435,19 @@ class Row {
             auto cell_value_type = column.get_value_type();
             BaseCell * new_cell = nullptr;
             if (cell_value_type == Column::ValueType::SignedInteger) {
-                new_cell = new SignedIntegerCell();
+                new_cell = new SignedIntegerCell(column);
             } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
-                new_cell = new UnsignedIntegerCell();
+                new_cell = new UnsignedIntegerCell(column);
             } else if (cell_value_type == Column::ValueType::Real) {
-                new_cell = new RealCell();
+                new_cell = new RealCell(column);
             } else if (cell_value_type == Column::ValueType::String) {
-                new_cell = new StringCell();
+                new_cell = new StringCell(column);
             } else {
                 throw std::runtime_error("Unrecognized column type");
             }
             this->column_label_cell_map_[column.get_label()] = new_cell;
-            this->column_label_definition_map_[column.get_label()] = &column;
             this->cells_.push_back(new_cell);
             this->aggregated_columns_.push_back(&column);
-        }
-
-        template <class T>
-        const T get_cell_value(BaseCell * base_cell, Column & column_definition) {
-            auto cell_value_type = column_definition.get_value_type();
-            if (cell_value_type == Column::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::Real) {
-                RealCell * t = dynamic_cast<RealCell *>(base_cell);
-                return t->get<T>();
-            } else if (cell_value_type == Column::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(base_cell);
-                return t->get<T>();
-            } else {
-                throw std::runtime_error("Unrecognized column type");
-            }
         }
 
     private:
@@ -450,9 +457,7 @@ class Row {
         unsigned long                     current_entry_cell_idx_;
         unsigned long                     key_columns_size_;
         unsigned long                     data_columns_size_;
-        unsigned long                     total_columns_size_;
         std::map<std::string, BaseCell *> column_label_cell_map_;
-        std::map<std::string, Column *>   column_label_definition_map_;
         std::vector<Column *>             aggregated_columns_;
 
 }; // Row
