@@ -13,10 +13,10 @@
 class DataTableTester {
 
     public:
-        typedef platypus::Column::signed_integer_implementation_type    signed_int_type;
-        typedef platypus::Column::unsigned_integer_implementation_type  unsigned_int_type;
-        typedef platypus::Column::real_implementation_type              real_type;
-        typedef platypus::Column::string_implementation_type            str_type;
+        typedef platypus::DataTable::Column::signed_integer_implementation_type    signed_int_type;
+        typedef platypus::DataTable::Column::unsigned_integer_implementation_type  unsigned_int_type;
+        typedef platypus::DataTable::Column::real_implementation_type              real_type;
+        typedef platypus::DataTable::Column::string_implementation_type            str_type;
 
     public:
 

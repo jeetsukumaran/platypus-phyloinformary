@@ -34,6 +34,8 @@
 
 namespace platypus {
 
+namespace datatable {
+
 //////////////////////////////////////////////////////////////////////////////
 // Column
 
@@ -385,10 +387,17 @@ class Row {
 
 }; // Row
 
+} // namespace datatable
+
 //////////////////////////////////////////////////////////////////////////////
 // Table
 
 class DataTable {
+
+    public:
+        typedef datatable::Column   Column;
+        typedef datatable::Row      Row;
+
     public:
         DataTable()
             : is_rows_added_(false) {
@@ -462,11 +471,11 @@ class DataTable {
             columns.emplace_back(Column::identify_type<T>(), label);
         }
     private:
-        std::vector<Column>   key_columns_;
-        std::vector<Column>   data_columns_;
-        std::vector<Row>      rows_;
-        bool                  is_rows_added_;
-        std::set<std::string> column_names_;
+        std::vector<Column> key_columns_;
+        std::vector<Column> data_columns_;
+        std::vector<Row>    rows_;
+        bool                           is_rows_added_;
+        std::set<std::string>          column_names_;
 }; // DataTable
 
 } // namespace platypus
