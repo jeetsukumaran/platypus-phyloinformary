@@ -459,6 +459,43 @@ class DataTable {
             out << std::endl;
         }
 
+        /////////////////////////////////////////////////////////////////////////
+        // Iterators
+        typedef std::vector<Row>::iterator               iterator;
+        typedef std::vector<Row>::const_iterator         const_iterator;
+        typedef std::vector<Row>::reverse_iterator       reverse_iterator;
+        typedef std::vector<Row>::const_reverse_iterator const_reverse_iterator;
+        iterator begin() {
+            return this->rows_.begin();
+        }
+        iterator end() {
+            return this->rows_.end();
+        }
+        const_iterator begin() const {
+            return this->rows_.begin();
+        }
+        const_iterator end() const {
+            return this->rows_.end();
+        }
+        const_iterator cbegin() const {
+            return this->rows_.cbegin();
+        }
+        const_iterator cend() const {
+            return this->rows_.cend();
+        }
+        reverse_iterator rbegin() {
+            return this->rows_.rbegin();
+        }
+        reverse_iterator rend() {
+            return this->rows_.rend();
+        }
+        const_reverse_iterator rbegin() const {
+            return this->rows_.rbegin();
+        }
+        const_reverse_iterator rend() const {
+            return this->rows_.rend();
+        }
+
     private:
         template <class T> void add_column(std::vector<Column> & columns, const std::string & label) {
             if (this->is_rows_added_) {
@@ -471,11 +508,11 @@ class DataTable {
             columns.emplace_back(Column::identify_type<T>(), label);
         }
     private:
-        std::vector<Column> key_columns_;
-        std::vector<Column> data_columns_;
-        std::vector<Row>    rows_;
-        bool                           is_rows_added_;
-        std::set<std::string>          column_names_;
+        std::vector<Column>   key_columns_;
+        std::vector<Column>   data_columns_;
+        std::vector<Row>      rows_;
+        bool                  is_rows_added_;
+        std::set<std::string> column_names_;
 }; // DataTable
 
 } // namespace platypus
