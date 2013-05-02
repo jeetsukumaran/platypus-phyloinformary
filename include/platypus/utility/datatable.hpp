@@ -233,12 +233,12 @@ class StringCell : public TypedCell<Column::string_implementation_type> {
 template<> std::string StringCell::get() const { return this->value_; }
 
 //////////////////////////////////////////////////////////////////////////////
-// Record
+// Row
 
-class Record {
+class Row {
 
     public:
-        Record(std::vector<Column> & key_columns, std::vector<Column> & data_columns)
+        Row(std::vector<Column> & key_columns, std::vector<Column> & data_columns)
                 : key_columns_(key_columns)
                 , data_columns_(data_columns)
                 , current_entry_cell_idx_(0) {
@@ -249,7 +249,7 @@ class Record {
         }
 
         template <class T>
-        Record & operator<<(const T & val) {
+        Row & operator<<(const T & val) {
             auto & column_definition = *(this->aggregated_columns_.at(this->current_entry_cell_idx_));
             auto * base_cell = this->cells_[this->current_entry_cell_idx_];
             auto cell_value_type = column_definition.get_value_type();
@@ -383,7 +383,7 @@ class Record {
         std::map<std::string, Column *>   column_label_definition_map_;
         std::vector<Column *>             aggregated_columns_;
 
-}; // Record
+}; // Row
 
 //////////////////////////////////////////////////////////////////////////////
 // Table
@@ -391,7 +391,7 @@ class Record {
 class DataTable {
     public:
         DataTable()
-            : is_records_added_(false) {
+            : is_rows_added_(false) {
         }
         template <class T> void define_key_column(const std::string & label) {
             this->add_column<T>(this->key_columns_, label);
@@ -399,37 +399,37 @@ class DataTable {
         template <class T> void define_data_column(const std::string & label) {
             this->add_column<T>(this->data_columns_, label);
         }
-        Record & new_record() {
-            this->records_.emplace_back(this->key_columns_, this->data_columns_);
-            return this->records_.back();
-            this->is_records_added_ = true;
+        Row & new_row() {
+            this->rows_.emplace_back(this->key_columns_, this->data_columns_);
+            return this->rows_.back();
+            this->is_rows_added_ = true;
         }
         void dump() {
             this->write_header_row(std::cout);
-            for (auto & record : this->records_) {
-                record.write_row(std::cout);
+            for (auto & row : this->rows_) {
+                row.write_row(std::cout);
             }
         }
         void dump_column(unsigned long column_idx) {
-            for (auto & record : this->records_) {
-                std::cout << record.get<std::string>(column_idx) << ", ";
+            for (auto & row : this->rows_) {
+                std::cout << row.get<std::string>(column_idx) << ", ";
             }
             std::cout << std::endl;
         }
         unsigned long num_columns() const {
             return this->column_names_.size();
         }
-        unsigned long num_records() const {
-            return this->records_.size();
+        unsigned long num_rows() const {
+            return this->rows_.size();
         }
-        Record & operator[](unsigned long ridx) {
-            return this->records_.at(ridx);
+        Row & operator[](unsigned long ridx) {
+            return this->rows_.at(ridx);
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
-            return this->records_.at(ridx).get<T>(col_name);
+            return this->rows_.at(ridx).get<T>(col_name);
         }
         template <class T> T get(unsigned long ridx, unsigned long fidx) {
-            return this->records_.at(ridx).get<T>(fidx);
+            return this->rows_.at(ridx).get<T>(fidx);
         }
         void write_header_row(std::ostream & out, std::string separator="\t") {
             unsigned long column_idx = 0;
@@ -452,8 +452,8 @@ class DataTable {
 
     private:
         template <class T> void add_column(std::vector<Column> & columns, const std::string & label) {
-            if (this->is_records_added_) {
-                throw std::runtime_error("Cannot add new column: records have already been added");
+            if (this->is_rows_added_) {
+                throw std::runtime_error("Cannot add new column: rows have already been added");
             }
             if (this->column_names_.find(label) != this->column_names_.end()) {
                 throw std::runtime_error("Cannot add new column: duplicate column name");
@@ -464,8 +464,8 @@ class DataTable {
     private:
         std::vector<Column>   key_columns_;
         std::vector<Column>   data_columns_;
-        std::vector<Record>   records_;
-        bool                  is_records_added_;
+        std::vector<Row>      rows_;
+        bool                  is_rows_added_;
         std::set<std::string> column_names_;
 }; // DataTable
 
