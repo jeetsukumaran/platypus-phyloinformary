@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 namespace platypus {
 
@@ -87,12 +88,14 @@ class BaseCell {
 template <class T>
 class TypedCell : public BaseCell {
     public:
+        TypedCell() { }
+        TypedCell(const T & val) : value_(val) { }
         virtual ~TypedCell() {}
         template <class U> void set(const U & val) {
             std::ostringstream o;
-            o << val;
+            o << std::setprecision(64) << val;
             std::istringstream i(o.str());
-            i >> this->value_;
+            i >> std::setprecision(64) >> this->value_;
         }
         template <class U> U get() const {
             std::ostringstream o;
@@ -109,6 +112,7 @@ class TypedCell : public BaseCell {
 class SignedIntegerCell : public TypedCell<Column::signed_integer_implementation_type> {
     public:
         typedef Column::signed_integer_implementation_type value_implementation_type;
+        SignedIntegerCell() : TypedCell<Column::signed_integer_implementation_type>(0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -145,6 +149,7 @@ template<> long double SignedIntegerCell::get() const { return static_cast<doubl
 class UnsignedIntegerCell : public TypedCell<Column::unsigned_integer_implementation_type> {
     public:
         typedef Column::unsigned_integer_implementation_type value_implementation_type;
+        UnsignedIntegerCell() : TypedCell<Column::unsigned_integer_implementation_type>(0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -178,6 +183,7 @@ template<> long double UnsignedIntegerCell::get() const { return static_cast<dou
 class RealCell : public TypedCell<Column::real_implementation_type> {
     public:
         typedef Column::real_implementation_type value_implementation_type;
+        RealCell() : TypedCell<Column::real_implementation_type>(0.0) { }
         template <class U> void set(const U & val) {
             TypedCell<value_implementation_type>::set(val);
         }
@@ -370,7 +376,7 @@ class Record {
 class DataTable {
     public:
         DataTable()
-            : records_added_(false) {
+            : is_records_added_(false) {
         }
         template <class T> void define_key_column(const std::string & label) {
             this->add_column<T>(this->key_columns_, label);
@@ -381,7 +387,7 @@ class DataTable {
         Record & new_record() {
             this->records_.emplace_back(this->key_columns_, this->data_columns_);
             return this->records_.back();
-            this->records_added_ = true;
+            this->is_records_added_ = true;
         }
         void dump() {
             this->write_header_row(std::cout);
@@ -394,6 +400,12 @@ class DataTable {
                 std::cout << record.get<std::string>(column_idx) << ", ";
             }
             std::cout << std::endl;
+        }
+        unsigned long num_columns() const {
+            return this->column_names_.size();
+        }
+        unsigned long num_records() const {
+            return this->records_.size();
         }
         Record & operator[](unsigned long ridx) {
             return this->records_.at(ridx);
@@ -422,19 +434,20 @@ class DataTable {
 
     private:
         template <class T> void add_column(std::vector<Column> & columns, const std::string & label) {
-            if (this->records_added_) {
+            if (this->is_records_added_) {
                 throw std::runtime_error("Cannot add new column: records have already been added");
             }
             if (this->column_names_.find(label) != this->column_names_.end()) {
                 throw std::runtime_error("Cannot add new column: duplicate column name");
             }
+            this->column_names_.insert(label);
             columns.emplace_back(Column::identify_type<T>(), label);
         }
     private:
         std::vector<Column>   key_columns_;
         std::vector<Column>   data_columns_;
         std::vector<Record>   records_;
-        bool                  records_added_;
+        bool                  is_records_added_;
         std::set<std::string> column_names_;
 }; // DataTable
 

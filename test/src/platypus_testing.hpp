@@ -217,33 +217,34 @@ int check_equal(
     }
 }
 
-inline bool is_almost_equal(double a, double b, double tolerance=1e-14) {
+template <typename T>
+inline bool is_almost_equal(T a, T b, double tolerance=1e-14) {
     if (a == b) {
         // shortcut, handles infinities
         return true;
     }
-    double abs_a = std::fabs(a);
-    double abs_b = std::fabs(b);
-    double diff = std::fabs(a - b);
+    T abs_a = std::fabs(a);
+    T abs_b = std::fabs(b);
+    T diff = std::fabs(a - b);
     if (abs_a < tolerance && abs_b < tolerance && diff < tolerance) {
         // Hacky, I know. Without this tests fail if, e.g. a = 0 and b =
         // 6.786e-15 ... is this a real failure?
         return true;
     }
-    const static double MIN_DOUBLE_VALUE = std::numeric_limits<double>::min();
-    if (a == 0 || b == 0 || diff < MIN_DOUBLE_VALUE)  {
+    const static T MIN_T_VALUE = std::numeric_limits<T>::min();
+    if (a == 0 || b == 0 || diff < MIN_T_VALUE)  {
         // a or b is zero or both are extremely close to it
         // relative error is less meaningful here
-        return diff < (tolerance * MIN_DOUBLE_VALUE);
+        return diff < (tolerance * MIN_T_VALUE);
     }
     // use relative error
     return (diff / (abs_a + abs_b)) < tolerance;
 }
 
-template <typename... Types>
+template <typename T, typename... Types>
 int check_almost_equal(
-        double expected,
-        double observed,
+        T expected,
+        T observed,
         const std::string& test_name,
         unsigned long line_num,
         const Types&... args) {
