@@ -651,8 +651,7 @@ class DataTable {
         typedef datatable::OutputStreamManipulators    OutputStreamManipulators;
 
     public:
-        DataTable()
-            : is_rows_added_(false) {
+        DataTable() {
         }
         ~DataTable() {
             for (auto & r : this->rows_) {
@@ -675,7 +674,6 @@ class DataTable {
         Row & new_row() {
             Row * r = new Row(this->columns_, this->column_label_index_map_);
             this->rows_.push_back(r);
-            this->is_rows_added_ = true;
             return *r;
         }
         unsigned long num_columns() const {
@@ -766,7 +764,7 @@ class DataTable {
         template <class T> Column & create_column(
                 const std::string & label,
                 const OutputStreamManipulators & format_manipulators={}) {
-            if (this->is_rows_added_) {
+            if (!this->rows_.empty()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
             }
             if (this->column_label_index_map_.find(label) != this->column_label_index_map_.end()) {
@@ -783,7 +781,6 @@ class DataTable {
         std::vector<Column *>                   key_columns_;
         std::vector<Column *>                   data_columns_;
         std::vector<Row *>                      rows_;
-        bool                                    is_rows_added_;
 }; // DataTable
 
 } // namespace platypus
