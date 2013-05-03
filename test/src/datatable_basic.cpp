@@ -15,7 +15,7 @@ class DataTableTester {
     public:
         typedef platypus::DataTable::Column::signed_integer_implementation_type      signed_int_type;
         typedef platypus::DataTable::Column::unsigned_integer_implementation_type    unsigned_int_type;
-        typedef platypus::DataTable::Column::real_implementation_type                real_type;
+        typedef platypus::DataTable::Column::floating_point_implementation_type      float_type;
         typedef platypus::DataTable::Column::string_implementation_type              str_type;
 
     public:
@@ -96,9 +96,9 @@ class DataTableTester {
         int test_formatting_on_definition() {
             int fails = 0;
             platypus::DataTable table;
-            auto & col1 = table.define_data_column<real_type>("1", {std::setprecision(12)});
-            auto & col2 = table.define_data_column<real_type>("2", {std::fixed, std::setprecision(2)});
-            auto & col3 = table.define_data_column<real_type>("3", {std::scientific, std::setprecision(4)});
+            auto & col1 = table.add_data_column<float_type>("1", {std::setprecision(12)});
+            auto & col2 = table.add_data_column<float_type>("2", {std::fixed, std::setprecision(2)});
+            auto & col3 = table.add_data_column<float_type>("3", {std::scientific, std::setprecision(4)});
             table.new_row() << 22./7 << 22./7 << 22./7;
             std::vector<std::string> expected{"3.14285714286", "3.14", "3.1429e+00"};
             for (auto & row : table) {
@@ -151,9 +151,9 @@ class DataTableTester {
         int test_formatting_post_definition() {
             int fails = 0;
             platypus::DataTable table;
-            auto & col1 = table.define_data_column<real_type>("1");
-            auto & col2 = table.define_data_column<real_type>("2");
-            auto & col3 = table.define_data_column<real_type>("3");
+            auto & col1 = table.add_data_column<float_type>("1");
+            auto & col2 = table.add_data_column<float_type>("2");
+            auto & col3 = table.add_data_column<float_type>("3");
             table.new_row() << 22./7 << 22./7 << 22./7;
             col1.add_formatting(std::setprecision(12));
             col2.add_formatting(std::fixed);
@@ -180,36 +180,36 @@ class DataTableTester {
         // Support
 
         void build_data_table(platypus::DataTable & table) {
-            this->define_data_table_columns(table);
+            this->add_data_table_columns(table);
             this->populate_data_table(table);
         }
 
-        void define_data_table_columns(platypus::DataTable & table) {
+        void add_data_table_columns(platypus::DataTable & table) {
             for (unsigned idx = 0; idx < this->num_cols_; ++idx) {
                 auto & label = this->labels_[idx];
                 if (this->is_signed_int_col(idx)) {
                     if (this->is_key_col(idx)) {
-                        table.define_key_column<signed_int_type>(label);
+                        table.add_key_column<signed_int_type>(label);
                     } else {
-                        table.define_data_column<signed_int_type>(label);
+                        table.add_data_column<signed_int_type>(label);
                     }
                 } else if (this->is_unsigned_int_col(idx)) {
                     if (this->is_key_col(idx)) {
-                        table.define_key_column<unsigned_int_type>(label);
+                        table.add_key_column<unsigned_int_type>(label);
                     } else {
-                        table.define_data_column<unsigned_int_type>(label);
+                        table.add_data_column<unsigned_int_type>(label);
                     }
                 } else if (this->is_real_col(idx)) {
                     if (this->is_key_col(idx)) {
-                        table.define_key_column<real_type>(label);
+                        table.add_key_column<float_type>(label);
                     } else {
-                        table.define_data_column<real_type>(label);
+                        table.add_data_column<float_type>(label);
                     }
                 } else {
                     if (this->is_key_col(idx)) {
-                        table.define_key_column<str_type>(label);
+                        table.add_key_column<str_type>(label);
                     } else {
-                        table.define_data_column<str_type>(label);
+                        table.add_data_column<str_type>(label);
                     }
                 }
             }
@@ -287,14 +287,14 @@ class DataTableTester {
                             __LINE__,
                             "Row: ", ridx, ", Column: 5");
                     fails += platypus::test::check_almost_equal(
-                            static_cast<real_type>(this->col6_[ridx]),
-                            static_cast<real_type>(table.get<real_type>(ridx, 6)),
+                            static_cast<float_type>(this->col6_[ridx]),
+                            static_cast<float_type>(table.get<float_type>(ridx, 6)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 6");
                     fails += platypus::test::check_almost_equal(
-                            static_cast<real_type>(this->col7_[ridx]),
-                            static_cast<real_type>(table.get<real_type>(ridx, 7)),
+                            static_cast<float_type>(this->col7_[ridx]),
+                            static_cast<float_type>(table.get<float_type>(ridx, 7)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 7");
@@ -350,14 +350,14 @@ class DataTableTester {
                             __LINE__,
                             "Row: ", ridx, ", Column: 5");
                     fails += platypus::test::check_almost_equal(
-                            static_cast<real_type>(this->col6_[ridx]),
-                            static_cast<real_type>(table.get<real_type>(ridx, 6)),
+                            static_cast<float_type>(this->col6_[ridx]),
+                            static_cast<float_type>(table.get<float_type>(ridx, 6)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 6");
                     fails += platypus::test::check_almost_equal(
-                            static_cast<real_type>(this->col7_[ridx]),
-                            static_cast<real_type>(table.get<real_type>(ridx, 7)),
+                            static_cast<float_type>(this->col7_[ridx]),
+                            static_cast<float_type>(table.get<float_type>(ridx, 7)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 7");
@@ -409,8 +409,8 @@ class DataTableTester {
         std::vector<signed_int_type>    col3_{LONG_MAX, LONG_MIN, INT_MAX, INT_MIN, CHAR_MAX, CHAR_MIN, SHRT_MAX, SHRT_MIN, LONG_MAX/2, INT_MAX/2, 0};
         std::vector<unsigned_int_type>  col4_{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         std::vector<unsigned_int_type>  col5_{ULONG_MAX, ULONG_MAX/2, UINT_MAX, UINT_MAX/2, UCHAR_MAX, UCHAR_MAX/2, USHRT_MAX, USHRT_MAX/2, 9, 10, 11};
-        std::vector<real_type>          col6_{ 22./7, 2.1782e-8/2.41e2, std::pow(3.412412e12, 2.14), 1.23213993e-8 * 412443./1.77e3, 93842848.681241221491924912491294192412491924912491294914292194921349192499992, 0.0000000000000000000000001294914292194921349192499992, -22./7, -2.1782e-8/2.41e2, -std::pow(3.412412e12, 2.14), -1.23213993e-8 * 412443./1.77e3, -0.0000000000000000000000001294914292194921349192499992};
-        std::vector<real_type>          col7_{DBL_MAX, DBL_MIN, LDBL_MAX, LDBL_MIN, FLT_MAX, FLT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, LDBL_EPSILON, 0.0};
+        std::vector<float_type>          col6_{ 22./7, 2.1782e-8/2.41e2, std::pow(3.412412e12, 2.14), 1.23213993e-8 * 412443./1.77e3, 93842848.681241221491924912491294192412491924912491294914292194921349192499992, 0.0000000000000000000000001294914292194921349192499992, -22./7, -2.1782e-8/2.41e2, -std::pow(3.412412e12, 2.14), -1.23213993e-8 * 412443./1.77e3, -0.0000000000000000000000001294914292194921349192499992};
+        std::vector<float_type>          col7_{DBL_MAX, DBL_MIN, LDBL_MAX, LDBL_MIN, FLT_MAX, FLT_MIN, LONG_MAX, LONG_MIN, ULONG_MAX, LDBL_EPSILON, 0.0};
         std::vector<str_type>           col8_{
                 "Philosophical Flying Fox",
                 "Crazy Owl Monkey",
