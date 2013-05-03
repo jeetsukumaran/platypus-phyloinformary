@@ -201,7 +201,7 @@ class DataTableColumn {
             // this->format_manipulators_.clear();
             // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
         }
-        template <class T> void format_value(std::ostream & out, const T & val) const {
+        template <class T> void print_value(std::ostream & out, const T & val) const {
             for (auto m : this->format_manipulators_) {
                 out << m;
             }
@@ -222,7 +222,7 @@ class BaseCell {
         BaseCell(const DataTableColumn & column)
             : column_(column) { }
         virtual ~BaseCell() { }
-        const DataTableColumn & get_column() const {
+        const DataTableColumn & column() const {
             return this->column_;
         }
     protected:
@@ -241,7 +241,10 @@ class TypedCell : public BaseCell {
             : BaseCell(column)
             , value_(val) { }
         virtual ~TypedCell() {}
-    protected:
+        void print(std::ostream & out) const {
+            this->column_.print_value(out, this->value_);
+        }
+    public:
         T       value_;
 }; // TypedCell
 
@@ -262,12 +265,15 @@ class NumericCell : public TypedCell<T> {
         }
         virtual std::string to_string() const {
             std::ostringstream o;
-            this->column_.format_value(o, this->value_);
+            this->column_.print_value(o, this->value_);
             std::istringstream i(o.str());
             return o.str();
         }
         template <class U> U get() const {
             return static_cast<U>(this->value_);
+        }
+        void print(std::ostream & out) const {
+            this->column_.print_value(out, this->value_);
         }
         virtual void set(short int val) { this->value_ = static_cast<T>(val); }
         virtual void set(unsigned short int val) { this->value_ = static_cast<T>(val); }
@@ -342,7 +348,7 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
 
         template <class U> void set(const U & val) {
             std::ostringstream o;
-            this->column_.format_value(o, val);
+            this->column_.print_value(o, val);
             this->value_ = o.str();
         }
         void set(char * val) {
@@ -356,6 +362,9 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
             std::istringstream i(this->value_);
             i >> u;
             return u;
+        }
+        void print(std::ostream & out) const {
+            this->column_.print_value(out, this->value_);
         }
 }; // specialization for std::string
 template <> inline std::string StringCell::get() const { return this->value_; }
@@ -509,24 +518,22 @@ class DataTableRow {
         //////////////////////////////////////////////////////////////////////////////
         // Output
 
-        void write_row(
-                std::ostream & out,
-                std::string separator="\t") {
-            unsigned long column_idx = 0;
-            for (auto & val : *this) {
-                if (column_idx > 0) {
+        void print(std::ostream & out, std::string separator="\t") {
+            for(unsigned long cell_idx = 0; cell_idx < this->cells_.size(); ++cell_idx) {
+                if (cell_idx > 0) {
                     out << separator;
                 }
-                out << val;
-                ++column_idx;
+                // out << *(this->cells_[cell_idx]);
+                DataTableRow::print_cell(out, this->cells_[cell_idx]);
             }
             out << std::endl;
         }
 
     public:
+
         template <class T>
         static const T get_cell_value(BaseCell * cell) {
-            auto & column_definition = cell->get_column();
+            auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
@@ -547,7 +554,7 @@ class DataTableRow {
 
         template <class T>
         static void set_cell_value(BaseCell * cell, const T & val) {
-            auto & column_definition = cell->get_column();
+            auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
@@ -561,6 +568,26 @@ class DataTableRow {
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
                 StringCell * t = dynamic_cast<StringCell *>(cell);
                 t->set(val);
+            } else {
+                throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
+            }
+        }
+
+        static void print_cell(std::ostream & out, BaseCell * cell) {
+            auto & column_definition = cell->column();
+            auto cell_value_type = column_definition.get_value_type();
+            if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
+                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                t->print(out);
+            } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
+                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                t->print(out);
+            } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
+                FloatingPointCell * t = dynamic_cast<FloatingPointCell *>(cell);
+                t->print(out);
+            } else if (cell_value_type == DataTableColumn::ValueType::String) {
+                StringCell * t = dynamic_cast<StringCell *>(cell);
+                t->print(out);
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
             }
@@ -668,18 +695,21 @@ class DataTable {
             }
             return this->rows_[ridx]->get<T>(cidx);
         }
-        Column & get_column(unsigned long column_idx) {
+        Column & column(unsigned long column_idx) {
             if (column_idx >= this->columns_.size()) {
                 throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
             }
             return *(this->columns_[column_idx]);
         }
-        Column & get_column(const std::string & col_name) {
+        Column & column(const std::string & col_name) {
             auto citer = this->column_label_index_map_.find(col_name);
             if (citer == this->column_label_index_map_.end()) {
                 throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
             return *(this->columns_[citer->second]);
+        }
+        const Column & column(unsigned long column_idx) const {
+            return this->column(column_idx);
         }
 
         //////////////////////////////////////////////////////////////////////////////

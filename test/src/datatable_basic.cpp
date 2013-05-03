@@ -445,4 +445,35 @@ int main() {
     } else {
         return EXIT_SUCCESS;
     }
+
+    // platypus::DataTable table;
+    // table.add_column<std::string>("a",
+    //         {std::setw(10), std::setfill('.'), std::left});
+    // table.add_column<std::string>("b",
+    //         {std::setw(10), std::setfill(' '), std::right});
+    // table.add_column<double>("c",
+    //         {std::fixed, std::setprecision(4)});
+    // table.add_column<long>("d");
+    // table.add_row() << "the" << "quick" << 22./7 << 1;
+    // table.add_row() << "quick" << "quack" << 22./7 << 1;
+    // table.add_row() << "brown" << "quake" << 22./7 << 1;
+    // table.add_row() << "fox" << "quaill" << 22./7 << 1;
+    // table.add_row() << "jumps" << "queen" << 22./7 << 1;
+    // table.add_row() << "over" << "quoka" << 22./7 << 1;
+    // table.add_row() << "the" << "quappy" << 22./7 << 1;
+    // table.add_row() << "the" << "quiet" << 22./7 << 1;
+    // table.add_row() << "lazy" << "quool" << 22./7 << 1;
+    // table.add_row() << "dog" << "quail" << 22./7 << 1;
+    // std::cout << "-----" << std::endl;
+    // for (auto & row : table) {
+    //     for (auto & cell : row) {
+    //         std::cout << cell << ",";
+    //     }
+    //     std::cout << "\n";
+    // }
+    // std::cout << "-----" << std::endl;
+    // for (auto & row : table) {
+    //     row.print(std::cout);
+    // }
+    // std::cout << "-----" << std::endl;
 }
