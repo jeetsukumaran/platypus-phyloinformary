@@ -34,10 +34,60 @@
 #include <iostream>
 #include <iomanip>
 #include <initializer_list>
+#include "exception.hpp"
 
 namespace platypus {
 
-namespace datatable {
+//////////////////////////////////////////////////////////////////////////////
+// Errors
+
+class DataTableException : public PlatypusException {
+    public:
+        DataTableException(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : PlatypusException(filename, line_num, message) { }
+};
+
+
+class DataTableUndefinedColumnError : public DataTableException {
+    public:
+        DataTableUndefinedColumnError(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : DataTableException(filename, line_num, message) { }
+};
+
+class DataTableInvalidCellError : public DataTableException {
+    public:
+        DataTableInvalidCellError(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : DataTableException(filename, line_num, message) { }
+};
+
+class DataTableUndefinedColumnValueType : public DataTableException {
+    public:
+        DataTableUndefinedColumnValueType(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : DataTableException(filename, line_num, message) { }
+};
+
+class DataTableStructureError : public DataTableException {
+    public:
+        DataTableStructureError(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : DataTableStructureError(filename, line_num, message) { }
+};
+
+namespace datatable { // implementation details supporting DataTable
 
 //////////////////////////////////////////////////////////////////////////////
 // OutputStreamManipulators
@@ -46,35 +96,35 @@ namespace datatable {
 
 // an abstract class to provide a common interface to all manipulators
 class abstract_manip {
-public:
-  virtual ~abstract_manip() { }
-  virtual void apply(std::ostream& out) const = 0;
+    public:
+        virtual ~abstract_manip() { }
+        virtual void apply(std::ostream& out) const = 0;
 };
 
 // a wrapper template to let arbitrary manipulators follow that interface
 template<typename M> class concrete_manip : public abstract_manip {
-public:
-  concrete_manip(const M& manip) : _manip(manip) { }
-  void apply(std::ostream& out) const { out << _manip; }
-private:
-  M _manip;
+    public:
+        concrete_manip(const M& manip) : _manip(manip) { }
+        void apply(std::ostream& out) const { out << _manip; }
+    private:
+        M _manip;
 };
 
 // a class to hide the memory management required for polymorphism
 class smanip {
-public:
-  template<typename M> smanip(const M& manip)
-    : _manip(new concrete_manip<M>(manip)) { }
-  template<typename R, typename A> smanip(R (&manip)(A))
-    : _manip(new concrete_manip<R (*)(A)>(&manip)) { }
-  void apply(std::ostream& out) const { _manip->apply(out); }
-private:
-  std::shared_ptr<abstract_manip> _manip;
+    public:
+        template<typename M> smanip(const M& manip)
+            : _manip(new concrete_manip<M>(manip)) { }
+        template<typename R, typename A> smanip(R (&manip)(A))
+            : _manip(new concrete_manip<R (*)(A)>(&manip)) { }
+        void apply(std::ostream& out) const { _manip->apply(out); }
+    private:
+        std::shared_ptr<abstract_manip> _manip;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const smanip& manip) {
-  manip.apply(out);
-  return out;
+    manip.apply(out);
+    return out;
 }
 
 typedef smanip OutputStreamManipulator;
@@ -85,11 +135,17 @@ typedef std::vector<OutputStreamManipulator>    OutputStreamManipulators;
 
 class Column {
     public:
+
         enum class ValueType {
                 SignedInteger,
                 UnsignedInteger,
                 Real,
                 String };
+        static const std::string & value_type_name_as_string(Column::ValueType vt) {
+            static const std::vector<std::string> value_type_names{"SignedInteger", "UnsignedInteger", "Real", "String"};
+            return value_type_names[static_cast<typename std::underlying_type<Column::ValueType>::type>(vt)];
+        }
+
         typedef long             signed_integer_implementation_type;
         typedef unsigned long    unsigned_integer_implementation_type;
         typedef long double      real_implementation_type;
@@ -136,17 +192,23 @@ class Column {
             // this->format_manipulators_.clear();
             // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
         }
-        template <class T> void format(std::ostream & out, const T & val) const {
+        template <class T> void format_value(std::ostream & out, const T & val) const {
             for (auto m : this->format_manipulators_) {
                 out << m;
             }
             out << val;
+            out.copyfmt(std::ios(NULL)); // restore state
         }
     protected:
         ValueType                   value_type_;
         std::string                 label_;
         OutputStreamManipulators    format_manipulators_;
 }; // Column
+
+std::ostream & operator << (std::ostream & os, const Column::ValueType & vt) {
+    os << static_cast<std::underlying_type<Column::ValueType>::type>(vt);
+    return os;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // BaseCell
@@ -177,17 +239,27 @@ class TypedCell : public BaseCell {
         virtual ~TypedCell() {}
         template <class U> void set(const U & val) {
             std::ostringstream o;
-            o << std::setprecision(64) << val;
+            this->column_.format_value(o, val);
             std::istringstream i(o.str());
-            i >> std::setprecision(64) >> this->value_;
+            i >> this->value_;
+        }
+        void set(const std::string & val) {
+            std::istringstream i(val);
+            i >> this->value_;
         }
         template <class U> U get() const {
             std::ostringstream o;
-            this->column_.format(o, this->value_);
+            this->column_.format_value(o, this->value_);
             std::istringstream i(o.str());
             U u;
             i >> u;
             return u;
+        }
+        std::string get() const {
+            std::ostringstream o;
+            this->column_.format_value(o, this->value_);
+            std::istringstream i(o.str());
+            return o.str();
         }
     protected:
         T       value_;
@@ -338,14 +410,17 @@ class Row {
 
         template <class T>
         const T get(unsigned long column_idx) const {
-            auto * base_cell = this->cells_.at(column_idx);
+            if (column_idx >= this->cells_.size()) {
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+            }
+            auto * base_cell = this->cells_[column_idx];
             return Row::get_cell_value<T>(base_cell);
         }
 
         template <class T> T get(const std::string & col_name) const {
             auto citer = this->column_label_cell_map_.find(col_name);
             if (citer == this->column_label_cell_map_.end()) {
-                throw std::runtime_error("Unrecognized column name");
+                throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
             auto * cell = citer->second;
             return Row::get_cell_value<T>(cell);
@@ -353,7 +428,10 @@ class Row {
 
         template <class T>
         Row & operator<<(const T & val) {
-            auto * cell = this->cells_.at(this->current_entry_cell_idx_);
+            if (this->current_entry_cell_idx_ >= this->cells_.size()) {
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "attempting to add data beyond end of row");
+            }
+            auto * cell = this->cells_[this->current_entry_cell_idx_];
             this->set_cell_value(cell, val);
             ++this->current_entry_cell_idx_;
             return * this;
@@ -361,7 +439,10 @@ class Row {
 
         template <class T>
         void set(unsigned long column_idx, const T & val) {
-            auto * cell = this->cells_.at(column_idx);
+            if (column_idx >= this->cells_.size()) {
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+            }
+            auto * cell = this->cells_[column_idx];
             this->set_cell_value(cell, val);
         }
 
@@ -369,7 +450,7 @@ class Row {
         void set(const std::string & col_name, const T & val) {
             auto citer = this->column_label_cell_map_.find(col_name);
             if (citer == this->column_label_cell_map_.end()) {
-                throw std::runtime_error("Unrecognized column name");
+                throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
             auto * cell = citer->second;
             this->set_cell_value(cell, val);
@@ -433,7 +514,7 @@ class Row {
                         Row::set_cell_value(*this->cell_iter_, val);
                         this->current_value_ = Row::get_cell_value<ValueT>(*this->cell_iter_);
                     } else {
-                        throw std::runtime_error("Invalid iterator");
+                        throw DataTableInvalidCellError(__FILE__, __LINE__, "cell index is out of bounds");
                     }
                 }
             protected:
@@ -487,7 +568,7 @@ class Row {
                 StringCell * t = dynamic_cast<StringCell *>(cell);
                 return t->get<T>();
             } else {
-                throw std::runtime_error("Unrecognized column type");
+                throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, Column::value_type_name_as_string(cell_value_type));
             }
         }
 
@@ -508,7 +589,7 @@ class Row {
                 StringCell * t = dynamic_cast<StringCell *>(cell);
                 t->set(val);
             } else {
-                throw std::runtime_error("Unrecognized column type");
+                throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, Column::value_type_name_as_string(cell_value_type));
             }
         }
 
@@ -536,7 +617,7 @@ class Row {
             } else if (cell_value_type == Column::ValueType::String) {
                 new_cell = new StringCell(*column);
             } else {
-                throw std::runtime_error("Unrecognized column type");
+                throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, Column::value_type_name_as_string(cell_value_type));
             }
             this->column_label_cell_map_[column->get_label()] = new_cell;
             this->cells_.push_back(new_cell);
@@ -686,10 +767,10 @@ class DataTable {
                 const std::string & label,
                 const OutputStreamManipulators & format_manipulators={}) {
             if (this->is_rows_added_) {
-                throw std::runtime_error("Cannot add new column: rows have already been added");
+                throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
             }
             if (this->column_names_.find(label) != this->column_names_.end()) {
-                throw std::runtime_error("Cannot add new column: duplicate column name");
+                throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: duplicate column name");
             }
             this->column_names_.insert(label);
             auto new_col = new Column(Column::identify_type<T>(), label, format_manipulators);
