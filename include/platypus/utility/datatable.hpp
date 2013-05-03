@@ -416,6 +416,11 @@ class DataTableRow {
             this->data_columns_size_ = this->data_columns_.size();
             this->create_cells();
         }
+        ~DataTableRow() {
+            for (auto & c : this->cells_) {
+                delete c;
+            }
+        }
 
         template <class T>
         const T get(unsigned long column_idx) const {
@@ -633,8 +638,8 @@ class DataTableRow {
         }
 
     private:
-        std::vector<DataTableColumn *> &              key_columns_;
-        std::vector<DataTableColumn *> &              data_columns_;
+        std::vector<DataTableColumn *> &     key_columns_;
+        std::vector<DataTableColumn *> &     data_columns_;
         std::vector<BaseCell *>              cells_;
         unsigned long                        current_entry_cell_idx_;
         unsigned long                        key_columns_size_;
@@ -661,6 +666,9 @@ class DataTable {
             : is_rows_added_(false) {
         }
         ~DataTable() {
+            for (auto & r : this->rows_) {
+                delete r;
+            }
             for (auto & c : this->key_columns_) {
                 delete c;
             }
@@ -681,21 +689,10 @@ class DataTable {
             return this->add_column<T>(this->data_columns_, label, format_manipulators);
         }
         Row & new_row() {
-            this->rows_.emplace_back(this->key_columns_, this->data_columns_);
-            return this->rows_.back();
+            Row * r = new Row(this->key_columns_, this->data_columns_);
+            this->rows_.push_back(r);
             this->is_rows_added_ = true;
-        }
-        void dump() {
-            this->write_header_row(std::cout);
-            for (auto & row : this->rows_) {
-                row.write_row(std::cout);
-            }
-        }
-        void dump_column(unsigned long column_idx) {
-            for (auto & row : this->rows_) {
-                std::cout << row.get<std::string>(column_idx) << ", ";
-            }
-            std::cout << std::endl;
+            return *r;
         }
         unsigned long num_columns() const {
             return this->column_names_.size();
@@ -707,19 +704,19 @@ class DataTable {
             if (ridx >= this->rows_.size()) {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
-            return this->rows_[ridx];
+            return *this->rows_[ridx];
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
             if (ridx >= this->rows_.size()) {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
-            return this->rows_[ridx].get<T>(col_name);
+            return this->rows_[ridx]->get<T>(col_name);
         }
         template <class T> T get(unsigned long ridx, unsigned long fidx) {
             if (ridx >= this->rows_.size()) {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
-            return this->rows_[ridx].get<T>(fidx);
+            return this->rows_[ridx]->get<T>(fidx);
         }
         void write_header_row(std::ostream & out, std::string separator="\t") {
             unsigned long column_idx = 0;
@@ -742,41 +739,63 @@ class DataTable {
             out << std::endl;
         }
 
-        /////////////////////////////////////////////////////////////////////////
-        // Iterators
-        typedef std::vector<Row>::iterator               iterator;
-        typedef std::vector<Row>::const_iterator         const_iterator;
-        typedef std::vector<Row>::reverse_iterator       reverse_iterator;
-        typedef std::vector<Row>::const_reverse_iterator const_reverse_iterator;
-        iterator begin() {
-            return this->rows_.begin();
+        //////////////////////////////////////////////////////////////////////////////
+        // Iteration
+
+        template <class IterT>
+        class iterator {
+            public:
+				typedef iterator                     self_type;
+				typedef Row                          value_type;
+				typedef value_type *                 pointer;
+				typedef const value_type *           const_pointer;
+				typedef value_type &                 reference;
+				typedef const value_type &           const_reference;
+				typedef unsigned long                size_type;
+				typedef int                          difference_type;
+				typedef std::forward_iterator_tag    iterator_category;
+			public:
+                iterator(IterT row_iter, IterT row_end)
+                        : row_iter_(row_iter)
+                        , row_end_(row_end) {
+                }
+                virtual ~iterator() {
+                }
+                inline reference operator*() {
+                    return **this->row_iter_;
+                }
+                inline pointer operator->() {
+                    return &(**this->row_iter_);
+                }
+                inline bool operator==(const self_type& rhs) const {
+                    return this->row_iter_ == rhs.row_iter_;
+                }
+                inline bool operator!=(const self_type& rhs) const {
+                    return !(*this == rhs);
+                }
+                inline const self_type & operator++() {
+                // inline self_type operator++() {
+                    if (this->row_iter_ != this->row_end_) {
+                        ++this->row_iter_;
+                    }
+                    return *this;
+                }
+                inline self_type operator++(int) {
+                    self_type i = *this;
+                    ++(*this);
+                    return i;
+                }
+            protected:
+                IterT   row_iter_;
+                IterT   row_end_;
+        }; // iterator
+
+        iterator<std::vector<Row *>::iterator> begin() {
+            return iterator<std::vector<Row *>::iterator>(this->rows_.begin(), this->rows_.end());
         }
-        iterator end() {
-            return this->rows_.end();
-        }
-        const_iterator begin() const {
-            return this->rows_.begin();
-        }
-        const_iterator end() const {
-            return this->rows_.end();
-        }
-        const_iterator cbegin() const {
-            return this->rows_.cbegin();
-        }
-        const_iterator cend() const {
-            return this->rows_.cend();
-        }
-        reverse_iterator rbegin() {
-            return this->rows_.rbegin();
-        }
-        reverse_iterator rend() {
-            return this->rows_.rend();
-        }
-        const_reverse_iterator rbegin() const {
-            return this->rows_.rbegin();
-        }
-        const_reverse_iterator rend() const {
-            return this->rows_.rend();
+
+        iterator<std::vector<Row *>::iterator> end() {
+            return iterator< std::vector<Row *>::iterator>(this->rows_.end(), this->rows_.end());
         }
 
     private:
@@ -798,7 +817,7 @@ class DataTable {
     private:
         std::vector<Column *>    key_columns_;
         std::vector<Column *>    data_columns_;
-        std::vector<Row>         rows_;
+        std::vector<Row *>       rows_;
         bool                     is_rows_added_;
         std::set<std::string>    column_names_;
 }; // DataTable
