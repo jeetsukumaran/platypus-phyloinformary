@@ -94,26 +94,26 @@ class DataTableTester {
 
         int test_formatting_on_definition() {
             int fails = 0;
-            platypus::DataTable table;
-            table.define_key_column<str_type>("0");
-            table.define_data_column<real_type>("1", {std::setprecision(8)});
-            table.define_data_column<real_type>("2", {std::fixed, std::setprecision(2)});
-            table.define_data_column<real_type>("3", {std::scientific});
-            table.new_row() << "r1" << 22./7 << 22./7 << 22./7;
-            std::vector<std::string> expected{"r1", "3.1428571", "3.14", "3.142857e+00"};
-            for (auto & row : table) {
-                unsigned long col_idx = 0;
-                for (auto & col : row) {
-                    fails += platypus::test::check_equal(
-                            expected.at(col_idx),
-                            col,
-                            __FILE__,
-                            __LINE__,
-                            "formatted output of column ", col_idx);
-                    col_idx += 1;
-                }
-                std::cout << std::endl;
-            }
+            // platypus::DataTable table;
+            // table.define_key_column<str_type>("0");
+            // table.define_data_column<real_type>("1", {std::setprecision(8)});
+            // table.define_data_column<real_type>("2", {std::fixed, std::setprecision(2)});
+            // table.define_data_column<real_type>("3", {std::scientific});
+            // table.new_row() << "r1" << 22./7 << 22./7 << 22./7;
+            // std::vector<std::string> expected{"r1", "3.1428571", "3.14", "3.142857e+00"};
+            // for (auto & row : table) {
+            //     unsigned long col_idx = 0;
+            //     for (auto & col : row) {
+            //         fails += platypus::test::check_equal(
+            //                 expected.at(col_idx),
+            //                 col,
+            //                 __FILE__,
+            //                 __LINE__,
+            //                 "formatted output of column ", col_idx);
+            //         col_idx += 1;
+            //     }
+            //     std::cout << std::endl;
+            // }
             return fails;
         }
 

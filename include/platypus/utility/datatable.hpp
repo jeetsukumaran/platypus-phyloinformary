@@ -40,47 +40,6 @@ namespace platypus {
 namespace datatable {
 
 //////////////////////////////////////////////////////////////////////////////
-// OutputStreamManipulators
-
-// from:: http://stackoverflow.com/questions/14702629/can-you-pass-a-manipulator-to-a-function
-
-// an abstract class to provide a common interface to all manipulators
-class abstract_manip {
-public:
-  virtual ~abstract_manip() { }
-  virtual void apply(std::ostream& out) const = 0;
-};
-
-// a wrapper template to let arbitrary manipulators follow that interface
-template<typename M> class concrete_manip : public abstract_manip {
-public:
-  concrete_manip(const M& manip) : _manip(manip) { }
-  void apply(std::ostream& out) const { out << _manip; }
-private:
-  M _manip;
-};
-
-// a class to hide the memory management required for polymorphism
-class smanip {
-public:
-  template<typename M> smanip(const M& manip)
-    : _manip(new concrete_manip<M>(manip)) { }
-  template<typename R, typename A> smanip(R (&manip)(A))
-    : _manip(new concrete_manip<R (*)(A)>(&manip)) { }
-  void apply(std::ostream& out) const { _manip->apply(out); }
-private:
-  std::shared_ptr<abstract_manip> _manip;
-};
-
-inline std::ostream& operator<<(std::ostream& out, const smanip& manip) {
-  manip.apply(out);
-  return out;
-}
-
-typedef smanip OutputStreamManipulator;
-typedef std::vector<OutputStreamManipulator>    OutputStreamManipulators;
-
-//////////////////////////////////////////////////////////////////////////////
 // Column
 
 class Column {
@@ -108,12 +67,9 @@ class Column {
             }
         }
     public:
-        Column(ValueType value_type,
-                const std::string & label,
-                const OutputStreamManipulators & format_manipulators={})
+        Column(ValueType value_type, const std::string & label)
                 : value_type_(value_type)
-                , label_(label)
-                , format_manipulators_(format_manipulators) {
+                , label_(label) {
         }
         const std::string & get_label() const {
             return this->label_;
@@ -121,31 +77,12 @@ class Column {
         ValueType get_value_type() const {
             return this->value_type_;
         }
-        template <class T>
-        void add_formatting(const T & format_manipulator) {
-            this->format_manipulators_.push_back(format_manipulator);
-        }
-        void add_formatting(const OutputStreamManipulators & format_manipulators) {
-            this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
-        }
-        void clear_formatting() {
-            this->format_manipulators_.clear();
-        }
-        void set_formatting(const OutputStreamManipulators & format_manipulators) {
-            this->format_manipulators_ = format_manipulators;
-            // this->format_manipulators_.clear();
-            // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
-        }
         template <class T> void format(std::ostream & out, const T & val) const {
-            for (auto m : this->format_manipulators_) {
-                out << m;
-            }
             out << val;
         }
     protected:
         ValueType                   value_type_;
         std::string                 label_;
-        OutputStreamManipulators    format_manipulators_;
 }; // Column
 
 //////////////////////////////////////////////////////////////////////////////
@@ -567,24 +504,16 @@ class DataTable {
     public:
         typedef datatable::Column                      Column;
         typedef datatable::Row                         Row;
-        typedef datatable::OutputStreamManipulator     OutputStreamManipulator;
-        typedef datatable::OutputStreamManipulators    OutputStreamManipulators;
 
     public:
         DataTable()
             : is_rows_added_(false) {
         }
-        // template <class T> Column & define_key_column(const std::string & label) {
-        //     return this->add_column<T>(this->key_columns_, label);
-        // }
-        // template <class T> Column & define_data_column(const std::string & label) {
-        //     return this->add_column<T>(this->data_columns_, label);
-        // }
-        template <class T> Column & define_key_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
-            return this->add_column<T>(this->key_columns_, label, format_manipulators);
+        template <class T> Column & define_key_column(const std::string & label) {
+            return this->add_column<T>(this->key_columns_, label);
         }
-        template <class T> Column & define_data_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
-            return this->add_column<T>(this->data_columns_, label, format_manipulators);
+        template <class T> Column & define_data_column(const std::string & label) {
+            return this->add_column<T>(this->data_columns_, label);
         }
         Row & new_row() {
             this->rows_.emplace_back(this->key_columns_, this->data_columns_);
@@ -677,8 +606,7 @@ class DataTable {
     private:
         template <class T> Column & add_column(
                 std::vector<Column> & columns,
-                const std::string & label,
-                const OutputStreamManipulators & format_manipulators={}) {
+                const std::string & label) {
             if (this->is_rows_added_) {
                 throw std::runtime_error("Cannot add new column: rows have already been added");
             }
@@ -686,7 +614,7 @@ class DataTable {
                 throw std::runtime_error("Cannot add new column: duplicate column name");
             }
             this->column_names_.insert(label);
-            columns.emplace_back(Column::identify_type<T>(), label, format_manipulators);
+            columns.emplace_back(Column::identify_type<T>(), label);
             return columns.back();
         }
     private:
