@@ -34,7 +34,7 @@
 #include <iostream>
 #include <iomanip>
 #include <initializer_list>
-#include "../utility/exception.hpp"
+#include "../base/exception.hpp"
 
 namespace platypus {
 

@@ -29,7 +29,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include "exception.hpp"
+#include "../base/exception.hpp"
 
 namespace platypus {
 

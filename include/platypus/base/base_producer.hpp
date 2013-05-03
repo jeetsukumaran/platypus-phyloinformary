@@ -29,7 +29,7 @@
 #include <string>
 #include <sstream>
 #include <functional>
-#include "../utility/exception.hpp"
+#include "exception.hpp"
 
 namespace platypus {
 
