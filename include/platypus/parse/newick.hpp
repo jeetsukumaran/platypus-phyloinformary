@@ -34,7 +34,7 @@ namespace platypus {
 // NewickReader Exceptions
 
 /**
- * Exception thrown when encountering a non-recognized NEWICK token.
+ * Base exception class for Newick parser.
  */
 class NewickReaderException : public ReaderException {
     public:
@@ -48,9 +48,9 @@ class NewickReaderException : public ReaderException {
 /**
  * Exception thrown when encountering a non-recognized NEWICK token.
  */
-class NewickReaderInvalidTokenException : public NewickReaderException {
+class NewickReaderInvalidTokenError : public NewickReaderException {
     public:
-        NewickReaderInvalidTokenException(
+        NewickReaderInvalidTokenError(
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
@@ -60,9 +60,9 @@ class NewickReaderInvalidTokenException : public NewickReaderException {
 /**
  * Exception thrown when encountering a non-recognized NEWICK token.
  */
-class NewickReaderMalformedStatement : public NewickReaderException {
+class NewickReaderMalformedStatementError : public NewickReaderException {
     public:
-        NewickReaderMalformedStatement(
+        NewickReaderMalformedStatementError(
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
@@ -140,7 +140,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
         tree_type & parse_tree_from_stream(TreeT & tree,
                 NexusTokenizer::iterator & src_iter) {
             if (*src_iter != "(") {
-                throw NewickReaderInvalidTokenException(__FILE__, __LINE__, *src_iter);
+                throw NewickReaderInvalidTokenError(__FILE__, __LINE__, *src_iter);
             }
             unsigned long num_leaf_nodes = 0;
             unsigned long num_internal_nodes = 1; // start at one to count root
@@ -182,13 +182,13 @@ class NewickReader : public BaseTreeReader<TreeT> {
             if (*src_iter == "(") {
                 // begin processing of child nodes
                 // if (src_iter.eof()) {
-                //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+                //     throw NewickReaderMalformedStatementError(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                 // }
                 src_iter.require_next();
                 bool node_created = false;
                 while (true) {
                     // if (src_iter.eof()) {
-                    //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+                    //     throw NewickReaderMalformedStatementError(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
                     // }
                     if (*src_iter == ",") {
                         // next child
@@ -251,7 +251,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
             }
             // std::cout << "{" << *src_iter << "}" << std::endl;
             // if (src_iter.eof()) {
-            //     throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
+            //     throw NewickReaderMalformedStatementError(__FILE__, __LINE__, "platypus::NewickReader: premature end of stream");
             // }
             bool label_parsed = false;
             while (true) {
@@ -274,11 +274,11 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 } else if (*src_iter == "(") {
                     // start of another node or tree without finishing this
                     // node
-                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: malformed tree statement");
+                        throw NewickReaderMalformedStatementError(__FILE__, __LINE__, "platypus::NewickReader: malformed tree statement");
                 } else {
                     // label
                     if (label_parsed) {
-                        throw NewickReaderMalformedStatement(__FILE__, __LINE__, "platypus::NewickReader: Expecting ':', ')', ',' or ';' after reading label");
+                        throw NewickReaderMalformedStatementError(__FILE__, __LINE__, "platypus::NewickReader: Expecting ':', ')', ',' or ';' after reading label");
                     } else {
                         this->set_node_value_label(current_node->value(), *src_iter);
                         label_parsed = true;

@@ -24,7 +24,7 @@ int main () {
     }
     // try {
     //     tree_reader.read_from_string(tree_string, "newick");
-    // } catch (const platypus::NewickReaderMalformedStatement & e) {
+    // } catch (const platypus::NewickReaderMalformedStatementError & e) {
     //     return 0;
     // }
     if (fail > 0) {
