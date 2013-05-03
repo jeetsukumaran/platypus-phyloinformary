@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <functional>
-#include <platypus/utility/datatable.hpp>
+#include <platypus/model/datatable.hpp>
 #include "platypus_testing.hpp"
 
 class DataTableTester {

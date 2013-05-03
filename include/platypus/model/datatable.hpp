@@ -284,28 +284,28 @@ class SignedIntegerCell : public TypedCell<DataTableColumn::signed_integer_imple
             this->value_ = val;
         }
 }; // specialization for long
-template<> void SignedIntegerCell::set(const short int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const unsigned short int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const unsigned int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const long int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const unsigned long int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const long long int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const unsigned long long int & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const float & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const double & val) { this->value_ = val; }
-template<> void SignedIntegerCell::set(const long double & val) { this->value_ = val; }
-template<> short int SignedIntegerCell::get() const { return static_cast<short int>(this->value_); }
-template<> unsigned short int SignedIntegerCell::get() const { return static_cast<unsigned short int>(this->value_); }
-template<> int SignedIntegerCell::get() const { return static_cast<int>(this->value_); }
-template<> unsigned int SignedIntegerCell::get() const { return static_cast<unsigned int>(this->value_); }
-template<> long int SignedIntegerCell::get() const { return static_cast<long int>(this->value_); }
-template<> unsigned long int SignedIntegerCell::get() const { return static_cast<unsigned long int>(this->value_); }
-template<> long long int SignedIntegerCell::get() const { return static_cast<long long int>(this->value_); }
-template<> unsigned long long int SignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
-template<> float SignedIntegerCell::get() const { return static_cast<float>(this->value_); }
-template<> double SignedIntegerCell::get() const { return static_cast<double>(this->value_); }
-template<> long double SignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
+template<> inline void SignedIntegerCell::set(const short int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const unsigned short int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const unsigned int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const long int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const unsigned long int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const long long int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const unsigned long long int & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const float & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const double & val) { this->value_ = val; }
+template<> inline void SignedIntegerCell::set(const long double & val) { this->value_ = val; }
+template<> inline short int SignedIntegerCell::get() const { return static_cast<short int>(this->value_); }
+template<> inline unsigned short int SignedIntegerCell::get() const { return static_cast<unsigned short int>(this->value_); }
+template<> inline int SignedIntegerCell::get() const { return static_cast<int>(this->value_); }
+template<> inline unsigned int SignedIntegerCell::get() const { return static_cast<unsigned int>(this->value_); }
+template<> inline long int SignedIntegerCell::get() const { return static_cast<long int>(this->value_); }
+template<> inline unsigned long int SignedIntegerCell::get() const { return static_cast<unsigned long int>(this->value_); }
+template<> inline long long int SignedIntegerCell::get() const { return static_cast<long long int>(this->value_); }
+template<> inline unsigned long long int SignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
+template<> inline float SignedIntegerCell::get() const { return static_cast<float>(this->value_); }
+template<> inline double SignedIntegerCell::get() const { return static_cast<double>(this->value_); }
+template<> inline long double SignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
 
 class UnsignedIntegerCell : public TypedCell<DataTableColumn::unsigned_integer_implementation_type> {
     public:
@@ -319,28 +319,28 @@ class UnsignedIntegerCell : public TypedCell<DataTableColumn::unsigned_integer_i
             return TypedCell<value_implementation_type>::get<U>();
         }
 }; // specialization for unsigned long
-template<> void UnsignedIntegerCell::set(const short int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const unsigned short int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const unsigned int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const long int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const unsigned long int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const long long int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const unsigned long long int & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const float & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const double & val) { this->value_ = val; }
-template<> void UnsignedIntegerCell::set(const long double & val) { this->value_ = val; }
-template<> short int UnsignedIntegerCell::get() const { return static_cast<short int>(this->value_); }
-template<> unsigned short int UnsignedIntegerCell::get() const { return static_cast<unsigned short int>(this->value_); }
-template<> int UnsignedIntegerCell::get() const { return static_cast<int>(this->value_); }
-template<> unsigned int UnsignedIntegerCell::get() const { return static_cast<unsigned int>(this->value_); }
-template<> long int UnsignedIntegerCell::get() const { return static_cast<long int>(this->value_); }
-template<> unsigned long int UnsignedIntegerCell::get() const { return static_cast<unsigned long int>(this->value_); }
-template<> long long int UnsignedIntegerCell::get() const { return static_cast<long long int>(this->value_); }
-template<> unsigned long long int UnsignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
-template<> float UnsignedIntegerCell::get() const { return static_cast<float>(this->value_); }
-template<> double UnsignedIntegerCell::get() const { return static_cast<double>(this->value_); }
-template<> long double UnsignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
+template<> inline void UnsignedIntegerCell::set(const short int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const unsigned short int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const unsigned int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const long int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const unsigned long int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const long long int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const unsigned long long int & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const float & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const double & val) { this->value_ = val; }
+template<> inline void UnsignedIntegerCell::set(const long double & val) { this->value_ = val; }
+template<> inline short int UnsignedIntegerCell::get() const { return static_cast<short int>(this->value_); }
+template<> inline unsigned short int UnsignedIntegerCell::get() const { return static_cast<unsigned short int>(this->value_); }
+template<> inline int UnsignedIntegerCell::get() const { return static_cast<int>(this->value_); }
+template<> inline unsigned int UnsignedIntegerCell::get() const { return static_cast<unsigned int>(this->value_); }
+template<> inline long int UnsignedIntegerCell::get() const { return static_cast<long int>(this->value_); }
+template<> inline unsigned long int UnsignedIntegerCell::get() const { return static_cast<unsigned long int>(this->value_); }
+template<> inline long long int UnsignedIntegerCell::get() const { return static_cast<long long int>(this->value_); }
+template<> inline unsigned long long int UnsignedIntegerCell::get() const { return static_cast<unsigned long long int>(this->value_); }
+template<> inline float UnsignedIntegerCell::get() const { return static_cast<float>(this->value_); }
+template<> inline double UnsignedIntegerCell::get() const { return static_cast<double>(this->value_); }
+template<> inline long double UnsignedIntegerCell::get() const { return static_cast<long double>(this->value_); }
 
 class FloatingPointCell : public TypedCell<DataTableColumn::floating_point_implementation_type> {
     public:
@@ -354,28 +354,28 @@ class FloatingPointCell : public TypedCell<DataTableColumn::floating_point_imple
             return TypedCell<value_implementation_type>::get<U>();
         }
 }; // specialization for double
-template<> void FloatingPointCell::set(const short int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const unsigned short int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const unsigned int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const long int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const unsigned long int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const long long int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const unsigned long long int & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const float & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const double & val) { this->value_ = val; }
-template<> void FloatingPointCell::set(const long double & val) { this->value_ = val; }
-template<> short int FloatingPointCell::get() const { return static_cast<short int>(this->value_); }
-template<> unsigned short int FloatingPointCell::get() const { return static_cast<unsigned short int>(this->value_); }
-template<> int FloatingPointCell::get() const { return static_cast<int>(this->value_); }
-template<> unsigned int FloatingPointCell::get() const { return static_cast<unsigned int>(this->value_); }
-template<> long int FloatingPointCell::get() const { return static_cast<long int>(this->value_); }
-template<> unsigned long int FloatingPointCell::get() const { return static_cast<unsigned long int>(this->value_); }
-template<> long long int FloatingPointCell::get() const { return static_cast<long long int>(this->value_); }
-template<> unsigned long long int FloatingPointCell::get() const { return static_cast<unsigned long long int>(this->value_); }
-template<> float FloatingPointCell::get() const { return static_cast<float>(this->value_); }
-template<> double FloatingPointCell::get() const { return static_cast<double>(this->value_); }
-template<> long double FloatingPointCell::get() const { return static_cast<long double>(this->value_); }
+template<> inline void FloatingPointCell::set(const short int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const unsigned short int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const unsigned int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const long int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const unsigned long int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const long long int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const unsigned long long int & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const float & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const double & val) { this->value_ = val; }
+template<> inline void FloatingPointCell::set(const long double & val) { this->value_ = val; }
+template<> inline short int FloatingPointCell::get() const { return static_cast<short int>(this->value_); }
+template<> inline unsigned short int FloatingPointCell::get() const { return static_cast<unsigned short int>(this->value_); }
+template<> inline int FloatingPointCell::get() const { return static_cast<int>(this->value_); }
+template<> inline unsigned int FloatingPointCell::get() const { return static_cast<unsigned int>(this->value_); }
+template<> inline long int FloatingPointCell::get() const { return static_cast<long int>(this->value_); }
+template<> inline unsigned long int FloatingPointCell::get() const { return static_cast<unsigned long int>(this->value_); }
+template<> inline long long int FloatingPointCell::get() const { return static_cast<long long int>(this->value_); }
+template<> inline unsigned long long int FloatingPointCell::get() const { return static_cast<unsigned long long int>(this->value_); }
+template<> inline float FloatingPointCell::get() const { return static_cast<float>(this->value_); }
+template<> inline double FloatingPointCell::get() const { return static_cast<double>(this->value_); }
+template<> inline long double FloatingPointCell::get() const { return static_cast<long double>(this->value_); }
 
 class StringCell : public TypedCell<DataTableColumn::string_implementation_type> {
     public:
@@ -395,7 +395,7 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
             this->value_ = val;
         }
 }; // specialization for std::string
-template<> std::string StringCell::get() const { return this->value_; }
+template<> inline std::string StringCell::get() const { return this->value_; }
 
 //////////////////////////////////////////////////////////////////////////////
 // DataTableRow
