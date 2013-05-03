@@ -1,7 +1,7 @@
 /**
  * @package     platypus-phyloinformary
- * @brief       Base class for classes that produce trees, alignments
- *              and other objects: parsers, simulators, etc.
+ * @brief       A two-dimensional container with columns of varying
+ *              (signed integer, unsigned integer, real, or string) types.
  * @author      Jeet Sukumaran
  * @copyright   Copyright (C) 2013 Jeet Sukumaran.
  *              This file is part of "platypus-phyloinformary".
