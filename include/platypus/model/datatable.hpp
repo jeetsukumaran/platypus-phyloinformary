@@ -269,17 +269,17 @@ class NumericCell : public TypedCell<T> {
         template <class U> U get() const {
             return static_cast<U>(this->value_);
         }
-        virtual void set(const short int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const unsigned short int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const unsigned int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const long int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const unsigned long int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const long long int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const unsigned long long int & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const float & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const double & val) { this->value_ = static_cast<T>(val); }
-        virtual void set(const long double & val) { this->value_ = static_cast<T>(val); }
+        virtual void set(short int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(unsigned short int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(unsigned int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(long int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(unsigned long int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(long long int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(unsigned long long int val) { this->value_ = static_cast<T>(val); }
+        virtual void set(float val) { this->value_ = static_cast<T>(val); }
+        virtual void set(double val) { this->value_ = static_cast<T>(val); }
+        virtual void set(long double val) { this->value_ = static_cast<T>(val); }
         virtual void set(const std::string & val) { this->from_string(val); }
     protected:
         T       value_;
@@ -345,8 +345,12 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
             this->column_.format_value(o, val);
             this->value_ = o.str();
         }
-        void set(const char * val) { this->value_ = val; }
-        void set(const value_implementation_type & val) { this->value_ = val; }
+        void set(char * val) {
+            this->value_ = val;
+        }
+        void set(const char * val) {
+            this->value_ = val;
+        }
         template <class U> U get() const {
             U u;
             std::istringstream i(this->value_);
@@ -355,6 +359,7 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
         }
 }; // specialization for std::string
 template <> inline std::string StringCell::get() const { return this->value_; }
+template <> inline void StringCell::set(const std::string & val) { this->value_ = val; }
 
 //////////////////////////////////////////////////////////////////////////////
 // DataTableRow
