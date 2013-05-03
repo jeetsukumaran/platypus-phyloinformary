@@ -99,7 +99,7 @@ class DataTableTester {
             auto & col1 = table.add_data_column<float_type>("1", {std::setprecision(12)});
             auto & col2 = table.add_data_column<float_type>("2", {std::fixed, std::setprecision(2)});
             auto & col3 = table.add_data_column<float_type>("3", {std::scientific, std::setprecision(4)});
-            table.new_row() << 22./7 << 22./7 << 22./7;
+            table.add_row() << 22./7 << 22./7 << 22./7;
             std::vector<std::string> expected{"3.14285714286", "3.14", "3.1429e+00"};
             for (auto & row : table) {
                 unsigned long col_idx = 0;
@@ -154,7 +154,7 @@ class DataTableTester {
             auto & col1 = table.add_data_column<float_type>("1");
             auto & col2 = table.add_data_column<float_type>("2");
             auto & col3 = table.add_data_column<float_type>("3");
-            table.new_row() << 22./7 << 22./7 << 22./7;
+            table.add_row() << 22./7 << 22./7 << 22./7;
             col1.add_formatting(std::setprecision(12));
             col2.add_formatting(std::fixed);
             col2.add_formatting(std::setprecision(2));
@@ -217,7 +217,7 @@ class DataTableTester {
 
         void populate_data_table(platypus::DataTable & table) {
             for (unsigned ridx = 0; ridx < this->num_rows_; ++ridx) {
-                auto & rec = table.new_row();
+                auto & rec = table.add_row();
                 rec << this->col0_[ridx];
                 rec << this->col1_[ridx];
                 rec << this->col2_[ridx];

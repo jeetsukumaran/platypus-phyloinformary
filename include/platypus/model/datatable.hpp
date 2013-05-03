@@ -620,6 +620,15 @@ class DataTable {
                 delete c;
             }
         }
+        template <class T> Column & add_column(const std::string & label,
+                const OutputStreamManipulators & format_manipulators={},
+                bool is_key_column=false) {
+            if (is_key_column) {
+                return this->add_key_column<T>(label, format_manipulators);
+            } else {
+                return this->add_data_column<T>(label, format_manipulators);
+            }
+        }
         template <class T> Column & add_key_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
             auto & col = this->create_column<T>(label, format_manipulators);
             this->key_columns_.push_back(&col);
@@ -630,7 +639,7 @@ class DataTable {
             this->data_columns_.push_back(&col);
             return col;
         }
-        Row & new_row() {
+        Row & add_row() {
             Row * r = new Row(this->columns_, this->column_label_index_map_);
             this->rows_.push_back(r);
             return *r;
