@@ -46,6 +46,7 @@ class DataTableTester {
             fails += this->test_basic_data_table_construction();
             fails += this->test_iteration();
             fails += this->test_formatting_on_definition();
+            fails += this->test_formatting_post_definition();
             return fails;
         }
 
@@ -94,26 +95,54 @@ class DataTableTester {
 
         int test_formatting_on_definition() {
             int fails = 0;
-            // platypus::DataTable table;
-            // table.define_key_column<str_type>("0");
-            // table.define_data_column<real_type>("1", {std::setprecision(8)});
-            // table.define_data_column<real_type>("2", {std::fixed, std::setprecision(2)});
-            // table.define_data_column<real_type>("3", {std::scientific});
-            // table.new_row() << "r1" << 22./7 << 22./7 << 22./7;
-            // std::vector<std::string> expected{"r1", "3.1428571", "3.14", "3.142857e+00"};
-            // for (auto & row : table) {
-            //     unsigned long col_idx = 0;
-            //     for (auto & col : row) {
-            //         fails += platypus::test::check_equal(
-            //                 expected.at(col_idx),
-            //                 col,
-            //                 __FILE__,
-            //                 __LINE__,
-            //                 "formatted output of column ", col_idx);
-            //         col_idx += 1;
-            //     }
-            //     std::cout << std::endl;
-            // }
+            platypus::DataTable table;
+            table.define_key_column<str_type>("0");
+            table.define_data_column<real_type>("1", {std::setprecision(12)});
+            table.define_data_column<real_type>("2", {std::fixed, std::setprecision(2)});
+            table.define_data_column<real_type>("3", {std::scientific, std::setprecision(4)});
+            table.new_row() << "r1" << 22./7 << 22./7 << 22./7;
+            std::vector<std::string> expected{"r1", "3.14285714286", "3.14", "3.1429e+00"};
+            for (auto & row : table) {
+                unsigned long col_idx = 0;
+                for (auto & col : row) {
+                    fails += platypus::test::check_equal(
+                            expected.at(col_idx),
+                            col,
+                            __FILE__,
+                            __LINE__,
+                            "formatted output of column ", col_idx);
+                    col_idx += 1;
+                }
+            }
+            return fails;
+        }
+
+        int test_formatting_post_definition() {
+            int fails = 0;
+            platypus::DataTable table;
+            table.define_key_column<str_type>("0");
+            auto & col1 = table.define_data_column<real_type>("1");
+            auto & col2 = table.define_data_column<real_type>("2");
+            auto & col3 = table.define_data_column<real_type>("3");
+            table.new_row() << "r1" << 22./7 << 22./7 << 22./7;
+            col1.add_formatting(std::setprecision(12));
+            col2.add_formatting(std::fixed);
+            col2.add_formatting(std::setprecision(2));
+            col3.add_formatting(std::scientific);
+            col3.add_formatting(std::setprecision(4));
+            std::vector<std::string> expected{"r1", "3.14285714286", "3.14", "3.1429e+00"};
+            for (auto & row : table) {
+                unsigned long col_idx = 0;
+                for (auto & col : row) {
+                    fails += platypus::test::check_equal(
+                            expected.at(col_idx),
+                            col,
+                            __FILE__,
+                            __LINE__,
+                            "formatted output of column ", col_idx);
+                    col_idx += 1;
+                }
+            }
             return fails;
         }
 
