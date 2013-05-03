@@ -29,5 +29,6 @@
 #include "parse/newick.hpp"
 #include "serialize/newick.hpp"
 #include "utility/exception.hpp"
+#include "utility/datatable.hpp"
 
 #endif
