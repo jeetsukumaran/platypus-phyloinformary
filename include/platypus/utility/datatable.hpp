@@ -27,25 +27,47 @@
 #include <sstream>
 #include <typeinfo>
 #include <stdexcept>
+#include <functional>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <initializer_list>
 
 namespace platypus {
 
 namespace datatable {
 
 //////////////////////////////////////////////////////////////////////////////
+// OutputStreamManipulators
+
+template<typename S>
+struct out_manipulator: public std::function<S &(S &)> {
+   // template<typename T> out_manipulator(T &&t): std::function<S &(S &)>(
+   //    [=](S &i) -> S &{ return i << t; }) {}
+   template<typename T> out_manipulator(T *t): std::function<S &(S &)>(
+      [=](S &i) -> S &{ return i << t; }) {}    // for g++
+   template<typename U> friend U &operator<<(U &u, out_manipulator &a) {
+      return static_cast<U &>(a(u));
+   }
+};
+typedef out_manipulator<std::ostream>           OutputStreamManipulator;
+typedef std::vector<OutputStreamManipulator>    OutputStreamManipulators;
+
+//////////////////////////////////////////////////////////////////////////////
 // Column
 
 class Column {
     public:
-        enum class ValueType { SignedInteger, UnsignedInteger, Real, String };
-        typedef long            signed_integer_implementation_type;
-        typedef unsigned long unsigned_integer_implementation_type;
-        typedef long double               real_implementation_type;
-        typedef std::string             string_implementation_type;
+        enum class ValueType {
+                SignedInteger,
+                UnsignedInteger,
+                Real,
+                String };
+        typedef long             signed_integer_implementation_type;
+        typedef unsigned long    unsigned_integer_implementation_type;
+        typedef long double      real_implementation_type;
+        typedef std::string      string_implementation_type;
         template <class T> static ValueType identify_type() {
             if (std::is_floating_point<T>::value) {
                 return ValueType::Real;
@@ -60,9 +82,12 @@ class Column {
             }
         }
     public:
-        Column(ValueType value_type, const std::string & label)
+        Column(ValueType value_type,
+                const std::string & label,
+                const OutputStreamManipulators & format_manipulators={})
                 : value_type_(value_type)
-                , label_(label) {
+                , label_(label)
+                , format_manipulators_(format_manipulators) {
         }
         const std::string & get_label() const {
             return this->label_;
@@ -70,9 +95,32 @@ class Column {
         ValueType get_value_type() const {
             return this->value_type_;
         }
+        template <class T>
+        void add_formatting(const T & format_manipulator) {
+            out_manipulator<std::ostream> v(std::setprecision(2));
+            this->format_manipulators_.push_back(v);
+        }
+        void add_formatting(const OutputStreamManipulators & format_manipulators) {
+            this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
+        }
+        void clear_formatting() {
+            this->format_manipulators_.clear();
+        }
+        void set_formatting(const OutputStreamManipulators & format_manipulators) {
+            this->format_manipulators_ = format_manipulators;
+            // this->format_manipulators_.clear();
+            // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
+        }
+        template <class T> void format(std::ostream & out, const T & val) const {
+            for (auto m : this->format_manipulators_) {
+                out << m;
+            }
+            out << val;
+        }
     protected:
-        ValueType       value_type_;
-        std::string     label_;
+        ValueType                   value_type_;
+        std::string                 label_;
+        OutputStreamManipulators    format_manipulators_;
 }; // Column
 
 //////////////////////////////////////////////////////////////////////////////
@@ -110,7 +158,7 @@ class TypedCell : public BaseCell {
         }
         template <class U> U get() const {
             std::ostringstream o;
-            o << this->value_;
+            this->column_.format(o, this->value_);
             std::istringstream i(o.str());
             U u;
             i >> u;
@@ -489,18 +537,20 @@ class Row {
 class DataTable {
 
     public:
-        typedef datatable::Column   Column;
-        typedef datatable::Row      Row;
+        typedef datatable::Column                      Column;
+        typedef datatable::Row                         Row;
+        typedef datatable::OutputStreamManipulator     OutputStreamManipulator;
+        typedef datatable::OutputStreamManipulators    OutputStreamManipulators;
 
     public:
         DataTable()
             : is_rows_added_(false) {
         }
-        template <class T> void define_key_column(const std::string & label) {
-            this->add_column<T>(this->key_columns_, label);
+        template <class T> Column & define_key_column(const std::string & label) {
+            return this->add_column<T>(this->key_columns_, label);
         }
-        template <class T> void define_data_column(const std::string & label) {
-            this->add_column<T>(this->data_columns_, label);
+        template <class T> Column & define_data_column(const std::string & label) {
+            return this->add_column<T>(this->data_columns_, label);
         }
         Row & new_row() {
             this->rows_.emplace_back(this->key_columns_, this->data_columns_);
@@ -591,7 +641,9 @@ class DataTable {
         }
 
     private:
-        template <class T> void add_column(std::vector<Column> & columns, const std::string & label) {
+        template <class T> Column & add_column(
+                std::vector<Column> & columns,
+                const std::string & label) {
             if (this->is_rows_added_) {
                 throw std::runtime_error("Cannot add new column: rows have already been added");
             }
@@ -600,6 +652,7 @@ class DataTable {
             }
             this->column_names_.insert(label);
             columns.emplace_back(Column::identify_type<T>(), label);
+            return columns.back();
         }
     private:
         std::vector<Column>   key_columns_;

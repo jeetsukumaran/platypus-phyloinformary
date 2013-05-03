@@ -45,6 +45,7 @@ class DataTableTester {
             int fails = 0;
             fails += this->test_basic_data_table_construction();
             fails += this->test_iteration();
+            fails += this->test_formatting_on_definition();
             return fails;
         }
 
@@ -88,6 +89,27 @@ class DataTableTester {
                     "default row iteration row count");
 
             fails += this->verify_data_table(table, false, true);
+            return fails;
+        }
+
+        int test_formatting_on_definition() {
+            int fails = 0;
+            platypus::DataTable table;
+            // table.xxx<str_type>({1,2,3,4});
+            // table.define_key_column<str_type>("a", {std::setprecision(2), std::setw(10)});
+            // platypus::DataTable::OutputStreamManipulators o = {std::setprecision(2), std::setw(10)};
+            auto col1 = table.define_key_column<str_type>("a");
+            col1.add_formatting(std::setprecision(2));
+            // table.define_data_column<real_type>("a", {std::setprecision(2), std::setw(10)});
+            // table.define_data_column<real_type>("b", {std::fixed});
+            // table.new_row() << "a" << 22./7 << 22./7;
+            // table.new_row() << "b" << DBL_MAX << DBL_MAX;
+            // for (auto & row : table) {
+            //     for (auto & col : row) {
+            //         std::cout << col << ",";
+            //     }
+            //     std::cout << std::endl;
+            // }
             return fails;
         }
 
