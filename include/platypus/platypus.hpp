@@ -21,14 +21,14 @@
 #ifndef PLATYPUS_PLATYPUS_HPP
 #define PLATYPUS_PLATYPUS_HPP
 
-#include "model/archetypaltree.hpp"
+#include "model/datatable.hpp"
 #include "model/coalescent.hpp"
 #include "model/tree.hpp"
+#include "model/treepattern.hpp"
 #include "model/standardtree.hpp"
 #include "numeric/rng.hpp"
 #include "parse/newick.hpp"
 #include "serialize/newick.hpp"
 #include "utility/exception.hpp"
-#include "utility/datatable.hpp"
 
 #endif

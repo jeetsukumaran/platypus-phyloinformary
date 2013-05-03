@@ -34,7 +34,7 @@
 #include <iostream>
 #include <iomanip>
 #include <initializer_list>
-#include "exception.hpp"
+#include "../utility/exception.hpp"
 
 namespace platypus {
 
@@ -213,11 +213,6 @@ class DataTableColumn {
         std::string                 label_;
         OutputStreamManipulators    format_manipulators_;
 }; // DataTableColumn
-
-std::ostream & operator << (std::ostream & os, const DataTableColumn::ValueType & vt) {
-    os << static_cast<std::underlying_type<DataTableColumn::ValueType>::type>(vt);
-    return os;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // BaseCell
