@@ -408,14 +408,15 @@ template<> std::string StringCell::get() const { return this->value_; }
 class DataTableRow {
 
     public:
-        DataTableRow(std::vector<DataTableColumn *> & key_columns, std::vector<DataTableColumn *> & data_columns)
-                : key_columns_(key_columns)
-                , data_columns_(data_columns)
+        DataTableRow(
+                std::vector<DataTableColumn *> & columns,
+                std::map<std::string, unsigned long> & column_label_index_map)
+                : columns_(columns)
+                , column_label_index_map_(column_label_index_map)
                 , current_entry_cell_idx_(0) {
-            this->key_columns_size_ = this->key_columns_.size();
-            this->data_columns_size_ = this->data_columns_.size();
             this->create_cells();
         }
+
         ~DataTableRow() {
             for (auto & c : this->cells_) {
                 delete c;
@@ -427,17 +428,16 @@ class DataTableRow {
             if (column_idx >= this->cells_.size()) {
                 throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
             }
-            auto * base_cell = this->cells_[column_idx];
-            return DataTableRow::get_cell_value<T>(base_cell);
+            auto * cell = this->cells_[column_idx];
+            return DataTableRow::get_cell_value<T>(cell);
         }
 
         template <class T> T get(const std::string & col_name) const {
-            auto citer = this->column_label_cell_map_.find(col_name);
-            if (citer == this->column_label_cell_map_.end()) {
+            auto citer = this->column_label_index_map_.find(col_name);
+            if (citer == this->column_label_index_map_.end()) {
                 throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
-            auto * cell = citer->second;
-            return DataTableRow::get_cell_value<T>(cell);
+            return DataTableRow::get_cell_value<T>(this->cells_[citer->second]);
         }
 
         template <class T>
@@ -462,12 +462,12 @@ class DataTableRow {
 
         template <class T>
         void set(const std::string & col_name, const T & val) {
-            auto citer = this->column_label_cell_map_.find(col_name);
-            if (citer == this->column_label_cell_map_.end()) {
+            auto citer = this->column_label_index_map_.find(col_name);
+            if (citer == this->column_label_index_map_.end()) {
                 throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
-            auto * cell = citer->second;
-            this->set_cell_value(cell, val);
+            return DataTableRow::get_cell_value<T>(this->cells_[citer->second]);
+            this->set_cell_value(this->cells_[citer->second], val);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -609,42 +609,31 @@ class DataTableRow {
 
     protected:
         void create_cells() {
-            unsigned long total_columns_size = this->key_columns_.size() + this->data_columns_.size();
-            this->cells_.reserve(total_columns_size);
-            for (auto & key_column : this->key_columns_) {
-                this->insert_cell(key_column);
+            this->current_entry_cell_idx_ = 0;
+            this->cells_.reserve(this->columns_.size());
+            for (auto & column : this->columns_) {
+                auto cell_value_type = column->get_value_type();
+                BaseCell * new_cell = nullptr;
+                if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
+                    new_cell = new SignedIntegerCell(*column);
+                } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
+                    new_cell = new UnsignedIntegerCell(*column);
+                } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
+                    new_cell = new FloatingPointCell(*column);
+                } else if (cell_value_type == DataTableColumn::ValueType::String) {
+                    new_cell = new StringCell(*column);
+                } else {
+                    throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
+                }
+                this->cells_.push_back(new_cell);
             }
-            for (auto & data_column : this->data_columns_) {
-                this->insert_cell(data_column);
-            }
-        }
-
-        void insert_cell(DataTableColumn * column) {
-            auto cell_value_type = column->get_value_type();
-            BaseCell * new_cell = nullptr;
-            if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                new_cell = new SignedIntegerCell(*column);
-            } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                new_cell = new UnsignedIntegerCell(*column);
-            } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                new_cell = new FloatingPointCell(*column);
-            } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                new_cell = new StringCell(*column);
-            } else {
-                throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
-            }
-            this->column_label_cell_map_[column->get_label()] = new_cell;
-            this->cells_.push_back(new_cell);
         }
 
     private:
-        std::vector<DataTableColumn *> &     key_columns_;
-        std::vector<DataTableColumn *> &     data_columns_;
-        std::vector<BaseCell *>              cells_;
-        unsigned long                        current_entry_cell_idx_;
-        unsigned long                        key_columns_size_;
-        unsigned long                        data_columns_size_;
-        std::map<std::string, BaseCell *>    column_label_cell_map_;
+        std::vector<DataTableColumn *> &          columns_;
+        std::map<std::string, unsigned long> &    column_label_index_map_;
+        std::vector<BaseCell *>                   cells_;
+        unsigned long                             current_entry_cell_idx_;
 
 }; // DataTableRow
 
@@ -669,33 +658,28 @@ class DataTable {
             for (auto & r : this->rows_) {
                 delete r;
             }
-            for (auto & c : this->key_columns_) {
-                delete c;
-            }
-            for (auto & c : this->data_columns_) {
+            for (auto & c : this->columns_) {
                 delete c;
             }
         }
-        // template <class T> Column & add_key_column(const std::string & label) {
-        //     return this->add_column<T>(this->key_columns_, label);
-        // }
-        // template <class T> Column & add_data_column(const std::string & label) {
-        //     return this->add_column<T>(this->data_columns_, label);
-        // }
         template <class T> Column & add_key_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
-            return this->add_column<T>(this->key_columns_, label, format_manipulators);
+            auto & col = this->create_column<T>(label, format_manipulators);
+            this->key_columns_.push_back(&col);
+            return col;
         }
         template <class T> Column & add_data_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
-            return this->add_column<T>(this->data_columns_, label, format_manipulators);
+            auto & col = this->create_column<T>(label, format_manipulators);
+            this->data_columns_.push_back(&col);
+            return col;
         }
         Row & new_row() {
-            Row * r = new Row(this->key_columns_, this->data_columns_);
+            Row * r = new Row(this->columns_, this->column_label_index_map_);
             this->rows_.push_back(r);
             this->is_rows_added_ = true;
             return *r;
         }
         unsigned long num_columns() const {
-            return this->column_names_.size();
+            return this->column_label_index_map_.size();
         }
         unsigned long num_rows() const {
             return this->rows_.size();
@@ -717,26 +701,6 @@ class DataTable {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
             return this->rows_[ridx]->get<T>(fidx);
-        }
-        void write_header_row(std::ostream & out, std::string separator="\t") {
-            unsigned long column_idx = 0;
-            for (auto & col_ptr : this->key_columns_) {
-                auto key_column = *col_ptr;
-                if (column_idx > 0) {
-                    out << separator;
-                }
-                out << key_column.get_label();
-                ++column_idx;
-            }
-            for (auto & col_ptr : this->data_columns_) {
-                auto data_column = *col_ptr;
-                if (column_idx > 0) {
-                    out << separator;
-                }
-                out << data_column.get_label();
-                ++column_idx;
-            }
-            out << std::endl;
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -799,27 +763,27 @@ class DataTable {
         }
 
     private:
-        template <class T> Column & add_column(
-                std::vector<Column *> & columns,
+        template <class T> Column & create_column(
                 const std::string & label,
                 const OutputStreamManipulators & format_manipulators={}) {
             if (this->is_rows_added_) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
             }
-            if (this->column_names_.find(label) != this->column_names_.end()) {
+            if (this->column_label_index_map_.find(label) != this->column_label_index_map_.end()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: duplicate column name");
             }
-            this->column_names_.insert(label);
             auto new_col = new Column(Column::identify_type<T>(), label, format_manipulators);
-            columns.push_back(new_col);
+            this->column_label_index_map_[label] = this->columns_.size();
+            this->columns_.push_back(new_col);
             return *new_col;
         }
     private:
-        std::vector<Column *>    key_columns_;
-        std::vector<Column *>    data_columns_;
-        std::vector<Row *>       rows_;
-        bool                     is_rows_added_;
-        std::set<std::string>    column_names_;
+        std::vector<Column *>                   columns_;
+        std::map<std::string, unsigned long>    column_label_index_map_;
+        std::vector<Column *>                   key_columns_;
+        std::vector<Column *>                   data_columns_;
+        std::vector<Row *>                      rows_;
+        bool                                    is_rows_added_;
 }; // DataTable
 
 } // namespace platypus
