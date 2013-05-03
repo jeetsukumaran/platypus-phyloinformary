@@ -87,6 +87,15 @@ class DataTableStructureError : public DataTableException {
             : DataTableStructureError(filename, line_num, message) { }
 };
 
+class DataTableInvalidRowError : public DataTableException {
+    public:
+        DataTableInvalidRowError(
+                    const std::string & filename,
+                    unsigned long line_num,
+                    const std::string & message)
+            : DataTableException(filename, line_num, message) { }
+};
+
 namespace datatable { // implementation details supporting DataTable
 
 //////////////////////////////////////////////////////////////////////////////
@@ -695,13 +704,22 @@ class DataTable {
             return this->rows_.size();
         }
         Row & operator[](unsigned long ridx) {
-            return this->rows_.at(ridx);
+            if (ridx >= this->rows_.size()) {
+                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
+            }
+            return this->rows_[ridx];
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
-            return this->rows_.at(ridx).get<T>(col_name);
+            if (ridx >= this->rows_.size()) {
+                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
+            }
+            return this->rows_[ridx].get<T>(col_name);
         }
         template <class T> T get(unsigned long ridx, unsigned long fidx) {
-            return this->rows_.at(ridx).get<T>(fidx);
+            if (ridx >= this->rows_.size()) {
+                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
+            }
+            return this->rows_[ridx].get<T>(fidx);
         }
         void write_header_row(std::ostream & out, std::string separator="\t") {
             unsigned long column_idx = 0;
