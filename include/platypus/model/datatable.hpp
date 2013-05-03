@@ -287,8 +287,6 @@ class NumericCell : public TypedCell<T> {
         virtual void set(double val) { this->value_ = static_cast<T>(val); }
         virtual void set(long double val) { this->value_ = static_cast<T>(val); }
         virtual void set(const std::string & val) { this->from_string(val); }
-    protected:
-        T       value_;
 }; // NumericCell
 
 //////////////////////////////////////////////////////////////////////////////
