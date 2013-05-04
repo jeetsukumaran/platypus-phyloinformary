@@ -22,7 +22,7 @@ int main () {
     newick_writer.write_tree(tree, o);
     std::string result = o.str();
     std::string expected =  "(((f,e),(h,g)),((b,a),(d,c)));";
-    int chk = test_equal(expected, result, __FILE__, __LINE__);
+    int chk = platypus::testing::compare_equal(expected, result, __FILE__, __LINE__);
     if (chk == 0) {
         return EXIT_SUCCESS;
     } else {

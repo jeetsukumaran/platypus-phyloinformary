@@ -11,7 +11,7 @@ int main () {
     tree_reader.read_from_string(tree_string, "newick");
     assert(trees.size() == 1);
     auto tree = trees[0];
-    int fail = test_against_standard_test_tree(tree);
+    int fail = compare_against_standard_test_tree(tree);
     if (fail == 0) {
         return EXIT_SUCCESS;
     } else {

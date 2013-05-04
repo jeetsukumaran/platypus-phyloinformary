@@ -23,7 +23,7 @@ int main() {
         assert(expected_iter != STANDARD_TEST_TREE_SIBLINGS.end());
         auto expected_siblings = expected_iter->second;
         if (siblings[*ndi] != expected_siblings) {
-            int chk = test_equal(
+            int chk = platypus::testing::compare_equal(
                     expected_siblings,
                     siblings[*ndi],
                     __FILE__,

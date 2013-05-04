@@ -86,7 +86,7 @@ int main () {
         write_newick_no_brlens(tree, o);
         std::string observed = o.str();
         stripspaces(observed);
-        fail += test_equal(expected, observed, __FILE__, __LINE__, "Input tree string: '", src, "'");
+        fail += platypus::testing::compare_equal(expected, observed, __FILE__, __LINE__, "Input tree string: '", src, "'");
     }
     if (fail == 0) {
         return EXIT_SUCCESS;

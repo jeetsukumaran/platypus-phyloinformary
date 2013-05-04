@@ -20,7 +20,7 @@ int main () {
         std::cerr << "Expecting 2 trees but found " << trees.size() << std::endl;
     }
     for (auto & tree : trees) {
-        fail += test_against_standard_test_tree(tree);
+        fail += compare_against_standard_test_tree(tree);
     }
     // try {
     //     tree_reader.read_from_string(tree_string, "newick");

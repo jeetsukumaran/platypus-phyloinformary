@@ -18,7 +18,7 @@ int main() {
         auto expected_iter = STANDARD_TEST_TREE_CHILDREN.find(*ndi);
         assert(expected_iter != STANDARD_TEST_TREE_CHILDREN.end());
         auto expected_children = expected_iter->second;
-        int chk = test_equal(
+        int chk = platypus::testing::compare_equal(
                 expected_children,
                 children[*ndi],
                 __FILE__,

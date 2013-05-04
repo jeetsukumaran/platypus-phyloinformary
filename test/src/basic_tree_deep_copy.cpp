@@ -24,10 +24,10 @@ int main() {
         uppercase(s);
         *ndi = s;
     }
-    if (test_against_newick_string(tree_copy, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
+    if (compare_against_newick_string(tree_copy, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
         return EXIT_FAILURE;
     };
-    if (test_against_newick_string(tree_original, "original tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
+    if (compare_against_newick_string(tree_original, "original tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
         return EXIT_FAILURE;
     }
     // Restore labels on original tree and make sure it is valid
@@ -41,10 +41,10 @@ int main() {
         uppercase(s);
         *ndi = s;
     }
-    if (test_against_newick_string(tree_original, "original tree with restored labels failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
+    if (compare_against_newick_string(tree_original, "original tree with restored labels failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false)) {
         return EXIT_FAILURE;
     }
-    if (test_against_newick_string(tree_copy, "cloned tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
+    if (compare_against_newick_string(tree_copy, "cloned tree yielded expected newick string even though labels modified", STANDARD_TEST_TREE_NEWICK, true)) {
         return EXIT_FAILURE;
     }
     return 0;

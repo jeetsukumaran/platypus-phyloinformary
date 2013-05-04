@@ -38,11 +38,11 @@ int main() {
     reader.read_from_string(tree_string);
 
     int fail = 0;
-    fail += test_equal(num_trees, trees.size(), __FILE__, __LINE__, "(number of trees)");
+    fail += platypus::testing::compare_equal(num_trees, trees.size(), __FILE__, __LINE__, "(number of trees)");
     for (auto & tree : trees) {
-        fail += test_equal(8UL, tree.num_leaves, __FILE__, __LINE__, "(number of leaves)");
-        fail += test_equal(7UL, tree.num_internal_nodes, __FILE__, __LINE__, "(number of internal nodes)");
-        fail += test_equal(0, tree.tree_length, __FILE__, __LINE__, "(total tree length)");
+        fail += platypus::testing::compare_equal(8UL, tree.num_leaves, __FILE__, __LINE__, "(number of leaves)");
+        fail += platypus::testing::compare_equal(7UL, tree.num_internal_nodes, __FILE__, __LINE__, "(number of internal nodes)");
+        fail += platypus::testing::compare_equal(0, tree.tree_length, __FILE__, __LINE__, "(total tree length)");
     }
 
     if (fail == 0) {

@@ -50,7 +50,7 @@ int main() {
     y.deep_copy_from(x);
     // write_newick(y, std::cout);
     std::string expected = "((9, (10, 11)5)2, ((12, 13)7, (14, (15, 16)8)6)3)1;";
-    int chk = test_against_newick_string(y, "cloned tree failed to yield expected newick string", expected, false);
+    int chk = compare_against_newick_string(y, "cloned tree failed to yield expected newick string", expected, false);
     if (chk == 0) {
         return EXIT_SUCCESS;
     } else {

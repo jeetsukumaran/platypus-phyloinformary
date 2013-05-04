@@ -14,7 +14,7 @@ int main() {
     for (auto ndi = tree.leaf_begin(); ndi != tree.leaf_end(); ++ndi) {
         leaves.push_back(*ndi);
     }
-    int chk = test_equal(
+    int chk = platypus::testing::compare_equal(
             STANDARD_TEST_TREE_LEAVES,
             leaves,
             __FILE__,

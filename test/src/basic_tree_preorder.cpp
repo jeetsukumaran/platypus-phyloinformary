@@ -14,7 +14,7 @@ int main() {
     for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
         visits.push_back(*ndi);
     }
-    int chk = test_equal(
+    int chk = platypus::testing::compare_equal(
             STANDARD_TEST_TREE_PREORDER,
             visits,
             __FILE__,

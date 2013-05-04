@@ -75,7 +75,7 @@ class DataTableTester {
                     col_count += 1;
                 }
                 // std::cout << "--" << std::endl;
-                fails += platypus::test::test_equal(
+                fails += platypus::testing::compare_equal(
                         this->num_cols_,
                         col_count,
                         __FILE__,
@@ -83,7 +83,7 @@ class DataTableTester {
                         "default column iteration column count");
                 row_count += 1;
             }
-            fails += platypus::test::test_equal(
+            fails += platypus::testing::compare_equal(
                     this->num_rows_,
                     row_count,
                     __FILE__,
@@ -105,7 +105,7 @@ class DataTableTester {
             for (auto & row : table) {
                 unsigned long col_idx = 0;
                 for (auto & col : row) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             expected.at(col_idx),
                             col,
                             __FILE__,
@@ -121,7 +121,7 @@ class DataTableTester {
             for (auto & row : table) {
                 unsigned long col_idx = 0;
                 for (auto & col : row) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             expected.at(col_idx),
                             col,
                             __FILE__,
@@ -137,7 +137,7 @@ class DataTableTester {
             for (auto & row : table) {
                 unsigned long col_idx = 0;
                 for (auto & col : row) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             expected.at(col_idx),
                             col,
                             __FILE__,
@@ -165,7 +165,7 @@ class DataTableTester {
             for (auto & row : table) {
                 unsigned long col_idx = 0;
                 for (auto & col : row) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             expected.at(col_idx),
                             col,
                             __FILE__,
@@ -191,11 +191,11 @@ class DataTableTester {
                 unsigned long col_idx = 0;
                 for (auto col = row.begin<val_type>(); col != row.end<val_type>(); ++col, ++col_idx) {
                     if (col_idx == 0) {
-                        fails += platypus::test::test_equal(static_cast<signed_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
+                        fails += platypus::testing::compare_equal(static_cast<signed_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
                     } else if (col_idx == 1) {
-                        fails += platypus::test::test_equal(static_cast<unsigned_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
+                        fails += platypus::testing::compare_equal(static_cast<unsigned_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
                     } else {
-                        fails += platypus::test::test_equal(ref, *col, __FILE__, __LINE__, "column: ", col_idx);
+                        fails += platypus::testing::compare_equal(ref, *col, __FILE__, __LINE__, "column: ", col_idx);
                     }
                 }
             }
@@ -263,74 +263,74 @@ class DataTableTester {
                 bool access_by_col_name=false) {
             int fails = 0;
             if (table.num_columns() != this->num_cols_) {
-                fails += platypus::test::fail_test(__FILE__, __LINE__, this->num_cols_, table.num_columns(), "number of columns");
+                fails += platypus::testing::fail_test(__FILE__, __LINE__, this->num_cols_, table.num_columns(), "number of columns");
                 if (exit_on_fail) {
                     exit(EXIT_FAILURE);
                 }
             }
             if (table.num_rows() != this->num_rows_) {
-                fails += platypus::test::fail_test(__FILE__, __LINE__, this->num_cols_, table.num_rows(), "number of rows");
+                fails += platypus::testing::fail_test(__FILE__, __LINE__, this->num_cols_, table.num_rows(), "number of rows");
                 if (exit_on_fail) {
                     exit(EXIT_FAILURE);
                 }
             }
             if (access_by_col_name) {
                 for (unsigned ridx = 0; ridx < this->num_rows_; ++ridx) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col0_[ridx],
                             table.get<str_type>(ridx, 0),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 0");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col1_[ridx],
                             table.get<unsigned_int_type>(ridx, 1),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 1");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col2_[ridx],
                             table.get<signed_int_type>(ridx, 2),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 2");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col3_[ridx],
                             table.get<signed_int_type>(ridx, 3),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 3");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col4_[ridx],
                             table.get<unsigned_int_type>(ridx, 4),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 4");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col5_[ridx],
                             table.get<unsigned_int_type>(ridx, 5),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 5");
-                    fails += platypus::test::test_almost_equal(
+                    fails += platypus::testing::compare_almost_equal(
                             static_cast<float_type>(this->col6_[ridx]),
                             static_cast<float_type>(table.get<float_type>(ridx, 6)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 6");
-                    fails += platypus::test::test_almost_equal(
+                    fails += platypus::testing::compare_almost_equal(
                             static_cast<float_type>(this->col7_[ridx]),
                             static_cast<float_type>(table.get<float_type>(ridx, 7)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 7");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col8_[ridx],
                             table.get<str_type>(ridx, 8),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 8");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col9_[ridx],
                             table.get<str_type>(ridx, 9),
                             __FILE__,
@@ -339,61 +339,61 @@ class DataTableTester {
                 }
             } else {
                 for (unsigned ridx = 0; ridx < this->num_rows_; ++ridx) {
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col0_[ridx],
                             table.get<str_type>(ridx, 0),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 0");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col1_[ridx],
                             table.get<unsigned_int_type>(ridx, 1),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 1");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col2_[ridx],
                             table.get<signed_int_type>(ridx, 2),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 2");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col3_[ridx],
                             table.get<signed_int_type>(ridx, 3),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 3");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col4_[ridx],
                             table.get<unsigned_int_type>(ridx, 4),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 4");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col5_[ridx],
                             table.get<unsigned_int_type>(ridx, 5),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 5");
-                    fails += platypus::test::test_almost_equal(
+                    fails += platypus::testing::compare_almost_equal(
                             static_cast<float_type>(this->col6_[ridx]),
                             static_cast<float_type>(table.get<float_type>(ridx, 6)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 6");
-                    fails += platypus::test::test_almost_equal(
+                    fails += platypus::testing::compare_almost_equal(
                             static_cast<float_type>(this->col7_[ridx]),
                             static_cast<float_type>(table.get<float_type>(ridx, 7)),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 7");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col8_[ridx],
                             table.get<str_type>(ridx, 8),
                             __FILE__,
                             __LINE__,
                             "Row: ", ridx, ", Column: 8");
-                    fails += platypus::test::test_equal(
+                    fails += platypus::testing::compare_equal(
                             this->col9_[ridx],
                             table.get<str_type>(ridx, 9),
                             __FILE__,

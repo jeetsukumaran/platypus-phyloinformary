@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <map>
 #include <platypus/platypus.hpp>
+#include <platypus/utility/testing.hpp>
 
 namespace platypus { namespace test {
 
@@ -137,127 +138,6 @@ std::vector<std::string> split(const std::string& str,
         const std::string& delimiter,
         bool trim_tokens=true,
         bool include_empty=true);
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Logging and printing
-
-template<class T>
-void write_container(std::ostream& out, const T& container, const std::string& separator=", ") {
-    std::copy(container.cbegin(), container.cend(), std::ostream_iterator<typename T::value_type>(out, separator.c_str()));
-}
-
-template<class T>
-std::string join_container(const T& container, const std::string& separator=", ") {
-    std::ostringstream out;
-    write_container(out, container, separator);
-    return out.str();
-}
-
-template <typename S>
-void log(S&) {}
-
-template <typename S, typename T>
-void log(S& stream, const T& arg1) {
-    stream << arg1;
-}
-
-template <typename S, typename T>
-void log(S& stream, const std::vector<T>& arg1) {
-    write_container(stream, arg1, ", ");
-    log(stream);
-}
-
-template <typename S, typename T, typename... Types>
-void log(S& stream, const std::vector<T>& arg1, const Types&... args) {
-    write_container(stream, arg1, ", ");
-    log(stream, args...);
-}
-
-template <typename S, typename T, typename... Types>
-void log(S& stream, const T& arg1, const Types&... args) {
-    stream << arg1;
-    log(stream, args...);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Testing
-
-template <typename T, typename U, typename... Types>
-int fail_test(const std::string& test_name,
-        unsigned long line_num,
-        const T& expected,
-        const U& observed,
-        const Types&... args) {
-    std::cerr << "\n||| FAIL |||";
-    std::cerr << "\n|     Test: " << test_name;
-    std::cerr << "\n|     Line: " << line_num;
-    log(std::cerr, "\n| Expected: ", expected);
-    log(std::cerr, "\n| Observed: ", observed);
-    log(std::cerr, "\n|  Remarks: ", args...);
-    std::cerr << std::endl;
-    return 1;
-}
-
-template <typename T, typename U, typename... Types>
-int test_equal(
-        const T& expected,
-        const U& observed,
-        const std::string& test_name,
-        unsigned long line_num,
-        const Types&... args) {
-    if (expected != observed) {
-        return fail_test(test_name,
-                line_num,
-                expected,
-                observed,
-                args...);
-    } else {
-        return 0;
-    }
-}
-
-template <typename T>
-inline bool is_almost_equal(T a, T b, double tolerance=1e-14) {
-    if (a == b) {
-        // shortcut, handles infinities
-        return true;
-    }
-    T abs_a = std::fabs(a);
-    T abs_b = std::fabs(b);
-    T diff = std::fabs(a - b);
-    if (abs_a < tolerance && abs_b < tolerance && diff < tolerance) {
-        // Hacky, I know. Without this tests fail if, e.g. a = 0 and b =
-        // 6.786e-15 ... is this a real failure?
-        return true;
-    }
-    const static T MIN_T_VALUE = std::numeric_limits<T>::min();
-    if (a == 0 || b == 0 || diff < MIN_T_VALUE)  {
-        // a or b is zero or both are extremely close to it
-        // relative error is less meaningful here
-        return diff < (tolerance * MIN_T_VALUE);
-    }
-    // use relative error
-    return (diff / (abs_a + abs_b)) < tolerance;
-}
-
-template <typename T, typename... Types>
-int test_almost_equal(
-        T expected,
-        T observed,
-        const std::string& test_name,
-        unsigned long line_num,
-        const Types&... args) {
-    if (!is_almost_equal(expected, observed))  {
-        return fail_test(test_name,
-                line_num,
-                expected,
-                observed,
-                args...);
-    } else {
-        return 0;
-    }
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // Tree Parsing
@@ -465,7 +345,7 @@ platypus::Tokenizer get_nexus_tokenizer();
 // Checking/Verification
 
 template <class TreeT>
-int test_against_newick_string(TreeT& tree,
+int compare_against_newick_string(TreeT& tree,
         const std::string & remarks,
         const std::string & compare_str=STANDARD_TEST_TREE_NEWICK,
         bool fail_if_equal=false) {
@@ -474,7 +354,7 @@ int test_against_newick_string(TreeT& tree,
     std::string result = out.str();
     trim(result, " \t\n\r");
     if ( (fail_if_equal && result == compare_str) || (!fail_if_equal && result != compare_str) ) {
-        return fail_test(__FILE__,
+        return platypus::testing::fail_test(__FILE__,
                 __LINE__,
                 STANDARD_TEST_TREE_NEWICK,
                 result,
@@ -484,8 +364,7 @@ int test_against_newick_string(TreeT& tree,
     }
 }
 
-int test_against_standard_test_tree(TestDataTree & tree);
-
+int compare_against_standard_test_tree(TestDataTree & tree);
 
 int compare_token_vectors(
         const std::vector<std::string> & expected,

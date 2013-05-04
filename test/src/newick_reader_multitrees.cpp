@@ -17,15 +17,16 @@ int main () {
     tree_reader.read_from_string(tree_string, "newick");
 
     if (trees.size() != num_trees) {
-        return fail_test(__FILE__,
+        platypus::testing::fail_test(__FILE__,
                 num_trees,
                 trees.size(),
                 "Incorrect number of trees read from test data");
+        return EXIT_FAILURE;
     }
 
     int fail = 0;
     for (auto & tree : trees) {
-        fail += test_against_standard_test_tree(tree);
+        fail += compare_against_standard_test_tree(tree);
     }
 
     if (fail == 0) {
