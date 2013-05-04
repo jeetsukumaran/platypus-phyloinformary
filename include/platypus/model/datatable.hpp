@@ -130,10 +130,10 @@ class DataTableColumn {
     public:
         DataTableColumn(ValueType value_type,
                 const std::string & label,
-                const platypus::stream::OutputStreamFormatters & format_manipulators={})
+                const platypus::stream::OutputStreamFormatters & formatters={})
                 : value_type_(value_type)
                 , label_(label)
-                , format_manipulators_(format_manipulators) {
+                , formatters_(formatters) {
         }
         const std::string & get_label() const {
             return this->label_;
@@ -142,22 +142,22 @@ class DataTableColumn {
             return this->value_type_;
         }
         template <class T>
-        void add_formatting(const T & format_manipulator) {
-            this->format_manipulators_.push_back(format_manipulator);
+        void add_formatting(const T & formatter) {
+            this->formatters_.push_back(formatter);
         }
-        void add_formatting(const platypus::stream::OutputStreamFormatters & format_manipulators) {
-            this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
+        void add_formatting(const platypus::stream::OutputStreamFormatters & formatters) {
+            this->formatters_.insert(this->formatters_.end(), formatters.cbegin(), formatters.cend());
         }
         void clear_formatting() {
-            this->format_manipulators_.clear();
+            this->formatters_.clear();
         }
-        void set_formatting(const platypus::stream::OutputStreamFormatters & format_manipulators) {
-            this->format_manipulators_ = format_manipulators;
-            // this->format_manipulators_.clear();
-            // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
+        void set_formatting(const platypus::stream::OutputStreamFormatters & formatters) {
+            this->formatters_ = formatters;
+            // this->formatters_.clear();
+            // this->formatters_.insert(this->formatters_.end(), formatters.cbegin(), formatters.cend());
         }
-        template <class T> void print_value(std::ostream & out, const T & val) const {
-            for (auto m : this->format_manipulators_) {
+        template <class T> void write_formatted_value(std::ostream & out, const T & val) const {
+            for (auto m : this->formatters_) {
                 out << m;
             }
             out << val;
@@ -166,7 +166,7 @@ class DataTableColumn {
     protected:
         ValueType                   value_type_;
         std::string                 label_;
-        platypus::stream::OutputStreamFormatters    format_manipulators_;
+        platypus::stream::OutputStreamFormatters    formatters_;
 }; // DataTableColumn
 
 //////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ class DataTableBaseCell {
         DataTableBaseCell(const DataTableColumn & column)
             : column_(column) { }
         virtual ~DataTableBaseCell() { }
-        const DataTableColumn & column() const {
+        const DataTableColumn & get_column() const {
             return this->column_;
         }
     protected:
@@ -196,8 +196,13 @@ class DataTableValueTypedCell : public DataTableBaseCell {
             : DataTableBaseCell(column)
             , value_(val) { }
         virtual ~DataTableValueTypedCell() {}
-        void print(std::ostream & out) const {
-            this->column_.print_value(out, this->value_);
+        void write_formatted(std::ostream & out) const {
+            this->column_.write_formatted_value(out, this->value_);
+        }
+        std::string get_formatted_value() const {
+            std::ostringstream o;
+            this->write_formatted_value(o);
+            return o.str();
         }
     public:
         T       value_;
@@ -220,15 +225,12 @@ class DataTableNumericCell : public DataTableValueTypedCell<T> {
         }
         virtual std::string to_string() const {
             std::ostringstream o;
-            this->column_.print_value(o, this->value_);
+            this->column_.write_formatted_value(o, this->value_);
             std::istringstream i(o.str());
             return o.str();
         }
         template <class U> U get() const {
             return static_cast<U>(this->value_);
-        }
-        void print(std::ostream & out) const {
-            this->column_.print_value(out, this->value_);
         }
         virtual void set(short int val) { this->value_ = static_cast<T>(val); }
         virtual void set(unsigned short int val) { this->value_ = static_cast<T>(val); }
@@ -301,7 +303,7 @@ class DataTableStringCell : public DataTableValueTypedCell<DataTableColumn::stri
 
         template <class U> void set(const U & val) {
             std::ostringstream o;
-            this->column_.print_value(o, val);
+            this->column_.write_formatted_value(o, val);
             this->value_ = o.str();
         }
         void set(char * val) {
@@ -315,9 +317,6 @@ class DataTableStringCell : public DataTableValueTypedCell<DataTableColumn::stri
             std::istringstream i(this->value_);
             i >> u;
             return u;
-        }
-        void print(std::ostream & out) const {
-            this->column_.print_value(out, this->value_);
         }
 }; // specialization for std::string
 template <> inline std::string DataTableStringCell::get() const { return this->value_; }
@@ -471,13 +470,12 @@ class DataTableRow {
         //////////////////////////////////////////////////////////////////////////////
         // Output
 
-        void print(std::ostream & out, std::string separator="\t") {
+        void write_formatted(std::ostream & out, std::string separator="\t") {
             for(unsigned long cell_idx = 0; cell_idx < this->cells_.size(); ++cell_idx) {
                 if (cell_idx > 0) {
                     out << separator;
                 }
-                // out << *(this->cells_[cell_idx]);
-                DataTableRow::print_cell(out, this->cells_[cell_idx]);
+                DataTableRow::write_formatted_cell(out, this->cells_[cell_idx]);
             }
             out << std::endl;
         }
@@ -486,7 +484,7 @@ class DataTableRow {
 
         template <class T>
         static const T get_cell_value(DataTableBaseCell * cell) {
-            auto & column_definition = cell->column();
+            auto & column_definition = cell->get_column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
@@ -507,7 +505,7 @@ class DataTableRow {
 
         template <class T>
         static void set_cell_value(DataTableBaseCell * cell, const T & val) {
-            auto & column_definition = cell->column();
+            auto & column_definition = cell->get_column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
@@ -526,21 +524,21 @@ class DataTableRow {
             }
         }
 
-        static void print_cell(std::ostream & out, DataTableBaseCell * cell) {
-            auto & column_definition = cell->column();
+        static void write_formatted_cell(std::ostream & out, DataTableBaseCell * cell) {
+            auto & column_definition = cell->get_column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
-                t->print(out);
+                t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
                 DataTableUnsignedIntegerCell * t = dynamic_cast<DataTableUnsignedIntegerCell *>(cell);
-                t->print(out);
+                t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
                 DataTableFloatingPointCell * t = dynamic_cast<DataTableFloatingPointCell *>(cell);
-                t->print(out);
+                t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
                 DataTableStringCell * t = dynamic_cast<DataTableStringCell *>(cell);
-                t->print(out);
+                t->write_formatted(out);
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
             }
@@ -599,21 +597,21 @@ class DataTable {
             }
         }
         template <class T> Column & add_column(const std::string & label,
-                const platypus::stream::OutputStreamFormatters & format_manipulators={},
+                const platypus::stream::OutputStreamFormatters & formatters={},
                 bool is_key_column=false) {
             if (is_key_column) {
-                return this->add_key_column<T>(label, format_manipulators);
+                return this->add_key_column<T>(label, formatters);
             } else {
-                return this->add_data_column<T>(label, format_manipulators);
+                return this->add_data_column<T>(label, formatters);
             }
         }
-        template <class T> Column & add_key_column(const std::string & label, const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
-            auto & col = this->create_column<T>(label, format_manipulators);
+        template <class T> Column & add_key_column(const std::string & label, const platypus::stream::OutputStreamFormatters & formatters={}) {
+            auto & col = this->create_column<T>(label, formatters);
             this->key_columns_.push_back(&col);
             return col;
         }
-        template <class T> Column & add_data_column(const std::string & label, const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
-            auto & col = this->create_column<T>(label, format_manipulators);
+        template <class T> Column & add_data_column(const std::string & label, const platypus::stream::OutputStreamFormatters & formatters={}) {
+            auto & col = this->create_column<T>(label, formatters);
             this->data_columns_.push_back(&col);
             return col;
         }
@@ -652,6 +650,12 @@ class DataTable {
             }
             return *(this->columns_[column_idx]);
         }
+        const Column & column(unsigned long column_idx) const {
+            if (column_idx >= this->columns_.size()) {
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+            }
+            return *(this->columns_[column_idx]);
+        }
         Column & column(const std::string & col_name) {
             auto citer = this->column_label_index_map_.find(col_name);
             if (citer == this->column_label_index_map_.end()) {
@@ -659,8 +663,12 @@ class DataTable {
             }
             return *(this->columns_[citer->second]);
         }
-        const Column & column(unsigned long column_idx) const {
-            return this->column(column_idx);
+        const Column & column(const std::string & col_name) const {
+            auto citer = this->column_label_index_map_.find(col_name);
+            if (citer == this->column_label_index_map_.end()) {
+                throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
+            }
+            return *(this->columns_[citer->second]);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -725,14 +733,14 @@ class DataTable {
     private:
         template <class T> Column & create_column(
                 const std::string & label,
-                const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
+                const platypus::stream::OutputStreamFormatters & formatters={}) {
             if (!this->rows_.empty()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
             }
             if (this->column_label_index_map_.find(label) != this->column_label_index_map_.end()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: duplicate column name");
             }
-            auto new_col = new Column(Column::identify_type<T>(), label, format_manipulators);
+            auto new_col = new Column(Column::identify_type<T>(), label, formatters);
             this->column_label_index_map_[label] = this->columns_.size();
             this->columns_.push_back(new_col);
             return *new_col;
