@@ -466,7 +466,7 @@ class DataTableTester {
 int main() {
     DataTableTester dtt;
     int fails = dtt.run_tests();
-    if (fails > 0) {
+    if (fails != 0) {
         return EXIT_FAILURE;
     } else {
         return EXIT_SUCCESS;
