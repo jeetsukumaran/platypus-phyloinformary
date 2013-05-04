@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iterator>
 #include <cmath>
+#include <sstream>
 #include <limits>
 #include <vector>
 
