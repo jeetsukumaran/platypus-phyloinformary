@@ -39,7 +39,7 @@ namespace platypus {
 ////////////////////////////////////////////////////////////////////////////////
 // NclTreeReader
 
-template <typename TreeT>
+template <typename TreeT, class EdgeLengthT=double>
 class NclTreeReader : public BaseTreeReader<TreeT> {
 
     public:
@@ -105,13 +105,13 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
             std::map<const NxsSimpleNode *, decltype(root)> ncl_to_native;
             unsigned long num_leaf_nodes = 0;
             unsigned long num_internal_nodes = 1; // start at one to count root
-            double tree_length = 0.0;
+            EdgeLengthT tree_length = 0.0;
             for (auto & ncl_node : ncl_nodes) {
                 const NxsSimpleEdge & ncl_edge = ncl_node->GetEdgeToParentRef();
                 const NxsSimpleNode * ncl_par = ncl_edge.GetParent();
                 std::vector<NxsSimpleNode *> ncl_child_nodes = ncl_node->GetChildren();
                 unsigned int nchildren = ncl_child_nodes.size();
-                double edge_len = ncl_edge.GetDblEdgeLen();
+                EdgeLengthT edge_len = static_cast<EdgeLengthT>(ncl_edge.GetDblEdgeLen());
                 if (edge_len < 0) {
                     edge_len = 0.0;
                 } else {

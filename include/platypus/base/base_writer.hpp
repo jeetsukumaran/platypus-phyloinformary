@@ -56,7 +56,7 @@ class WriterException : public PlatypusException {
  *   platypus::Tree.
  *
  */
-template <typename TreeT>
+template <typename TreeT, typename EdgeLengthT=double>
 class BaseTreeWriter {
 
     public:
@@ -67,9 +67,9 @@ class BaseTreeWriter {
         typedef typename tree_type::value_type   tree_value_type;
 
         // typedefs for functions used in writing
-        typedef std::function<bool (const tree_type &)>                     tree_is_rooted_getter_fntype;
-        typedef std::function<std::string (const tree_value_type &)>        node_value_label_getter_fntype;
-        typedef std::function<double (const tree_value_type &)>             node_value_edge_length_getter_fntype;
+        typedef std::function<bool (const tree_type &)>                 tree_is_rooted_getter_fntype;
+        typedef std::function<std::string (const tree_value_type &)>    node_value_label_getter_fntype;
+        typedef std::function<EdgeLengthT (const tree_value_type &)>    node_value_edge_length_getter_fntype;
 
     public:
         BaseTreeWriter() { }

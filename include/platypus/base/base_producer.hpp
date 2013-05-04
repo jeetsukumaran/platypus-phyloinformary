@@ -48,7 +48,7 @@ class ProducerException : public PlatypusException {
 ////////////////////////////////////////////////////////////////////////////////
 // BaseTreeProducer (base class for all tree-producing classes)
 
-template <typename TreeT>
+template <typename TreeT, typename EdgeLengthT=double>
 class BaseTreeProducer {
 
     public:
@@ -62,8 +62,8 @@ class BaseTreeProducer {
         typedef std::function<tree_type & ()>                                   tree_factory_fntype;
         typedef std::function<void (tree_type &, bool)>                         tree_is_rooted_setter_fntype;
         typedef std::function<void (tree_value_type &, const std::string &)>    node_value_label_setter_fntype;
-        typedef std::function<void (tree_value_type &, double)>                 node_value_edge_length_setter_fntype;
-        typedef std::function<void (tree_type &, double)>                       tree_stats_numeric_setter_fntype;
+        typedef std::function<void (tree_value_type &, EdgeLengthT)>            node_value_edge_length_setter_fntype;
+        typedef std::function<void (tree_type &, EdgeLengthT)>                  tree_stats_numeric_setter_fntype;
         typedef std::function<void (tree_type &, unsigned long)>                tree_stats_count_setter_fntype;
 
     public:
@@ -91,7 +91,7 @@ class BaseTreeProducer {
          *
          * @param node_value_edge_length_func
          *   A function object that takes a reference to TreeT::value_type and
-         *   a double value as arguments and sets the edge length of the node
+         *   a EdgeLengthT value as arguments and sets the edge length of the node
          *   accordingly.
          */
         BaseTreeProducer(
@@ -159,7 +159,7 @@ class BaseTreeProducer {
             this->node_value_edge_length_setter_ = node_value_edge_length_func;
         }
         virtual void clear_edge_length_setter() {
-            this->node_value_edge_length_setter_ = [] (tree_value_type&, double) { };
+            this->node_value_edge_length_setter_ = [] (tree_value_type&, EdgeLengthT) { };
         }
         virtual void set_tree_stats_num_leaf_nodes_setter(const tree_stats_count_setter_fntype & f) {
             this->tree_stats_num_leaf_nodes_setter_ = f;
@@ -188,7 +188,7 @@ class BaseTreeProducer {
                 this->node_value_label_setter_(nv, label);
             }
         }
-        void set_node_value_edge_length(tree_value_type & nv, double length) {
+        void set_node_value_edge_length(tree_value_type & nv, EdgeLengthT length) {
             if (this->node_value_edge_length_setter_) {
                 this->node_value_edge_length_setter_(nv, length);
             }
@@ -203,7 +203,7 @@ class BaseTreeProducer {
                 this->tree_stats_num_internal_nodes_setter_(tree, v);
             }
         }
-        void set_tree_stats_tree_length(tree_type & tree, double v) {
+        void set_tree_stats_tree_length(tree_type & tree, EdgeLengthT v) {
             if (this->tree_stats_tree_length_setter_) {
                 this->tree_stats_tree_length_setter_(tree, v);
             }

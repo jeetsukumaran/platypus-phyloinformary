@@ -31,6 +31,8 @@
 namespace platypus {
 namespace coalescent {
 
+typedef double CoalescentTimeValueType;
+
 /**
  * Return a random waiting time for coalescence of any two gene lineages from a
  * sample of `num_lineages` evolving in a population with a haploid size of
@@ -80,7 +82,7 @@ namespace coalescent {
  *   value of `haploid_pop_size` till the next coalescent event.
  */
 template <class RngT=platypus::numeric::RandomNumberGenerator>
-double random_time_to_coalescence(
+CoalescentTimeValueType random_time_to_coalescence(
         RngT & rng,
         unsigned long num_lineages,
         double haploid_pop_size=1.0,
@@ -107,7 +109,7 @@ double random_time_to_coalescence(
  *   The expected or mean time to coalescence of `num_lineages` gene lineages
  *   evolving in a population with haploid size `haploid_pop_size`.
  */
-inline double expected_time_to_coalescence(
+inline CoalescentTimeValueType expected_time_to_coalescence(
         unsigned long num_lineages,
         double haploid_pop_size=1.0,
         unsigned long num_to_coalesce=2) {
@@ -202,12 +204,12 @@ class BasicCoalescentSimulator : public platypus::BaseTreeProducer<TreeT> {
                 bool use_expected_tmrca=false) {
             auto & tree = this->create_new_tree();
             this->set_tree_is_rooted(tree, true);
-            std::map<typename TreeT::node_type *, double> nodes;
+            std::map<typename TreeT::node_type *, CoalescentTimeValueType> nodes;
             for (auto & leaf_iter = leaf_values_begin; leaf_iter != leaf_values_end; ++leaf_iter) {
                 typename TreeT::node_type * new_node = tree.create_leaf_node(*leaf_iter);
                 nodes[new_node] = 0.0;
             }
-            double time_expended = 0.0;
+            CoalescentTimeValueType time_expended = 0.0;
             while (nodes.size() > 1) {
                 this->simulate_basic_coalescent_event(
                         tree,
@@ -283,10 +285,10 @@ class BasicCoalescentSimulator : public platypus::BaseTreeProducer<TreeT> {
          */
         typename TreeT::node_type * simulate_basic_coalescent_event(
                 TreeT & tree,
-                std::map<typename TreeT::node_type *, double> & nodes,
-                double & time_expended,
+                std::map<typename TreeT::node_type *, CoalescentTimeValueType> & nodes,
+                CoalescentTimeValueType & time_expended,
                 unsigned long haploid_pop_size,
-                double time_available=0.0,
+                CoalescentTimeValueType time_available=0.0,
                 bool use_expected_tmrca=false) {
             if (nodes.size() < 2) {
                 time_expended = 0.0;
@@ -298,7 +300,7 @@ class BasicCoalescentSimulator : public platypus::BaseTreeProducer<TreeT> {
             if (haploid_pop_size < 0.0) {
                 throw std::logic_error("Population size cannot be less than 0");
             }
-            double tmrca = 0.0;
+            CoalescentTimeValueType tmrca = 0.0;
             if (use_expected_tmrca) {
                 tmrca = expected_time_to_coalescence(nodes.size(), haploid_pop_size, 2);
             } else {
@@ -306,7 +308,7 @@ class BasicCoalescentSimulator : public platypus::BaseTreeProducer<TreeT> {
                 tmrca = random_time_to_coalescence(*(this->rng_ptr_), nodes.size(), haploid_pop_size, 2);
             }
             tmrca = tmrca * haploid_pop_size;
-            if (time_available == 0.0 || tmrca <= time_available) {
+            if (time_available <= 0.0 || tmrca <= time_available) {
                 for (auto & nde : nodes) {
                     nde.second += tmrca;
                 }

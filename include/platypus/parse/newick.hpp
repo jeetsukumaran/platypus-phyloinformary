@@ -75,7 +75,7 @@ class NewickReaderMalformedStatementError : public NewickReaderException {
 /**
  * Parses NEWICK tree data sources and instantiates corresponding tree objects.
  */
-template <typename TreeT>
+template <typename TreeT, typename EdgeLengthT=double>
 class NewickReader : public BaseTreeReader<TreeT> {
 
     public:
@@ -144,7 +144,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
             }
             unsigned long num_leaf_nodes = 0;
             unsigned long num_internal_nodes = 1; // start at one to count root
-            double tree_length = 0.0;
+            EdgeLengthT tree_length = 0.0;
             this->parse_node_from_stream(tree,
                     tree.head_node(),
                     src_iter,
@@ -178,7 +178,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 NexusTokenizer::iterator & src_iter,
                 unsigned long & num_leaf_nodes,
                 unsigned long & num_internal_nodes,
-                double & tree_length) {
+                EdgeLengthT & tree_length) {
             if (*src_iter == "(") {
                 // begin processing of child nodes
                 // if (src_iter.eof()) {
@@ -257,7 +257,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
             while (true) {
                 if (*src_iter == ":") {
                     src_iter.require_next();
-                    double edge_len = std::atof(src_iter->c_str());
+                    EdgeLengthT edge_len = std::atof(src_iter->c_str());
                     this->set_node_value_edge_length(current_node->value(), edge_len);
                     tree_length += edge_len;
                     src_iter.require_next();

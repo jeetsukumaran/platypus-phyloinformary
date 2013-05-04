@@ -123,11 +123,11 @@ class StandardTree : public Tree<NodeValueT, TreeNodeAllocatorT> {
  *      void set_label(const std::string &);
  *      void set_edge_length(double);
  */
-template <class T>
+template <class T, class EdgeLengthT=double>
 void configure_producer_for_standard_interface(T & producer) {
     producer.set_tree_is_rooted_setter([] (typename T::tree_type & tree, bool rooted) { tree.set_is_rooted(rooted); });
     producer.set_node_label_setter([] (typename T::tree_value_type & nv, const std::string& label) { nv.set_label(label); });
-    producer.set_edge_length_setter([] (typename T::tree_value_type & nv, double length) { nv.set_edge_length(length); });
+    producer.set_edge_length_setter([] (typename T::tree_value_type & nv, EdgeLengthT length) { nv.set_edge_length(length); });
 }
 
 /**
@@ -142,9 +142,9 @@ void configure_producer_for_standard_interface(T & producer) {
  *      void set_label(const std::string &);
  *      void set_edge_length(double);
  */
-template <class T>
+template <class T, class EdgeLengthT=double>
 void configure_reader_for_standard_interface(T & reader) {
-    configure_producer_for_standard_interface(reader);
+    configure_producer_for_standard_interface<EdgeLengthT>(reader);
 }
 
 /**
@@ -159,11 +159,11 @@ void configure_reader_for_standard_interface(T & reader) {
  *
  *      bool is_rooted(bool) const;
  */
-template <class T>
+template <class T, class EdgeLengthT=double>
 void configure_writer_for_standard_interface(T & writer) {
     writer.set_tree_is_rooted_getter([] (const typename T::tree_type & tree) -> bool {return tree.is_rooted(); });
     writer.set_node_label_getter([] (const typename T::tree_value_type & nv) -> std::string { return nv.get_label(); });
-    writer.set_edge_length_getter([] (const typename T::tree_value_type & nv) -> double {return nv.get_edge_length(); });
+    writer.set_edge_length_getter([] (const typename T::tree_value_type & nv) -> EdgeLengthT {return nv.get_edge_length(); });
 }
 
 } // namespae platypus
