@@ -661,22 +661,16 @@ class DataTable {
             return this->column(col_name);
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
-            if (ridx >= this->rows_.size()) {
-                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
-            }
-            return this->rows_[ridx]->get<T>(col_name);
+            return this->row(ridx).get<T>(col_name);
         }
         template <class T> const T get(unsigned long ridx, const std::string & col_name) const {
-            return this->get<T>(ridx, col_name);
+            return this->row(ridx).get<T>(col_name);
         }
         template <class T> T get(unsigned long ridx, unsigned long cidx) {
-            if (ridx >= this->rows_.size()) {
-                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
-            }
-            return this->rows_[ridx]->get<T>(cidx);
+            return this->row(ridx).get<T>(cidx);
         }
         template <class T> const T get(unsigned long ridx, unsigned long cidx) const {
-            return this->get<T>(ridx, cidx);
+            return this->row(ridx).get<T>(cidx);
         }
 
         //////////////////////////////////////////////////////////////////////////////
