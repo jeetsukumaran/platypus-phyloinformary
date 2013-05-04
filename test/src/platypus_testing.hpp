@@ -196,11 +196,11 @@ int fail_test(const std::string& test_name,
     log(std::cerr, "\n| Observed: ", observed);
     log(std::cerr, "\n|  Remarks: ", args...);
     std::cerr << std::endl;
-    return EXIT_FAILURE;
+    return 1;
 }
 
 template <typename T, typename U, typename... Types>
-int check_equal(
+int test_equal(
         const T& expected,
         const U& observed,
         const std::string& test_name,
@@ -213,7 +213,7 @@ int check_equal(
                 observed,
                 args...);
     } else {
-        return EXIT_SUCCESS;
+        return 0;
     }
 }
 
@@ -242,7 +242,7 @@ inline bool is_almost_equal(T a, T b, double tolerance=1e-14) {
 }
 
 template <typename T, typename... Types>
-int check_almost_equal(
+int test_almost_equal(
         T expected,
         T observed,
         const std::string& test_name,
@@ -255,7 +255,7 @@ int check_almost_equal(
                 observed,
                 args...);
     } else {
-        return EXIT_SUCCESS;
+        return 0;
     }
 }
 
@@ -465,7 +465,7 @@ platypus::Tokenizer get_nexus_tokenizer();
 // Checking/Verification
 
 template <class TreeT>
-int check_newick(TreeT& tree,
+int test_against_newick_string(TreeT& tree,
         const std::string & remarks,
         const std::string & compare_str=STANDARD_TEST_TREE_NEWICK,
         bool fail_if_equal=false) {
@@ -480,11 +480,11 @@ int check_newick(TreeT& tree,
                 result,
                 remarks);
     } else {
-        return EXIT_SUCCESS;
+        return 0;
     }
 }
 
-int validate_standard_test_tree(TestDataTree & tree);
+int test_against_standard_test_tree(TestDataTree & tree);
 
 
 int compare_token_vectors(

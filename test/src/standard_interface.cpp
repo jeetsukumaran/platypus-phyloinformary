@@ -43,5 +43,10 @@ int main() {
         "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
         "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n";
 
-    return check_equal(expected, result, __FILE__, __LINE__);
+    int chk = test_equal(expected, result, __FILE__, __LINE__);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }

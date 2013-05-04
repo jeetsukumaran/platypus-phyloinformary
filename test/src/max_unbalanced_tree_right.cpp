@@ -22,6 +22,11 @@ int main () {
     newick_writer.write_tree(tree, o);
     std::string result = o.str();
     std::string expected =  "(a,(b,(c,(d,(e,(f,(g,(h,(i,j)))))))));";
-    return check_equal(expected, result, __FILE__, __LINE__);
+    int chk = test_equal(expected, result, __FILE__, __LINE__);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }
 

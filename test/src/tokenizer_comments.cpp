@@ -20,5 +20,10 @@ int main() {
     std::vector<std::string> expected{
             "(", "foo", ":","1", ",", "(", "bar", ":", "2",  ",", "c", ":", "2", ")"
             };
-    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
+    int fail = compare_token_vectors(expected, observed, __FILE__, __LINE__);
+    if (fail == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }

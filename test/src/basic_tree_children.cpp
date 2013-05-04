@@ -18,12 +18,17 @@ int main() {
         auto expected_iter = STANDARD_TEST_TREE_CHILDREN.find(*ndi);
         assert(expected_iter != STANDARD_TEST_TREE_CHILDREN.end());
         auto expected_children = expected_iter->second;
-        return check_equal(
+        int chk = test_equal(
                 expected_children,
                 children[*ndi],
                 __FILE__,
                 __LINE__,
                 "parent node: ",
                 *ndi);
+        if (chk == 0) {
+            return EXIT_SUCCESS;
+        } else {
+            return EXIT_FAILURE;
+        }
     }
 }

@@ -52,6 +52,11 @@ int main() {
     build_tree(x, STANDARD_TEST_TREE_STRING);
     platypus::Tree<Y> y;
     y.deep_copy_from(x);
-    return check_newick(y, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
+    int chk = test_against_newick_string(y, "cloned tree failed to yield expected newick string", STANDARD_TEST_TREE_NEWICK, false);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }
 

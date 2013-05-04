@@ -41,10 +41,10 @@ int main () {
         write_newick(tree, o);
         std::cerr << o.str() << std::endl;
     }
-    if (fail > 0) {
-        return EXIT_FAILURE;
-    } else {
+    if (fail == 0) {
         return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
     }
 }
 

@@ -12,5 +12,9 @@ int main() {
     write_newick(tree, out);
     std::string result = out.str();
     trim(result, " \t\n\r");
-    return check_equal(STANDARD_TEST_TREE_NEWICK, result, __FILE__, __LINE__);
+    if (test_equal(STANDARD_TEST_TREE_NEWICK, result, __FILE__, __LINE__) != 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }

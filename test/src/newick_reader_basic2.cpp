@@ -86,8 +86,12 @@ int main () {
         write_newick_no_brlens(tree, o);
         std::string observed = o.str();
         stripspaces(observed);
-        fail += check_equal(expected, observed, __FILE__, __LINE__, "Input tree string: '", src, "'");
+        fail += test_equal(expected, observed, __FILE__, __LINE__, "Input tree string: '", src, "'");
     }
-    return fail;
+    if (fail == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }
 

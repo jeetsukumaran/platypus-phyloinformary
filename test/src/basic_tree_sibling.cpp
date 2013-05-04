@@ -23,12 +23,17 @@ int main() {
         assert(expected_iter != STANDARD_TEST_TREE_SIBLINGS.end());
         auto expected_siblings = expected_iter->second;
         if (siblings[*ndi] != expected_siblings) {
-            return check_equal(
+            int chk = test_equal(
                     expected_siblings,
                     siblings[*ndi],
                     __FILE__,
                     __LINE__,
                     "Start node: ", *ndi);
+            if (chk == 0) {
+                return EXIT_SUCCESS;
+            } else {
+                return EXIT_FAILURE;
+            }
         }
     }
     return 0;

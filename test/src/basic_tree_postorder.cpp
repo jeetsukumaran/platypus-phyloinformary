@@ -14,9 +14,14 @@ int main() {
     for (auto ndi = tree.postorder_begin(); ndi != tree.postorder_end(); ++ndi) {
         visits.push_back(*ndi);
     }
-    return check_equal(
+    int chk = test_equal(
             STANDARD_TEST_TREE_POSTORDER,
             visits,
             __FILE__,
             __LINE__);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }

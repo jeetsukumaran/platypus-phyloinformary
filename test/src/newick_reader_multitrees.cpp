@@ -23,15 +23,15 @@ int main () {
                 "Incorrect number of trees read from test data");
     }
 
-    bool fail = 0;
+    int fail = 0;
     for (auto & tree : trees) {
-        fail += validate_standard_test_tree(tree);
+        fail += test_against_standard_test_tree(tree);
     }
 
-    if (fail > 0) {
-        return EXIT_FAILURE;
-    } else {
+    if (fail == 0) {
         return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
     }
 }
 

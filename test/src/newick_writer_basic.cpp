@@ -23,6 +23,11 @@ int main () {
     std::ostringstream o2;
     newick_writer.write(trees2.cbegin(), trees2.cend(), o2);
     std::string tree_string3 = o2.str();
-    return check_equal( tree_string2, tree_string3, __FILE__, __LINE__);
+    int chk = test_equal( tree_string2, tree_string3, __FILE__, __LINE__);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }
 

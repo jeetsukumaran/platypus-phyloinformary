@@ -43,7 +43,7 @@ int main () {
     assert(trees.size() == 1);
     auto tree = trees[0];
 
-    bool fail = 0;
+    int fail = 0;
     for (auto ndi = tree.postorder_begin(); ndi != tree.postorder_end(); ++ndi) {
         char label = ndi->get_label()[0];
         double edge_length = ndi->get_edge_length();
@@ -55,10 +55,10 @@ int main () {
             std::cerr << ", but found " << edge_length << std::endl;
         }
     }
-    if (fail > 0) {
-        return EXIT_FAILURE;
-    } else {
+    if (fail == 0) {
         return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
     }
 }
 

@@ -20,17 +20,17 @@ int main () {
         std::cerr << "Expecting 2 trees but found " << trees.size() << std::endl;
     }
     for (auto & tree : trees) {
-        fail += validate_standard_test_tree(tree);
+        fail += test_against_standard_test_tree(tree);
     }
     // try {
     //     tree_reader.read_from_string(tree_string, "newick");
     // } catch (const platypus::NewickReaderMalformedStatementError & e) {
     //     return 0;
     // }
-    if (fail > 0) {
-        return EXIT_FAILURE;
-    } else {
+    if (fail == 0) {
         return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
     }
 }
 

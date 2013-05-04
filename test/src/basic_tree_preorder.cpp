@@ -14,9 +14,14 @@ int main() {
     for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
         visits.push_back(*ndi);
     }
-    return check_equal(
+    int chk = test_equal(
             STANDARD_TEST_TREE_PREORDER,
             visits,
             __FILE__,
             __LINE__);
+    if (chk == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }

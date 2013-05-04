@@ -16,5 +16,10 @@ int main() {
         observed.push_back(*iter);
     }
     std::vector<std::string> expected;
-    return compare_token_vectors(expected, observed, __FILE__, __LINE__);
+    int fail = compare_token_vectors(expected, observed, __FILE__, __LINE__);
+    if (fail == 0) {
+        return EXIT_SUCCESS;
+    } else {
+        return EXIT_FAILURE;
+    }
 }
