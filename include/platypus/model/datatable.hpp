@@ -632,17 +632,17 @@ class DataTable {
             }
             return *this->rows_[ridx];
         }
-        template <class T> T get(unsigned long ridx, const std::string & col_name) {
+        const Row & operator[](unsigned long ridx) const {
             if (ridx >= this->rows_.size()) {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
-            return this->rows_[ridx]->get<T>(col_name);
+            return *this->rows_[ridx];
         }
-        template <class T> T get(unsigned long ridx, unsigned long cidx) {
-            if (ridx >= this->rows_.size()) {
-                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
-            }
-            return this->rows_[ridx]->get<T>(cidx);
+        Row & row(unsigned long ridx) {
+            return this->operator[](ridx);
+        }
+        const Row & row(unsigned long ridx) const {
+            return this->operator[](ridx);
         }
         Column & column(unsigned long column_idx) {
             if (column_idx >= this->columns_.size()) {
@@ -669,6 +669,18 @@ class DataTable {
                 throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
             return *(this->columns_[citer->second]);
+        }
+        template <class T> T get(unsigned long ridx, const std::string & col_name) {
+            if (ridx >= this->rows_.size()) {
+                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
+            }
+            return this->rows_[ridx]->get<T>(col_name);
+        }
+        template <class T> T get(unsigned long ridx, unsigned long cidx) {
+            if (ridx >= this->rows_.size()) {
+                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
+            }
+            return this->rows_[ridx]->get<T>(cidx);
         }
 
         //////////////////////////////////////////////////////////////////////////////
