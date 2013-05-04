@@ -214,6 +214,7 @@ class DataTableValueTypedCell : public DataTableBaseCell {
 template <class T>
 class DataTableNumericCell : public DataTableValueTypedCell<T> {
     public:
+        typedef T value_implementation_type;
         DataTableNumericCell(const DataTableColumn & column)
             : DataTableValueTypedCell<T>(column) { }
         DataTableNumericCell(const DataTableColumn & column, const T & val)
@@ -244,6 +245,7 @@ class DataTableNumericCell : public DataTableValueTypedCell<T> {
         virtual void set(double val) { this->value_ = static_cast<T>(val); }
         virtual void set(long double val) { this->value_ = static_cast<T>(val); }
         virtual void set(const std::string & val) { this->from_string(val); }
+
 }; // DataTableNumericCell
 
 //////////////////////////////////////////////////////////////////////////////

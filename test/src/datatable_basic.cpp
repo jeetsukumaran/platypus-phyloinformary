@@ -47,6 +47,7 @@ class DataTableTester {
             fails += this->test_iteration();
             fails += this->test_formatting_on_definition();
             fails += this->test_formatting_post_definition();
+            fails += this->test_value_comparison();
             return fails;
         }
 
@@ -171,6 +172,31 @@ class DataTableTester {
                             __LINE__,
                             "formatted output of column ", col_idx);
                     col_idx += 1;
+                }
+            }
+            return fails;
+        }
+
+        int test_value_comparison() {
+            int fails = 0;
+            platypus::DataTable table;
+            table.add_column<signed_int_type>("signed.int");
+            table.add_column<unsigned_int_type>("unsigned.int");
+            table.add_column<float_type>("float");
+
+            typedef long double val_type;
+            val_type ref = 22./7;
+            table.add_row() << ref << ref << ref;
+            for (auto & row : table) {
+                unsigned long col_idx = 0;
+                for (auto col = row.begin<val_type>(); col != row.end<val_type>(); ++col, ++col_idx) {
+                    if (col_idx == 0) {
+                        fails += platypus::test::check_equal(static_cast<signed_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
+                    } else if (col_idx == 1) {
+                        fails += platypus::test::check_equal(static_cast<unsigned_int_type>(ref), *col, __FILE__, __LINE__, "column: ", col_idx);
+                    } else {
+                        fails += platypus::test::check_equal(ref, *col, __FILE__, __LINE__, "column: ", col_idx);
+                    }
                 }
             }
             return fails;
@@ -438,42 +464,42 @@ class DataTableTester {
 }; // DataTableTester
 
 int main() {
-    // DataTableTester dtt;
-    // int fails = dtt.run_tests();
-    // if (fails > 0) {
-    //     return EXIT_FAILURE;
-    // } else {
-    //     return EXIT_SUCCESS;
-    // }
+    DataTableTester dtt;
+    int fails = dtt.run_tests();
+    if (fails > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 
-    platypus::DataTable table;
-    table.add_column<std::string>("a",
-            {std::setw(10), std::setfill('.'), std::left});
-    table.add_column<std::string>("b",
-            {std::setw(10), std::setfill(' '), std::right});
-    table.add_column<double>("c",
-            {std::fixed, std::setprecision(4)});
-    table.add_column<long>("d");
-    table.add_row() << "the"   << "quick"  << 22./7 << 1;
-    table.add_row() << "quick" << "quack"  << 22./7 << 1;
-    table.add_row() << "brown" << "quake"  << 22./7 << 1;
-    table.add_row() << "fox"   << "quaill" << 22./7 << 1;
-    table.add_row() << "jumps" << "queen"  << 22./7 << 1;
-    table.add_row() << "over"  << "quoka"  << 22./7 << 1;
-    table.add_row() << "the"   << "quappy" << 22./7 << 1;
-    table.add_row() << "the"   << "quiet"  << 22./7 << 1;
-    table.add_row() << "lazy"  << "quool"  << 22./7 << 1;
-    table.add_row() << "dog"   << "quail"  << 22./7 << 1;
-    std::cout << "-----" << std::endl;
-    for (auto & row : table) {
-        for (auto & cell : row) {
-            std::cout << cell << ",";
-        }
-        std::cout << "\n";
-    }
-    std::cout << "-----" << std::endl;
-    for (auto & row : table) {
-        row.write_formatted(std::cout);
-    }
-    std::cout << "-----" << std::endl;
+    // platypus::DataTable table;
+    // table.add_column<std::string>("a",
+    //         {std::setw(10), std::setfill('.'), std::left});
+    // table.add_column<std::string>("b",
+    //         {std::setw(10), std::setfill(' '), std::right});
+    // table.add_column<double>("c",
+    //         {std::fixed, std::setprecision(4)});
+    // table.add_column<long>("d");
+    // table.add_row() << "the"   << "quick"  << 22./7 << 1;
+    // table.add_row() << "quick" << "quack"  << 22./7 << 1;
+    // table.add_row() << "brown" << "quake"  << 22./7 << 1;
+    // table.add_row() << "fox"   << "quaill" << 22./7 << 1;
+    // table.add_row() << "jumps" << "queen"  << 22./7 << 1;
+    // table.add_row() << "over"  << "quoka"  << 22./7 << 1;
+    // table.add_row() << "the"   << "quappy" << 22./7 << 1;
+    // table.add_row() << "the"   << "quiet"  << 22./7 << 1;
+    // table.add_row() << "lazy"  << "quool"  << 22./7 << 1;
+    // table.add_row() << "dog"   << "quail"  << 22./7 << 1;
+    // std::cout << "-----" << std::endl;
+    // for (auto & row : table) {
+    //     for (auto & cell : row) {
+    //         std::cout << cell << ",";
+    //     }
+    //     std::cout << "\n";
+    // }
+    // std::cout << "-----" << std::endl;
+    // for (auto & row : table) {
+    //     row.write_formatted(std::cout);
+    // }
+    // std::cout << "-----" << std::endl;
 }
