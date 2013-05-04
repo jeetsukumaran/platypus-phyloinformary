@@ -633,10 +633,7 @@ class DataTable {
             return *this->rows_[ridx];
         }
         const Row & operator[](unsigned long ridx) const {
-            if (ridx >= this->rows_.size()) {
-                throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
-            }
-            return *this->rows_[ridx];
+            return this->operator[](ridx);
         }
         Row & row(unsigned long ridx) {
             return this->operator[](ridx);
@@ -651,10 +648,7 @@ class DataTable {
             return *(this->columns_[column_idx]);
         }
         const Column & column(unsigned long column_idx) const {
-            if (column_idx >= this->columns_.size()) {
-                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
-            }
-            return *(this->columns_[column_idx]);
+            return this->column(column_idx);
         }
         Column & column(const std::string & col_name) {
             auto citer = this->column_label_index_map_.find(col_name);
@@ -664,11 +658,7 @@ class DataTable {
             return *(this->columns_[citer->second]);
         }
         const Column & column(const std::string & col_name) const {
-            auto citer = this->column_label_index_map_.find(col_name);
-            if (citer == this->column_label_index_map_.end()) {
-                throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
-            }
-            return *(this->columns_[citer->second]);
+            return this->column(col_name);
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
             if (ridx >= this->rows_.size()) {
@@ -676,11 +666,17 @@ class DataTable {
             }
             return this->rows_[ridx]->get<T>(col_name);
         }
+        template <class T> const T get(unsigned long ridx, const std::string & col_name) const {
+            return this->get<T>(ridx, col_name);
+        }
         template <class T> T get(unsigned long ridx, unsigned long cidx) {
             if (ridx >= this->rows_.size()) {
                 throw DataTableInvalidRowError(__FILE__, __LINE__, "row index is out of bounds");
             }
             return this->rows_[ridx]->get<T>(cidx);
+        }
+        template <class T> const T get(unsigned long ridx, unsigned long cidx) const {
+            return this->get<T>(ridx, cidx);
         }
 
         //////////////////////////////////////////////////////////////////////////////
