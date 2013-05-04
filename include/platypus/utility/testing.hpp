@@ -20,6 +20,12 @@
 
 #ifndef PLATYPUS_UTILITY_TESTING_HPP
 
+#include <iostream>
+#include <iterator>
+#include <cmath>
+#include <limits>
+#include <vector>
+
 namespace platypus { namespace testing {
 
 namespace detail {
