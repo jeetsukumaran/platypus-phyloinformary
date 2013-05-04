@@ -19,21 +19,19 @@
  *              <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PLATYPUS_UTILITY_DATATABLE_HPP
-#define PLATYPUS_UTILITY_DATATABLE_HPP
+#ifndef PLATYPUS_MODEL_DATATABLE_HPP
+#define PLATYPUS_MODEL_DATATABLE_HPP
 
-#include <memory>
 #include <map>
 #include <set>
 #include <sstream>
 #include <typeinfo>
-#include <stdexcept>
-#include <functional>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <initializer_list>
+#include "../utility/stream.hpp"
 #include "../base/exception.hpp"
 
 namespace platypus {
@@ -96,49 +94,6 @@ class DataTableInvalidRowError : public DataTableException {
             : DataTableException(filename, line_num, message) { }
 };
 
-namespace datatable { // implementation details supporting DataTable
-
-//////////////////////////////////////////////////////////////////////////////
-// OutputStreamManipulators
-
-// from:: http://stackoverflow.com/questions/14702629/can-you-pass-a-manipulator-to-a-function
-
-// an abstract class to provide a common interface to all manipulators
-class abstract_manip {
-    public:
-        virtual ~abstract_manip() { }
-        virtual void apply(std::ostream& out) const = 0;
-};
-
-// a wrapper template to let arbitrary manipulators follow that interface
-template<typename M> class concrete_manip : public abstract_manip {
-    public:
-        concrete_manip(const M& manip) : _manip(manip) { }
-        void apply(std::ostream& out) const { out << _manip; }
-    private:
-        M _manip;
-};
-
-// a class to hide the memory management required for polymorphism
-class smanip {
-    public:
-        template<typename M> smanip(const M& manip)
-            : _manip(new concrete_manip<M>(manip)) { }
-        template<typename R, typename A> smanip(R (&manip)(A))
-            : _manip(new concrete_manip<R (*)(A)>(&manip)) { }
-        void apply(std::ostream& out) const { _manip->apply(out); }
-    private:
-        std::shared_ptr<abstract_manip> _manip;
-};
-
-inline std::ostream& operator<<(std::ostream& out, const smanip& manip) {
-    manip.apply(out);
-    return out;
-}
-
-typedef smanip OutputStreamManipulator;
-typedef std::vector<OutputStreamManipulator>    OutputStreamManipulators;
-
 //////////////////////////////////////////////////////////////////////////////
 // DataTableColumn
 
@@ -175,7 +130,7 @@ class DataTableColumn {
     public:
         DataTableColumn(ValueType value_type,
                 const std::string & label,
-                const OutputStreamManipulators & format_manipulators={})
+                const platypus::stream::OutputStreamFormatters & format_manipulators={})
                 : value_type_(value_type)
                 , label_(label)
                 , format_manipulators_(format_manipulators) {
@@ -190,13 +145,13 @@ class DataTableColumn {
         void add_formatting(const T & format_manipulator) {
             this->format_manipulators_.push_back(format_manipulator);
         }
-        void add_formatting(const OutputStreamManipulators & format_manipulators) {
+        void add_formatting(const platypus::stream::OutputStreamFormatters & format_manipulators) {
             this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
         }
         void clear_formatting() {
             this->format_manipulators_.clear();
         }
-        void set_formatting(const OutputStreamManipulators & format_manipulators) {
+        void set_formatting(const platypus::stream::OutputStreamFormatters & format_manipulators) {
             this->format_manipulators_ = format_manipulators;
             // this->format_manipulators_.clear();
             // this->format_manipulators_.insert(this->format_manipulators_.end(), format_manipulators.cbegin(), format_manipulators.cend());
@@ -211,54 +166,54 @@ class DataTableColumn {
     protected:
         ValueType                   value_type_;
         std::string                 label_;
-        OutputStreamManipulators    format_manipulators_;
+        platypus::stream::OutputStreamFormatters    format_manipulators_;
 }; // DataTableColumn
 
 //////////////////////////////////////////////////////////////////////////////
-// BaseCell
+// DataTableBaseCell
 
-class BaseCell {
+class DataTableBaseCell {
     public:
-        BaseCell(const DataTableColumn & column)
+        DataTableBaseCell(const DataTableColumn & column)
             : column_(column) { }
-        virtual ~BaseCell() { }
+        virtual ~DataTableBaseCell() { }
         const DataTableColumn & column() const {
             return this->column_;
         }
     protected:
         const DataTableColumn &    column_;
-}; // BaseCell
+}; // DataTableBaseCell
 
 //////////////////////////////////////////////////////////////////////////////
-// TypedCell
+// DataTableValueTypedCell
 
 template <class T>
-class TypedCell : public BaseCell {
+class DataTableValueTypedCell : public DataTableBaseCell {
     public:
-        TypedCell(const DataTableColumn & column)
-            : BaseCell(column) { }
-        TypedCell(const DataTableColumn & column, const T & val)
-            : BaseCell(column)
+        DataTableValueTypedCell(const DataTableColumn & column)
+            : DataTableBaseCell(column) { }
+        DataTableValueTypedCell(const DataTableColumn & column, const T & val)
+            : DataTableBaseCell(column)
             , value_(val) { }
-        virtual ~TypedCell() {}
+        virtual ~DataTableValueTypedCell() {}
         void print(std::ostream & out) const {
             this->column_.print_value(out, this->value_);
         }
     public:
         T       value_;
-}; // TypedCell
+}; // DataTableValueTypedCell
 
 //////////////////////////////////////////////////////////////////////////////
-// NumericCell
+// DataTableNumericCell
 
 template <class T>
-class NumericCell : public TypedCell<T> {
+class DataTableNumericCell : public DataTableValueTypedCell<T> {
     public:
-        NumericCell(const DataTableColumn & column)
-            : TypedCell<T>(column) { }
-        NumericCell(const DataTableColumn & column, const T & val)
-            : TypedCell<T>(column, val) { }
-        virtual ~NumericCell() {}
+        DataTableNumericCell(const DataTableColumn & column)
+            : DataTableValueTypedCell<T>(column) { }
+        DataTableNumericCell(const DataTableColumn & column, const T & val)
+            : DataTableValueTypedCell<T>(column, val) { }
+        virtual ~DataTableNumericCell() {}
         virtual void from_string(const std::string & val) {
             std::istringstream i(val);
             i >> this->value_;
@@ -287,62 +242,62 @@ class NumericCell : public TypedCell<T> {
         virtual void set(double val) { this->value_ = static_cast<T>(val); }
         virtual void set(long double val) { this->value_ = static_cast<T>(val); }
         virtual void set(const std::string & val) { this->from_string(val); }
-}; // NumericCell
+}; // DataTableNumericCell
 
 //////////////////////////////////////////////////////////////////////////////
-// SignedIntegerCell
+// DataTableSignedIntegerCell
 
-class SignedIntegerCell : public NumericCell<DataTableColumn::signed_integer_implementation_type> {
+class DataTableSignedIntegerCell : public DataTableNumericCell<DataTableColumn::signed_integer_implementation_type> {
     public:
         typedef DataTableColumn::signed_integer_implementation_type value_implementation_type;
-        SignedIntegerCell(const DataTableColumn & column)
-            : NumericCell<value_implementation_type>(column, 0) {
+        DataTableSignedIntegerCell(const DataTableColumn & column)
+            : DataTableNumericCell<value_implementation_type>(column, 0) {
         }
         template <class U> U get() const {
             return static_cast<U>(this->value_);
         }
 }; // specialization for long
-template <> inline std::string SignedIntegerCell::get() const { return this->to_string(); }
+template <> inline std::string DataTableSignedIntegerCell::get() const { return this->to_string(); }
 
 //////////////////////////////////////////////////////////////////////////////
-// UnsignedIntegerCell
+// DataTableUnsignedIntegerCell
 
-class UnsignedIntegerCell : public NumericCell<DataTableColumn::unsigned_integer_implementation_type> {
+class DataTableUnsignedIntegerCell : public DataTableNumericCell<DataTableColumn::unsigned_integer_implementation_type> {
     public:
         typedef DataTableColumn::unsigned_integer_implementation_type value_implementation_type;
-        UnsignedIntegerCell(const DataTableColumn & column)
-            : NumericCell<value_implementation_type>(column, 0) {
+        DataTableUnsignedIntegerCell(const DataTableColumn & column)
+            : DataTableNumericCell<value_implementation_type>(column, 0) {
         }
         template <class U> U get() const {
             return static_cast<U>(this->value_);
         }
 }; // specialization for unsigned long
-template <> inline std::string UnsignedIntegerCell::get() const { return this->to_string(); }
+template <> inline std::string DataTableUnsignedIntegerCell::get() const { return this->to_string(); }
 
 //////////////////////////////////////////////////////////////////////////////
-// FloatingPointCell
+// DataTableFloatingPointCell
 
-class FloatingPointCell : public NumericCell<DataTableColumn::floating_point_implementation_type> {
+class DataTableFloatingPointCell : public DataTableNumericCell<DataTableColumn::floating_point_implementation_type> {
     public:
         typedef DataTableColumn::floating_point_implementation_type value_implementation_type;
-        FloatingPointCell(const DataTableColumn & column)
-            : NumericCell<value_implementation_type>(column, 0.0) {
+        DataTableFloatingPointCell(const DataTableColumn & column)
+            : DataTableNumericCell<value_implementation_type>(column, 0.0) {
         }
         template <class U> U get() const {
             return static_cast<U>(this->value_);
         }
 }; // specialization for double
-template <> inline std::string FloatingPointCell::get() const { return this->to_string(); }
+template <> inline std::string DataTableFloatingPointCell::get() const { return this->to_string(); }
 
 //////////////////////////////////////////////////////////////////////////////
-// StringCell
+// DataTableStringCell
 
-class StringCell : public TypedCell<DataTableColumn::string_implementation_type> {
+class DataTableStringCell : public DataTableValueTypedCell<DataTableColumn::string_implementation_type> {
     public:
         typedef DataTableColumn::string_implementation_type value_implementation_type;
 
-        StringCell(const DataTableColumn & column)
-            : TypedCell<value_implementation_type>(column) { }
+        DataTableStringCell(const DataTableColumn & column)
+            : DataTableValueTypedCell<value_implementation_type>(column) { }
 
         template <class U> void set(const U & val) {
             std::ostringstream o;
@@ -365,8 +320,8 @@ class StringCell : public TypedCell<DataTableColumn::string_implementation_type>
             this->column_.print_value(out, this->value_);
         }
 }; // specialization for std::string
-template <> inline std::string StringCell::get() const { return this->value_; }
-template <> inline void StringCell::set(const std::string & val) { this->value_ = val; }
+template <> inline std::string DataTableStringCell::get() const { return this->value_; }
+template <> inline void DataTableStringCell::set(const std::string & val) { this->value_ = val; }
 
 //////////////////////////////////////////////////////////////////////////////
 // DataTableRow
@@ -504,13 +459,13 @@ class DataTableRow {
         }; // iterator
 
         template <class ValueT=std::string>
-        iterator<ValueT, std::vector<BaseCell *>::iterator> begin() {
-            return iterator<ValueT, std::vector<BaseCell *>::iterator>(this->cells_.begin(), this->cells_.end());
+        iterator<ValueT, std::vector<DataTableBaseCell *>::iterator> begin() {
+            return iterator<ValueT, std::vector<DataTableBaseCell *>::iterator>(this->cells_.begin(), this->cells_.end());
         }
 
         template <class ValueT=std::string>
-        iterator<ValueT, std::vector<BaseCell *>::iterator> end() {
-            return iterator<ValueT, std::vector<BaseCell *>::iterator>(this->cells_.end(), this->cells_.end());
+        iterator<ValueT, std::vector<DataTableBaseCell *>::iterator> end() {
+            return iterator<ValueT, std::vector<DataTableBaseCell *>::iterator>(this->cells_.end(), this->cells_.end());
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -530,20 +485,20 @@ class DataTableRow {
     public:
 
         template <class T>
-        static const T get_cell_value(BaseCell * cell) {
+        static const T get_cell_value(DataTableBaseCell * cell) {
             auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
                 return t->get<T>();
             } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                DataTableUnsignedIntegerCell * t = dynamic_cast<DataTableUnsignedIntegerCell *>(cell);
                 return t->get<T>();
             } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                FloatingPointCell * t = dynamic_cast<FloatingPointCell *>(cell);
+                DataTableFloatingPointCell * t = dynamic_cast<DataTableFloatingPointCell *>(cell);
                 return t->get<T>();
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(cell);
+                DataTableStringCell * t = dynamic_cast<DataTableStringCell *>(cell);
                 return t->get<T>();
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
@@ -551,40 +506,40 @@ class DataTableRow {
         }
 
         template <class T>
-        static void set_cell_value(BaseCell * cell, const T & val) {
+        static void set_cell_value(DataTableBaseCell * cell, const T & val) {
             auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
                 t->set(val);
             } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                DataTableUnsignedIntegerCell * t = dynamic_cast<DataTableUnsignedIntegerCell *>(cell);
                 t->set(val);
             } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                FloatingPointCell * t = dynamic_cast<FloatingPointCell *>(cell);
+                DataTableFloatingPointCell * t = dynamic_cast<DataTableFloatingPointCell *>(cell);
                 t->set(val);
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(cell);
+                DataTableStringCell * t = dynamic_cast<DataTableStringCell *>(cell);
                 t->set(val);
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
             }
         }
 
-        static void print_cell(std::ostream & out, BaseCell * cell) {
+        static void print_cell(std::ostream & out, DataTableBaseCell * cell) {
             auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                SignedIntegerCell * t = dynamic_cast<SignedIntegerCell *>(cell);
+                DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
                 t->print(out);
             } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                UnsignedIntegerCell * t = dynamic_cast<UnsignedIntegerCell *>(cell);
+                DataTableUnsignedIntegerCell * t = dynamic_cast<DataTableUnsignedIntegerCell *>(cell);
                 t->print(out);
             } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                FloatingPointCell * t = dynamic_cast<FloatingPointCell *>(cell);
+                DataTableFloatingPointCell * t = dynamic_cast<DataTableFloatingPointCell *>(cell);
                 t->print(out);
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                StringCell * t = dynamic_cast<StringCell *>(cell);
+                DataTableStringCell * t = dynamic_cast<DataTableStringCell *>(cell);
                 t->print(out);
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
@@ -597,15 +552,15 @@ class DataTableRow {
             this->cells_.reserve(this->columns_.size());
             for (auto & column : this->columns_) {
                 auto cell_value_type = column->get_value_type();
-                BaseCell * new_cell = nullptr;
+                DataTableBaseCell * new_cell = nullptr;
                 if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                    new_cell = new SignedIntegerCell(*column);
+                    new_cell = new DataTableSignedIntegerCell(*column);
                 } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                    new_cell = new UnsignedIntegerCell(*column);
+                    new_cell = new DataTableUnsignedIntegerCell(*column);
                 } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                    new_cell = new FloatingPointCell(*column);
+                    new_cell = new DataTableFloatingPointCell(*column);
                 } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                    new_cell = new StringCell(*column);
+                    new_cell = new DataTableStringCell(*column);
                 } else {
                     throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
                 }
@@ -616,12 +571,10 @@ class DataTableRow {
     private:
         std::vector<DataTableColumn *> &          columns_;
         std::map<std::string, unsigned long> &    column_label_index_map_;
-        std::vector<BaseCell *>                   cells_;
+        std::vector<DataTableBaseCell *>                   cells_;
         unsigned long                             current_entry_cell_idx_;
 
 }; // DataTableRow
-
-} // namespace datatable
 
 //////////////////////////////////////////////////////////////////////////////
 // Table
@@ -629,10 +582,10 @@ class DataTableRow {
 class DataTable {
 
     public:
-        typedef datatable::DataTableColumn             Column;
-        typedef datatable::DataTableRow                Row;
-        typedef datatable::OutputStreamManipulator     OutputStreamManipulator;
-        typedef datatable::OutputStreamManipulators    OutputStreamManipulators;
+        typedef DataTableColumn                  Column;
+        typedef DataTableRow                     Row;
+        typedef platypus::stream::OutputStreamFormatter     OutputStreamFormatter;
+        typedef platypus::stream::OutputStreamFormatters    OutputStreamFormatters;
 
     public:
         DataTable() {
@@ -646,7 +599,7 @@ class DataTable {
             }
         }
         template <class T> Column & add_column(const std::string & label,
-                const OutputStreamManipulators & format_manipulators={},
+                const platypus::stream::OutputStreamFormatters & format_manipulators={},
                 bool is_key_column=false) {
             if (is_key_column) {
                 return this->add_key_column<T>(label, format_manipulators);
@@ -654,12 +607,12 @@ class DataTable {
                 return this->add_data_column<T>(label, format_manipulators);
             }
         }
-        template <class T> Column & add_key_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
+        template <class T> Column & add_key_column(const std::string & label, const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
             auto & col = this->create_column<T>(label, format_manipulators);
             this->key_columns_.push_back(&col);
             return col;
         }
-        template <class T> Column & add_data_column(const std::string & label, const OutputStreamManipulators & format_manipulators={}) {
+        template <class T> Column & add_data_column(const std::string & label, const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
             auto & col = this->create_column<T>(label, format_manipulators);
             this->data_columns_.push_back(&col);
             return col;
@@ -772,7 +725,7 @@ class DataTable {
     private:
         template <class T> Column & create_column(
                 const std::string & label,
-                const OutputStreamManipulators & format_manipulators={}) {
+                const platypus::stream::OutputStreamFormatters & format_manipulators={}) {
             if (!this->rows_.empty()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
             }
