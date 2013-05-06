@@ -42,7 +42,7 @@ namespace platypus {
  *   become attached to leaf nodes.
  */
 template <typename TreeT, typename LeafIterT>
-void build_maximally_unbalanced_tree(
+inline void build_maximally_unbalanced_tree(
         TreeT & tree,
         LeafIterT leaf_values_begin,
         LeafIterT leaf_values_end,
@@ -101,7 +101,7 @@ void build_maximally_unbalanced_tree(
  *   become attached to leaf nodes.
  */
 template <typename TreeT, typename LeafIterT>
-void build_maximally_balanced_tree(
+inline void build_maximally_balanced_tree(
         TreeT & tree,
         LeafIterT leaf_values_begin,
         LeafIterT leaf_values_end) {
