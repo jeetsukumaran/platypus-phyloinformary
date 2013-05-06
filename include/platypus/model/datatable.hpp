@@ -388,7 +388,6 @@ class DataTableRow {
             if (citer == this->column_label_index_map_.end()) {
                 throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
             }
-            return DataTableRow::get_cell_value<T>(this->cells_[citer->second]);
             this->set_cell_value(this->cells_[citer->second], val);
         }
 
