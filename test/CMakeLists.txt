@@ -59,6 +59,7 @@ SET(TEST_TARGET_SOURCES
     src/newick_reader_blank_nodes.cpp
     src/newick_reader_tree_stats.cpp
     src/newick_writer_basic.cpp
+    src/newick_vector_reader.cpp
     src/standard_interface.cpp
     src/max_unbalanced_tree_right.cpp
     src/max_unbalanced_tree_left.cpp

@@ -28,6 +28,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <memory>
 #include "base_producer.hpp"
 
 namespace platypus {
@@ -143,9 +144,6 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
         //////////////////////////////////////////////////////////////////////////////
         // Reading interface
 
-        // To be implementad by derived classes.
-        virtual int parse_stream(std::istream& src, const std::string& format="") = 0;
-
         virtual int read_from_filepath(const std::string& filepath, const std::string& format="") {
             std::ifstream f(filepath);
             if (!f.good()) {
@@ -162,6 +160,39 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
         virtual int read_from_stream(std::istream& src, const std::string& format="") {
             return this->parse_stream(src, format);
         }
+
+        std::vector<TreeT> get_from_stream(
+                std::istream& src,
+                const std::string& format="") {
+                // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {
+            std::vector<TreeT> trees;
+            auto old_tree_factory = this->tree_factory_fn_;
+            // auto tf = [&trees, &new_tree_fn]()->TreeT & { trees.emplace_back(new_tree_fn()); return trees.back(); };
+            auto tf = [&trees]()->TreeT & { trees.emplace_back(); return trees.back(); };
+            this->tree_factory_fn_ = tf;
+            this->parse_stream(src, format);
+            this->tree_factory_fn_ = old_tree_factory;
+            return trees;
+        }
+
+        std::vector<std::shared_ptr<TreeT>> get_ptr_vector_from_stream(
+                std::istream& src,
+                const std::string& format="") {
+                // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {
+            std::vector<std::shared_ptr<TreeT>> trees;
+            auto old_tree_factory = this->tree_factory_fn_;
+            // auto tf = [&trees, &new_tree_fn]()->TreeT & { trees.emplace_back(new_tree_fn()); return trees.back(); };
+            auto tf = [&trees]()->TreeT & { std::shared_ptr<TreeT> t(new TreeT()); trees.push_back(t); return *trees.back(); };
+            this->tree_factory_fn_ = tf;
+            this->parse_stream(src, format);
+            this->tree_factory_fn_ = old_tree_factory;
+            return trees;
+        }
+
+    protected:
+
+        // To be implementad by derived classes.
+        virtual int parse_stream(std::istream& src, const std::string& format="") = 0;
 
 }; // BaseTreeReader
 
