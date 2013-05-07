@@ -31,7 +31,7 @@ int main() {
 
     // reading
     auto reader = platypus::NewickReader<TreeType>(tree_factory);
-    configure_producer_for_standard_interface(reader);
+    platypus::bind_standard_interface(reader);
     reader.set_tree_stats_num_leaf_nodes_setter([](TreeType & tree, unsigned long n) {tree.num_leaves = n;});
     reader.set_tree_stats_num_internal_nodes_setter([](TreeType & tree, unsigned long n) {tree.num_internal_nodes = n;});
     reader.set_tree_stats_tree_length_setter([](TreeType & tree, double n) {tree.tree_length = n;});

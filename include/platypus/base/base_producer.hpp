@@ -69,43 +69,6 @@ class BaseTreeProducer {
     public:
 
         /**
-         * Sets the service functions of the TreeProducer-derived classes.
-         *
-         * @param tree_factory
-         *   A Function object that takes no arguments and returns a reference
-         *   to a new TreeT object. This function should take responsibility
-         *   for allocating memory, constructing, and initializing the TreeT
-         *   object. In addition, the function should also take responsibility
-         *   for storage ofthe object. Client code is responsible for the
-         *   management (including disposal) of the object.
-         *
-         * @param tree_is_rooted_func
-         *   A function object that takes a TreeT object and a boolean value
-         *   representing whether or not the tree is rooted (true == rooted)
-         *   as arguments and sets the rooted state of the tree accordingly.
-         *
-         * @param node_value_label_func
-         *   A function object that takes a reference to TreeT::value_type and
-         *   a std::string value as arguments and sets the label of the
-         *   node accordingly.
-         *
-         * @param node_value_edge_length_func
-         *   A function object that takes a reference to TreeT::value_type and
-         *   a EdgeLengthT value as arguments and sets the edge length of the node
-         *   accordingly.
-         */
-        BaseTreeProducer(
-                const tree_factory_fntype & tree_factory,
-                const tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const node_value_label_setter_fntype & node_value_label_func,
-                const node_value_edge_length_setter_fntype & node_value_edge_length_func) {
-            this->set_tree_factory(tree_factory);
-            this->set_tree_is_rooted_setter(tree_is_rooted_func);
-            this->set_node_label_setter(node_value_label_func);
-            this->set_edge_length_setter(node_value_edge_length_func);
-        }
-
-        /**
          * Sets the service functions of the BaseTreeProducer.
          *
          * @param tree_factory

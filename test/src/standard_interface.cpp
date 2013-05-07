@@ -21,7 +21,7 @@ int main() {
 
     // reading
     auto reader = platypus::NewickReader<TreeType>(tree_factory);
-    configure_producer_for_standard_interface(reader);
+    bind_standard_interface(reader);
     reader.read_from_string(tree_string);
 
     // check reading
@@ -31,7 +31,7 @@ int main() {
 
     // writer
     auto writer = platypus::NewickWriter<TreeType>();
-    configure_writer_for_standard_interface(writer);
+    bind_standard_interface(writer);
     std::ostringstream out;
     writer.write(trees.begin(), trees.end(), out);
     auto result = out.str();
