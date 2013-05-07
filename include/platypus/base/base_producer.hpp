@@ -134,6 +134,8 @@ class BaseTreeProducer {
             this->tree_stats_tree_length_setter_ = f;
         }
 
+    protected:
+
         // Use of functions
         tree_type & create_new_tree() {
             if (!this->tree_factory_fn_) {
