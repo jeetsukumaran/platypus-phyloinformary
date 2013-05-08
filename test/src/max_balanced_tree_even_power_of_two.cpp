@@ -19,7 +19,7 @@ int main () {
     newick_writer.set_suppress_rooting(true);
     newick_writer.set_suppress_edge_lengths(true);
     newick_writer.set_compact_spaces(true);
-    newick_writer.write_tree(tree, o);
+    newick_writer.write(o, tree);
     std::string result = o.str();
     std::string expected =  "(((f,e),(h,g)),((b,a),(d,c)));";
     int chk = platypus::testing::compare_equal(expected, result, __FILE__, __LINE__);

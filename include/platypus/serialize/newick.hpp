@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <exception>
 #include <string>
+#include <memory>
 #include "../base/base_writer.hpp"
 
 namespace platypus {
@@ -59,9 +60,9 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         // Main interface
 
         template <typename IterT>
-        void write(IterT trees_begin, IterT trees_end, std::ostream & out) {
+        void write(std::ostream & out, IterT trees_begin, IterT trees_end) {
             for (auto trees_iter = trees_begin; trees_iter != trees_end; ++trees_iter) {
-                this->write_tree(*trees_iter, out);
+                this->write(out, *trees_iter);
                 out << "\n";
             }
         }
@@ -70,7 +71,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         // Support
 
         // workhorse
-        void write_tree(const tree_type & tree, std::ostream & out) {
+        void write(std::ostream & out, const tree_type & tree) {
             if (this->tree_is_rooted_getter_ && !this->suppress_rooting_) {
                 if (this->tree_is_rooted_getter_(tree)) {
                     out << "[&R]";
@@ -86,8 +87,12 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         }
 
         // support pointers
-        void write_tree(const tree_type * tree, std::ostream & out) {
-            this->write_tree(*tree, out);
+        void write(std::ostream & out, const tree_type * tree) {
+            this->write(out, *tree);
+        }
+
+        void write(std::ostream & out, const std::shared_ptr<tree_type> & tree) {
+            this->write(out, *tree);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -148,7 +153,6 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
 
 
 }; // NewickWriter
-
 
 } // platypus
 

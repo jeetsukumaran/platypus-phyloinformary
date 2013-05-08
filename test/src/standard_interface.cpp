@@ -33,7 +33,7 @@ int main() {
     auto writer = platypus::NewickWriter<TreeType>();
     bind_standard_interface(writer);
     std::ostringstream out;
-    writer.write(trees.begin(), trees.end(), out);
+    writer.write(out, trees.begin(), trees.end());
     auto result = out.str();
 
     std::string expected =
