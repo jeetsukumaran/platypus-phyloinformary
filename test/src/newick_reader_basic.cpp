@@ -9,12 +9,12 @@
 static const unsigned int DEFAULT_NUM_TREES = 5;
 static const unsigned long EXPECTED_NTIPS = 8;
 static const unsigned long EXPECTED_NINTS = 7;
-static const double EXPECTED_LENGTH = 0.0;
+static const double EXPECTED_LENGTH = 120.0;
 
 std::string get_multitree_string(unsigned int num_trees=DEFAULT_NUM_TREES) {
     std::ostringstream o;
     for (unsigned int i = 0; i < num_trees; ++i) {
-        o << platypus::test::STANDARD_TEST_TREE_NEWICK << "\n";
+        o << platypus::test::STANDARD_TEST_TREE_WEDGE_NEWICK << "\n";
     }
     return o.str();
 }
@@ -68,6 +68,7 @@ int class_node_value_type_tree_read() {
     unsigned long idx = 0;
     for (auto & tree : trees) {
         fails += platypus::test::compare_against_standard_test_tree(tree);
+        fails += platypus::test::compare_edge_lengths_against_standard_test_tree(tree);
         fails += platypus::testing::compare_equal(
                 idx,
                 tree.get_index(),
@@ -116,6 +117,7 @@ int tree_ptrs_read() {
     unsigned long idx = 0;
     for (auto & tree : trees) {
         fails += platypus::test::compare_against_standard_test_tree(*tree);
+        fails += platypus::test::compare_edge_lengths_against_standard_test_tree(*tree);
         fails += platypus::testing::compare_equal(
                 idx,
                 tree->get_index(),
@@ -146,8 +148,14 @@ int tree_ptrs_read() {
 }
 
 int main () {
-    primitive_node_value_type_tree_read();
-    class_node_value_type_tree_read();
-    tree_ptrs_read();
+    int fails = 0;
+    fails += primitive_node_value_type_tree_read();
+    fails += class_node_value_type_tree_read();
+    fails += tree_ptrs_read();
+    if (fails != 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }
 

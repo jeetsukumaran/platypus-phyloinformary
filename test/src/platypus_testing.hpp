@@ -219,6 +219,7 @@ void build_tree(TreeType& tree,
 
 const std::string STANDARD_TEST_TREE_STRING = "a -> b -> i; b -> e -> j; e -> k; a -> c; c -> g; c -> f; g -> l; g -> m; f -> n; f -> h -> o; h -> p;";
 const std::string STANDARD_TEST_TREE_NEWICK = "((i, (j, k)e)b, ((l, m)g, (n, (o, p)h)f)c)a;";
+const std::string STANDARD_TEST_TREE_WEDGE_NEWICK = "((i:1, (j:2, k:3)e:4)b:5, ((l:6, m:7)g:8, (n:9, (o:10, p:11)h:12)f:13)c:14)a:15;";
 const std::vector<std::string> STANDARD_TEST_TREE_PREORDER = {"a", "b", "i", "e", "j", "k", "c", "g", "l", "m", "f", "n", "h", "o", "p"};
 const std::vector<std::string> STANDARD_TEST_TREE_POSTORDER = {"i", "j", "k", "e", "b", "l", "m", "g", "n", "o", "p", "h", "f", "c", "a"};
 const std::vector<std::string> STANDARD_TEST_TREE_LEAVES = {"i", "j", "k", "l", "m", "n", "o", "p"};
@@ -255,6 +256,23 @@ const std::map<std::string, std::vector<std::string>> STANDARD_TEST_TREE_SIBLING
     {"n", {"h"}},
     {"o", {"p"}},
     {"p", {}},
+};
+const std::map<std::string, double> STANDARD_TEST_EDGE_LENGTHS = {
+    {"a",15.0},
+    {"b", 5.0},
+    {"c",14.0},
+    {"e", 4.0},
+    {"f",13.0},
+    {"g", 8.0},
+    {"h",12.0},
+    {"i", 1.0},
+    {"j", 2.0},
+    {"k", 3.0},
+    {"l", 6.0},
+    {"m", 7.0},
+    {"n", 9.0},
+    {"o",10.0},
+    {"p",11.0},
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -435,6 +453,23 @@ int compare_against_standard_test_tree(TreeT & tree,
     }
 
     return has_failed;
+}
+template <class TreeT>
+int compare_edge_lengths_against_standard_test_tree(TreeT & tree,
+        const std::function<std::string (const typename TreeT::value_type &)> & get_label = [](const typename TreeT::value_type & nv){return nv.get_label();},
+        const std::function<double (const typename TreeT::value_type &)> & get_edge_length = [](const typename TreeT::value_type & nv){return nv.get_edge_length();}) {
+    int fails = 0;
+    for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
+        std::string label = get_label(*ndi);
+        double edge_length = get_edge_length(*ndi);
+        auto eli = STANDARD_TEST_EDGE_LENGTHS.find(label);
+        if (eli != STANDARD_TEST_EDGE_LENGTHS.end()) {
+            fails += platypus::testing::compare_equal(eli->second, edge_length, __FILE__, __LINE__, "Edge length for node '", label, "'");
+        } else {
+            fails += platypus::testing::fail_test(__FILE__, __LINE__, "Node '", label, "' not found");
+        }
+    }
+    return fails;
 }
 
 int compare_token_vectors(
