@@ -161,7 +161,7 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
             return this->parse_stream(src, format);
         }
 
-        std::vector<TreeT> get_from_stream(
+        std::vector<TreeT> get_tree_vector(
                 std::istream& src,
                 const std::string& format="") {
                 // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {
@@ -175,7 +175,7 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
             return trees;
         }
 
-        std::vector<std::shared_ptr<TreeT>> get_ptr_vector_from_stream(
+        std::vector<std::shared_ptr<TreeT>> get_tree_ptr_vector(
                 std::istream& src,
                 const std::string& format="") {
                 // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {

@@ -20,7 +20,7 @@ int simple_get() {
     auto reader = platypus::NewickReader<TreeType>();
     bind_standard_interface(reader);
     std::istringstream src(get_tree_string());
-    auto trees1 = reader.get_from_stream(src);
+    auto trees1 = reader.get_tree_vector(src);
     return platypus::testing::compare_equal(
                 NUM_TREES,
                 trees1.size(),
@@ -36,7 +36,7 @@ int complex_get() {
     auto reader = platypus::NewickReader<TreeType>();
     bind_standard_interface(reader);
     std::istringstream src(get_tree_string());
-    auto trees1 = reader.get_from_stream(src);
+    auto trees1 = reader.get_tree_vector(src);
     fails += platypus::testing::compare_equal(
                 NUM_TREES,
                 trees1.size(),
@@ -56,7 +56,7 @@ int pointer_get() {
     auto reader = platypus::NewickReader<TreeType>();
     bind_standard_interface(reader);
     std::istringstream src(get_tree_string());
-    auto trees1 = reader.get_ptr_vector_from_stream(src);
+    auto trees1 = reader.get_tree_ptr_vector(src);
     fails += platypus::testing::compare_equal(
                 NUM_TREES,
                 trees1.size(),
