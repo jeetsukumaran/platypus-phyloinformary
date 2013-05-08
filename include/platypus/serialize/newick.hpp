@@ -60,7 +60,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         // Main interface
 
         template <typename IterT>
-        void write(std::ostream & out, IterT trees_begin, IterT trees_end) {
+        void write(std::ostream & out, IterT trees_begin, IterT trees_end) const {
             for (auto trees_iter = trees_begin; trees_iter != trees_end; ++trees_iter) {
                 this->write(out, *trees_iter);
                 out << "\n";
@@ -71,7 +71,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         // Support
 
         // workhorse
-        void write(std::ostream & out, const tree_type & tree) {
+        void write(std::ostream & out, const tree_type & tree) const {
             if (this->tree_is_rooted_getter_ && !this->suppress_rooting_) {
                 if (this->tree_is_rooted_getter_(tree)) {
                     out << "[&R]";
@@ -87,11 +87,11 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         }
 
         // support pointers
-        void write(std::ostream & out, const tree_type * tree) {
+        void write(std::ostream & out, const tree_type * tree) const {
             this->write(out, *tree);
         }
 
-        void write(std::ostream & out, const std::shared_ptr<tree_type> & tree) {
+        void write(std::ostream & out, const std::shared_ptr<tree_type> & tree) const {
             this->write(out, *tree);
         }
 
@@ -118,7 +118,7 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
 
         void write_node(const tree_type & tree,
                 const typename tree_type::iterator & node_iter,
-                std::ostream& out) {
+                std::ostream& out) const {
             bool is_leaf = node_iter.is_leaf();
             if (!is_leaf) {
                 out << "(";
