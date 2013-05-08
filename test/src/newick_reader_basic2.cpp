@@ -1,6 +1,9 @@
 #include <sstream>
 #include <map>
 #include <string>
+#include <platypus/parse/newick.hpp>
+#include <platypus/model/tree.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include "platypus_testing.hpp"
 
 using namespace platypus::test;
@@ -79,9 +82,11 @@ int main () {
     for (auto & si : tree_strings) {
         auto & src = si.first;
         auto & expected = stripspaces(si.second);
+        auto tree_reader = platypus::NewickReader<TreeType>();
+        platypus::bind_standard_interface(tree_reader);
         TreeType tree;
-        auto tree_reader = get_single_tree_newick_reader(tree);
-        tree_reader.read_from_string(src);
+        tree_reader.read(std::istringstream(src),
+                [&tree]()->TreeType& { return tree; });
         std::stringstream o;
         write_newick_no_brlens(tree, o);
         std::string observed = o.str();
