@@ -1,4 +1,5 @@
 #include <sstream>
+#include <platypus/model/treepattern.hpp>
 #include "platypus_testing.hpp"
 
 using namespace platypus::test;

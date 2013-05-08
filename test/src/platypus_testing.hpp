@@ -12,6 +12,7 @@
 #include <functional>
 #include <platypus/model/tree.hpp>
 #include <platypus/parse/newick.hpp>
+#include <platypus/serialize/newick.hpp>
 #include <platypus/model/standardinterface.hpp>
 #include <platypus/utility/tokenizer.hpp>
 #include <platypus/utility/testing.hpp>
@@ -129,6 +130,15 @@ std::vector<TreeT> get_test_data_tree_vector_from_string(const std::string & s) 
             [&trees]()->TreeT&{trees.emplace_back(); return trees.back();}
             );
     return trees;
+}
+
+template <class TreeT>
+platypus::NewickWriter<TreeT> get_standard_newick_writer(bool include_edge_lengths=true) {
+    auto tree_writer = platypus::NewickWriter<TreeT>();
+    if (include_edge_lengths) {
+        tree_writer.set_edge_length_getter([](const typename TreeT::value_type & nv)->double {return nv.get_edge_length();} );
+    }
+    return tree_writer;
 }
 
 //////////////////////////////////////////////////////////////////////////////
