@@ -35,15 +35,15 @@ namespace platypus {
 // Definition of standard interface node values.
 
 template <class EdgeLengthT=double>
-class StandardNodeValueInterface {
+class StandardInterfaceNodeValue {
     public:
-        virtual ~StandardNodeValueInterface() { }
+        virtual ~StandardInterfaceNodeValue() { }
         virtual void set_label(const std::string & label) = 0;
         virtual std::string & get_label() = 0;
         virtual const std::string & get_label() const = 0;
         virtual void set_edge_length(EdgeLengthT edge_length) = 0;
         virtual EdgeLengthT get_edge_length() const = 0;
-}; // StandardNodeValueInterface
+}; // StandardInterfaceNodeValue
 
 //////////////////////////////////////////////////////////////////////////////
 // StandardTree
@@ -75,7 +75,7 @@ class StandardTreeInterface : public Tree<NodeValueT, TreeNodeAllocatorT> {
 // Reference implementation of standard interface (for node values).
 
 template <class EdgeLengthT=double>
-class StandardNodeValue : public StandardNodeValueInterface<EdgeLengthT> {
+class StandardNodeValue : public StandardInterfaceNodeValue<EdgeLengthT> {
     public:
         StandardNodeValue()
             : edge_length_(0.0) { }

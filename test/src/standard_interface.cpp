@@ -1,28 +1,28 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <platypus/parse/newick.hpp>
 #include <platypus/model/tree.hpp>
+#include <platypus/parse/newick.hpp>
+#include <platypus/serialize/newick.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include "platypus_testing.hpp"
 
-using namespace platypus::test;
 
 int main() {
     // tree source
     std::string tree_string;
     for (int i = 0; i < 5; ++i) {
-        tree_string += STANDARD_TEST_TREE_NEWICK;
+        tree_string += platypus::test::STANDARD_TEST_TREE_NEWICK;
     }
 
     // tree
-    typedef platypus::StandardTree<platypus::StandardNodeValue> TreeType;
+    typedef platypus::StandardTree<platypus::StandardNodeValue<>> TreeType;
     std::vector<TreeType> trees;
-    auto tree_factory = [&trees] () -> TreeType & { trees.emplace_back(true); return trees.back(); };
-
-    // reading
-    auto reader = platypus::NewickReader<TreeType>(tree_factory);
+    auto reader = platypus::NewickReader<TreeType>();
     bind_standard_interface(reader);
-    reader.read_from_string(tree_string);
+    reader.read(std::istringstream(tree_string),
+        [&trees] () -> TreeType & { trees.emplace_back(true); return trees.back(); }
+            );
 
     // check reading
     if (trees.size() != 5) {

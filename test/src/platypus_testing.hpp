@@ -135,6 +135,8 @@ std::vector<TreeT> get_test_data_tree_vector_from_string(const std::string & s) 
 template <class TreeT>
 platypus::NewickWriter<TreeT> get_standard_newick_writer(bool include_edge_lengths=true) {
     auto tree_writer = platypus::NewickWriter<TreeT>();
+    tree_writer.set_tree_is_rooted_getter([](const TreeT & tree)->bool {return tree.is_rooted();} );
+    tree_writer.set_node_label_getter([](const typename TreeT::value_type & nv)->std::string {return nv.get_label();} );
     if (include_edge_lengths) {
         tree_writer.set_edge_length_getter([](const typename TreeT::value_type & nv)->double {return nv.get_edge_length();} );
     }
