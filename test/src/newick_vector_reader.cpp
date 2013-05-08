@@ -63,10 +63,11 @@ int pointer_get() {
                 __FILE__,
                 __LINE__,
                 "Incorrect number of trees read from test data");
-    // platypus::NewickWriter<TreeType> newick_writer;
-    // bind_standard_interface(newick_writer);
-    // newick_writer.write(trees1.begin(), trees1.end(), std::cout);
-    // exit(EXIT_FAILURE);
+    platypus::NewickWriter<TreeType> newick_writer;
+    bind_standard_interface(newick_writer);
+    std::ostringstream o;
+    newick_writer.write(o, trees1.begin(), trees1.end());
+    return fails;
 }
 
 
