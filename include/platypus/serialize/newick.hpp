@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <exception>
 #include <string>
+#include <sstream>
 #include <memory>
 #include "../base/base_writer.hpp"
 
@@ -60,15 +61,33 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         // Main interface
 
         template <typename IterT>
+        std::string format(IterT trees_begin, IterT trees_end) const {
+            std::ostringstream o;
+            this->write(o, trees_begin, trees_end);
+            return o.str();
+        }
+
+        std::string format(const tree_type & tree) const {
+            std::ostringstream o;
+            this->write(o, tree);
+            return o.str();
+        }
+
+        std::string format(const tree_type * tree) const {
+            return this->format(*tree);
+        }
+
+        std::string format(const std::shared_ptr<tree_type> & tree) const {
+            return this->format(*tree);
+        }
+
+        template <typename IterT>
         void write(std::ostream & out, IterT trees_begin, IterT trees_end) const {
             for (auto trees_iter = trees_begin; trees_iter != trees_end; ++trees_iter) {
                 this->write(out, *trees_iter);
                 out << "\n";
             }
         }
-
-        //////////////////////////////////////////////////////////////////////////////
-        // Support
 
         // workhorse
         void write(std::ostream & out, const tree_type & tree) const {
@@ -149,8 +168,6 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
         bool    suppress_internal_node_labels_;
         bool    suppress_edge_lengths_;
         bool    compact_spaces_;
-
-
 
 }; // NewickWriter
 
