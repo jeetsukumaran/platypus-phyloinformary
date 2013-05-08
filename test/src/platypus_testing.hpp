@@ -69,6 +69,7 @@ class TestDataTree : public platypus::Tree<TestData> {
     public:
         TestDataTree()
             : is_rooted_(true)
+              , index_(0)
               , ntips_(0)
               , nints_(0)
               , length_(0.0) { }
@@ -78,6 +79,12 @@ class TestDataTree : public platypus::Tree<TestData> {
         }
         bool is_rooted() const {
             return this->is_rooted_;
+        }
+        unsigned long get_index() const {
+            return this->index_;
+        }
+        void set_index(unsigned long index) {
+            this->index_ = index;
         }
         unsigned long get_ntips() const {
             return this->ntips_;
@@ -99,6 +106,7 @@ class TestDataTree : public platypus::Tree<TestData> {
         }
     private:
         bool             is_rooted_;
+        unsigned long    index_;
         unsigned long    ntips_;
         unsigned long    nints_;
         double           length_;

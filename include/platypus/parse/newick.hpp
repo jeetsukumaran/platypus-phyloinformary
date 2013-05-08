@@ -105,7 +105,7 @@ class NewickReader : public BaseTreeReader<TreeT, EdgeLengthT> {
             }
             while (src_iter != this->tokenizer_.end()) {
                 auto & tree = get_new_tree_reference();
-                this->parse_tree_from_stream(tree, src_iter);
+                this->parse_tree_from_stream(tree, src_iter, tree_count);
                 ++tree_count;
                 if (tree_limit > 0 && tree_count >= tree_limit) {
                     break;
@@ -128,7 +128,8 @@ class NewickReader : public BaseTreeReader<TreeT, EdgeLengthT> {
          *   be the first parenthesis of a tree statement.
          */
         tree_type & parse_tree_from_stream(TreeT & tree,
-                NexusTokenizer::iterator & src_iter) {
+                NexusTokenizer::iterator & src_iter,
+                unsigned long tree_count=0) {
             if (*src_iter != "(") {
                 throw NewickReaderInvalidTokenError(__FILE__, __LINE__, *src_iter);
             }
@@ -141,7 +142,7 @@ class NewickReader : public BaseTreeReader<TreeT, EdgeLengthT> {
                     num_leaf_nodes,
                     num_internal_nodes,
                     tree_length);
-            this->postprocess_tree(tree, num_leaf_nodes, num_internal_nodes, tree_length);
+            this->postprocess_tree(tree, tree_count, num_leaf_nodes, num_internal_nodes, tree_length);
             // skip over multiple consecutive trailing semi-colons
             while (!src_iter.eof() && *src_iter == ";") {
                 ++src_iter;

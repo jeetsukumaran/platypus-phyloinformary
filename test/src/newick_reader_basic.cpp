@@ -20,7 +20,8 @@ std::string get_multitree_string(unsigned int num_trees=DEFAULT_NUM_TREES) {
 }
 
 template <class TreeT>
-void postprocess_tree(TreeT & tree, unsigned long ntips, unsigned long nints, double tree_length) {
+void postprocess_tree(TreeT & tree, unsigned long idx, unsigned long ntips, unsigned long nints, double tree_length) {
+    tree.set_index(idx);
     tree.set_ntips(ntips);
     tree.set_nints(nints);
     tree.set_length(tree_length);
@@ -64,8 +65,15 @@ int class_node_value_type_tree_read() {
             __FILE__,
             __LINE__,
             "Number of trees in vector");
+    unsigned long idx = 0;
     for (auto & tree : trees) {
         fails += platypus::test::compare_against_standard_test_tree(tree);
+        fails += platypus::testing::compare_equal(
+                idx,
+                tree.get_index(),
+                __FILE__,
+                __LINE__,
+                "Tree index");
         fails += platypus::testing::compare_equal(
                 EXPECTED_NTIPS,
                 tree.get_ntips(),
@@ -84,6 +92,7 @@ int class_node_value_type_tree_read() {
                 __FILE__,
                 __LINE__,
                 "Length of tree reported");
+        ++idx;
     }
     return fails;
 }
@@ -104,8 +113,15 @@ int tree_ptrs_read() {
             __FILE__,
             __LINE__,
             "Number of trees in vector");
+    unsigned long idx = 0;
     for (auto & tree : trees) {
         fails += platypus::test::compare_against_standard_test_tree(*tree);
+        fails += platypus::testing::compare_equal(
+                idx,
+                tree->get_index(),
+                __FILE__,
+                __LINE__,
+                "Tree index");
         fails += platypus::testing::compare_equal(
                 EXPECTED_NTIPS,
                 tree->get_ntips(),
@@ -124,6 +140,7 @@ int tree_ptrs_read() {
                 __FILE__,
                 __LINE__,
                 "Length of tree reported");
+        ++idx;
     }
     return fails;
 }

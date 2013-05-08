@@ -59,10 +59,10 @@ class BaseTreeProducer {
         typedef typename tree_type::value_type   tree_value_type;
 
         // typedefs for functions used in construction
-        typedef std::function<void (tree_type &, bool)>                                         tree_is_rooted_setter_fntype;
-        typedef std::function<void (tree_value_type &, const std::string &)>                    node_value_label_setter_fntype;
-        typedef std::function<void (tree_value_type &, EdgeLengthT)>                            node_value_edge_length_setter_fntype;
-        typedef std::function<void (tree_type &, unsigned long, unsigned long, EdgeLengthT)>    tree_postprocess_fntype;
+        typedef std::function<void (tree_type &, bool)>                                                        tree_is_rooted_setter_fntype;
+        typedef std::function<void (tree_value_type &, const std::string &)>                                   node_value_label_setter_fntype;
+        typedef std::function<void (tree_value_type &, EdgeLengthT)>                                           node_value_edge_length_setter_fntype;
+        typedef std::function<void (tree_type &, unsigned long, unsigned long, unsigned long, EdgeLengthT)>    tree_postprocess_fntype;
 
 
     public:
@@ -125,20 +125,22 @@ class BaseTreeProducer {
         /**
          * Binds the tree post-processing function.
          *
-         * @param node_value_edge_length_func
-         *   A function that takes a reference to a TreeT::value_type object
-         *   (representing the data stored at a particular node in the tree),
-         *   an unsigned long argument (representing the number of tips or
-         *   leaf nodes in the tree), another unsigned long argument
-         *   (representing the number of internal nodes of the tree), and an
-         *   EdgeLengthT argument (representing the total tree length, or the
-         *   sum of edge lengths on the tree).
+         * @param tree_postprocess_fn
+         *   A function that takes, in order, the following arguments:
+         *      - an TreeT object reference, representing the tree produced
+         *      - an unsigned long value, representing the 0-based index of the tree
+         *        produced (first tree produced has index of 0)
+         *      - an unsigned long value, representing the number of tips or
+         *        leaf nodes in the tree
+         *      - an unsigned long value, representing the number of internal nodes of the tree
+         *      - an EdgeLengthT argument, representing the total tree length,
+         *        i.e. the sum of edge lengths on the tree
          */
         virtual void set_tree_postprocess_fn(const tree_postprocess_fntype & tree_postprocess_fn) {
             this->tree_postprocess_fn_ = tree_postprocess_fn;
         }
         virtual void clear_tree_postprocess_fn() {
-            this->tree_postprocess_fn_ = [] (tree_type &, unsigned long, unsigned long, EdgeLengthT) { };
+            this->tree_postprocess_fn_ = [] (tree_type &, unsigned long, unsigned long, unsigned long, EdgeLengthT) { };
         }
 
     protected:
@@ -158,9 +160,9 @@ class BaseTreeProducer {
                 this->node_value_edge_length_setter_(nv, length);
             }
         }
-        void postprocess_tree(tree_type & tree, unsigned long tips, unsigned long internals, EdgeLengthT length) {
+        void postprocess_tree(tree_type & tree, unsigned long idx, unsigned long tips, unsigned long internals, EdgeLengthT length) {
             if (this->tree_postprocess_fn_) {
-                this->tree_postprocess_fn_(tree, tips, internals, length);
+                this->tree_postprocess_fn_(tree, idx, tips, internals, length);
             }
         }
 
