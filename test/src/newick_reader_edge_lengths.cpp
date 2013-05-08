@@ -1,5 +1,8 @@
 #include <sstream>
 #include <map>
+#include <platypus/parse/newick.hpp>
+#include <platypus/model/tree.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include "platypus_testing.hpp"
 
 using namespace platypus::test;
@@ -37,9 +40,13 @@ int main () {
         }
     }
     auto tree_string = o.str();
-    std::vector<TestDataTree> trees;
-    auto tree_reader = get_test_data_tree_newick_reader(trees);
-    tree_reader.read_from_string(tree_string, "newick");
+    typedef TestDataTree TreeType;
+    std::vector<TreeType> trees;
+    auto tree_reader = platypus::NewickReader<TreeType>();
+    platypus::bind_standard_interface(tree_reader);
+    tree_reader.read(std::istringstream(tree_string),
+            [&trees]()->TreeType&{trees.emplace_back(); return trees.back();}
+            );
     assert(trees.size() == 1);
     auto tree = trees[0];
 
