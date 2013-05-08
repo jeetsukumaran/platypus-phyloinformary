@@ -76,7 +76,7 @@ class NewickReaderMalformedStatementError : public NewickReaderException {
  * Parses NEWICK tree data sources and instantiates corresponding tree objects.
  */
 template <typename TreeT, typename EdgeLengthT=double>
-class NewickReader : public BaseTreeReader<TreeT> {
+class NewickReader : public BaseTreeReader<TreeT, EdgeLengthT> {
 
     public:
         typedef TreeT                          tree_type;
@@ -85,28 +85,15 @@ class NewickReader : public BaseTreeReader<TreeT> {
 
     public:
 
-        NewickReader(
-                const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory,
-                const typename BaseTreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const typename BaseTreeReader<TreeT>::node_value_label_setter_fntype & node_value_label_func,
-                const typename BaseTreeReader<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
-            : BaseTreeReader<TreeT>(tree_factory,
-                    tree_is_rooted_func,
-                    node_value_label_func,
-                    node_value_edge_length_func) {
-        }
+        NewickReader() : BaseTreeReader<TreeT, EdgeLengthT>() { }
+        ~NewickReader() { }
 
-        NewickReader(const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory)
-            : BaseTreeReader<TreeT>(tree_factory) {
-        }
+    protected:
 
-        NewickReader() {
-        }
-
-        int parse_stream(std::istream& src, const std::string& format="") override {
-            if (!format.empty() && format != "newick") {
-                throw NewickReaderException(__FILE__, __LINE__, "platypus::NewickReader only supports 'newick' formatted sources");
-            }
+        int parse_stream(
+                std::istream & src,
+                const std::function<tree_type & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0) override {
             NexusTokenizer::iterator src_iter = this->tokenizer_.begin(src);
             int tree_count = 0;
             // skip over leading semi-colons
@@ -117,9 +104,12 @@ class NewickReader : public BaseTreeReader<TreeT> {
                 return 0;
             }
             while (src_iter != this->tokenizer_.end()) {
-                auto & tree = this->create_new_tree();
+                auto & tree = get_new_tree_reference();
                 this->parse_tree_from_stream(tree, src_iter);
                 ++tree_count;
+                if (tree_limit > 0 && tree_count >= tree_limit) {
+                    break;
+                }
             }
             return tree_count;
         }
@@ -151,9 +141,7 @@ class NewickReader : public BaseTreeReader<TreeT> {
                     num_leaf_nodes,
                     num_internal_nodes,
                     tree_length);
-            this->set_tree_stats_num_leaf_nodes(tree, num_leaf_nodes);
-            this->set_tree_stats_num_internal_nodes(tree, num_internal_nodes);
-            this->set_tree_stats_tree_length(tree, tree_length);
+            this->postprocess_tree(tree, num_leaf_nodes, num_internal_nodes, tree_length);
             // skip over multiple consecutive trailing semi-colons
             while (!src_iter.eof() && *src_iter == ";") {
                 ++src_iter;

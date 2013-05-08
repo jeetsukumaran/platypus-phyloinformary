@@ -79,11 +79,11 @@ class ReaderException : public ProducerException {
  *    };
  *    typedef platypus::Tree<NodeData> TreeType;
  *    std::vector<TreeType> trees;
- *    auto tree_factory = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
- *    platypus::SomeTreeReader<TreeType> tree_reader(tree_factory);
+ *    auto get_new_tree_reference = [&trees] () -> TreeType& { trees.emplace_back(); return trees.back(); };
+ *    platypus::SomeTreeReader<TreeType> tree_reader(get_new_tree_reference);
  *    // or:
  *    // platypus::SomeTreeReader<TreeType> tree_reader;
- *    // tree_reader.set_tree_factory(tree_factory);
+ *    // tree_reader.set_get_new_tree_reference(get_new_tree_reference);
  *    auto is_rooted_f = [] (TreeType& tree, bool) {}; // no-op
  *    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
  *    auto node_label_f = [] (NodeData& nd, const std::string& label) {nd.label = label;};
@@ -94,47 +94,25 @@ class ReaderException : public ProducerException {
  *  @endcode@
  *
  */
-template <typename TreeT>
-class BaseTreeReader : public BaseTreeProducer<TreeT> {
+template <typename TreeT, typename EdgeLengthT=double>
+class BaseTreeReader : public BaseTreeProducer<TreeT, EdgeLengthT> {
 
     public:
-        typedef typename BaseTreeProducer<TreeT>::tree_type             tree_type;
-        typedef typename BaseTreeProducer<TreeT>::tree_node_type        tree_node_type;
-        typedef typename BaseTreeProducer<TreeT>::tree_value_type       tree_value_type;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::tree_type             tree_type;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::tree_node_type        tree_node_type;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::tree_value_type       tree_value_type;
 
     public:
-        typedef typename BaseTreeProducer<TreeT>::tree_factory_fntype                    tree_factory_fntype;
-        typedef typename BaseTreeProducer<TreeT>::tree_is_rooted_setter_fntype           tree_is_rooted_setter_fntype;
-        typedef typename BaseTreeProducer<TreeT>::node_value_label_setter_fntype         node_value_label_setter_fntype;
-        typedef typename BaseTreeProducer<TreeT>::node_value_edge_length_setter_fntype   node_value_edge_length_setter_fntype;
-        typedef typename BaseTreeProducer<TreeT>::tree_stats_numeric_setter_fntype       tree_stats_numeric_setter_fntype;
-        typedef typename BaseTreeProducer<TreeT>::tree_stats_count_setter_fntype         tree_stats_count_setter_fntype;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::tree_is_rooted_setter_fntype            tree_is_rooted_setter_fntype;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::node_value_label_setter_fntype          node_value_label_setter_fntype;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::node_value_edge_length_setter_fntype    node_value_edge_length_setter_fntype;
+        typedef typename BaseTreeProducer<TreeT, EdgeLengthT>::tree_postprocess_fntype                 tree_postprocess_fntype;
 
     public:
 
         //////////////////////////////////////////////////////////////////////////////
         // Life-cycle
 
-        /**
-         * @brief Constructs a BaseTreeReader object that can parse data sources
-         * and instantiate corresponding TreeT objects.
-         *
-         * @param tree_factory
-         *   A Function object that takes no arguments and returns a reference
-         *   to a new TreeT object. This function should take responsibility
-         *   for allocating memory, constructing, and initializing the TreeT
-         *   object. In addition, the function should also take responsibility
-         *   for storage ofthe object. Client code is responsible for the
-         *   management (including disposal) of the object.
-         *
-         */
-        BaseTreeReader(const tree_factory_fntype & tree_factory)
-            : BaseTreeProducer<TreeT>(tree_factory) {
-        }
-
-        /**
-         * Default constructor.
-         */
         BaseTreeReader() {
         }
 
@@ -144,55 +122,93 @@ class BaseTreeReader : public BaseTreeProducer<TreeT> {
         //////////////////////////////////////////////////////////////////////////////
         // Reading interface
 
-        virtual int read_from_filepath(const std::string& filepath, const std::string& format="") {
-            std::ifstream f(filepath);
-            if (!f.good()) {
-                throw ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
-            }
-            return this->parse_stream(f, format);
+        /**
+         * Reads the stream `src`, creating tree objects using `get_new_tree_reference`
+         * and populating them based on the data in the stream.
+         *
+         * @param src
+         *   Input stream which contains a representation of the tree(s).
+         *
+         * @param get_new_tree_reference
+         *   A Function object that takes no arguments and returns a
+         *   *reference* to a new TreeT object. This function will be called
+         *   multiple times, once for each tree produced by the producer. This
+         *   function should take responsibility for allocating memory,
+         *   constructing, and initializing the TreeT object. In addition, the
+         *   function should also take responsibility for storage of the
+         *   object.  Client code is responsible for the lifecycle management
+         *   (including disposal) of the object.
+         *
+         *   Examples of factory functions:
+         *
+         *      // Container (vector) of Tree objects
+         *      std::vector<Tree> trees;
+         *      auto tf1 = [&trees] () -> Tree & {
+         *          trees.emplace_back();
+         *          return trees.back();
+         *      };
+         *
+         *      // Container (vector) of pointers to Tree objects
+         *      std::vector<std::shared_ptr<Tree>> tree_ptrs;
+         *      auto tf2 = [&tree_ptrs] () -> Tree & {
+         *          tree_ptrs.emplace_back(std::shared_ptr<Tree>(new Tree()));
+         *          return *tree_ptrs.back();
+         *      };
+         *
+         *      // Single tree object (if only one tree is needed)
+         *      Tree tree;
+         *      auto tf3 = [&tree] () -> Tree & { return tree; }
+         *
+         * @param tree_limit
+         *   The maximum number of trees to be read from the source. If 0, all
+         *   trees available in the source will be read.
+         *
+         * @return
+         *   The number of trees read.
+         */
+        virtual unsigned long read(
+                std::istream & src,
+                const std::function<TreeT & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0) {
+            return this->parse_stream(src, get_new_tree_reference, tree_limit);
         }
 
-        virtual int read_from_string(const std::string& str, const std::string& format="") {
-            std::istringstream s(str);
-            return this->parse_stream(s, format);
-        }
-
-        virtual int read_from_stream(std::istream& src, const std::string& format="") {
-            return this->parse_stream(src, format);
+        // overload for binding `src` to temporary
+        virtual unsigned long read(
+                std::istream && src,
+                const std::function<TreeT & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0) {
+            return this->read(src, get_new_tree_reference, tree_limit);
         }
 
         std::vector<TreeT> get_tree_vector(
-                std::istream& src,
-                const std::string& format="") {
+                std::istream & src,
+                unsigned long tree_limit=0) {
                 // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {
             std::vector<TreeT> trees;
-            auto old_tree_factory = this->tree_factory_fn_;
-            // auto tf = [&trees, &new_tree_fn]()->TreeT & { trees.emplace_back(new_tree_fn()); return trees.back(); };
             auto tf = [&trees]()->TreeT & { trees.emplace_back(); return trees.back(); };
-            this->tree_factory_fn_ = tf;
-            this->parse_stream(src, format);
-            this->tree_factory_fn_ = old_tree_factory;
+            this->parse_stream(src, tf, tree_limit);
             return trees;
         }
 
-        std::vector<std::shared_ptr<TreeT>> get_tree_ptr_vector(
+        std::vector<std::unique_ptr<TreeT>> get_tree_ptr_vector(
                 std::istream& src,
-                const std::string& format="") {
+                unsigned long tree_limit=0) {
                 // std::function<TreeT&()> new_tree_fn = []()->TreeT&{return TreeT();}) {
-            std::vector<std::shared_ptr<TreeT>> trees;
-            auto old_tree_factory = this->tree_factory_fn_;
+            std::vector<std::unique_ptr<TreeT>> trees;
             // auto tf = [&trees, &new_tree_fn]()->TreeT & { trees.emplace_back(new_tree_fn()); return trees.back(); };
-            auto tf = [&trees]()->TreeT & { std::shared_ptr<TreeT> t(new TreeT()); trees.push_back(t); return *trees.back(); };
-            this->tree_factory_fn_ = tf;
-            this->parse_stream(src, format);
-            this->tree_factory_fn_ = old_tree_factory;
+            auto tf = [&trees]()->TreeT & { std::unique_ptr<TreeT> t(new TreeT()); trees.push_back(t); return *trees.back(); };
+            this->parse_stream(src, tf, tree_limit);
             return trees;
         }
 
     protected:
 
         // To be implementad by derived classes.
-        virtual int parse_stream(std::istream& src, const std::string& format="") = 0;
+        virtual int parse_stream(
+                std::istream& src,
+                const std::function<TreeT & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0) = 0;
 
 }; // BaseTreeReader
 

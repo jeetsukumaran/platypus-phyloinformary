@@ -9,7 +9,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <map>
-#include <platypus/platypus.hpp>
+#include <functional>
+#include <platypus/model/tree.hpp>
+#include <platypus/utility/tokenizer.hpp>
 #include <platypus/utility/testing.hpp>
 
 namespace platypus { namespace test {
@@ -77,47 +79,6 @@ class TestDataTree : public platypus::Tree<TestData> {
     private:
         bool is_rooted_;
 }; // TestDataTree
-
-template <class TreeT>
-platypus::NewickReader<TreeT> get_test_data_tree_newick_reader(std::vector<TreeT> & trees) {
-    auto tree_factory = [&trees] () -> TreeT & { trees.emplace_back(); return trees.back(); };
-    auto is_rooted_f = [] (TreeT & tree, bool) {}; // no-op
-    auto node_label_f = [] (TestData & value, const std::string& label) {value.set_label(label);};
-    auto node_edge_f = [] (TestData & value, double len) {value.set_edge_length(len);};
-    platypus::NewickReader<TreeT> tree_reader;
-    tree_reader.set_tree_factory(tree_factory);
-    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
-    tree_reader.set_node_label_setter(node_label_f);
-    tree_reader.set_edge_length_setter(node_edge_f);
-    return tree_reader;
-}
-
-template <class TreeT>
-platypus::NewickWriter<TreeT> get_standard_newick_writer(bool include_edge_lengths=true) {
-    platypus::NewickWriter<TreeT>  newick_writer;
-    newick_writer.set_tree_is_rooted_getter([](const TreeT & tree)->bool {return tree.is_rooted();} );
-    newick_writer.set_node_label_getter([](const typename TreeT::value_type & nv)->std::string {return nv.get_label();} );
-    if (include_edge_lengths) {
-        newick_writer.set_edge_length_getter([](const typename TreeT::value_type & nv)->double {return nv.get_edge_length();} );
-    }
-    return newick_writer;
-}
-
-
-template <class TreeT>
-platypus::NewickReader<TreeT> get_single_tree_newick_reader(TreeT & tree) {
-    auto tree_factory = [&tree] () -> TreeT & { return tree; };
-    auto is_rooted_f = [] (TreeT & tree, bool) {}; // no-op
-    auto node_label_f = [] (TestData & value, const std::string& label) {value.set_label(label);};
-    auto node_edge_f = [] (TestData & value, double len) {value.set_edge_length(len);};
-    platypus::NewickReader<TreeT> tree_reader;
-    tree_reader.set_tree_factory(tree_factory);
-    tree_reader.set_tree_is_rooted_setter(is_rooted_f);
-    tree_reader.set_node_label_setter(node_label_f);
-    tree_reader.set_edge_length_setter(node_edge_f);
-    return tree_reader;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // General String Support/Utility
@@ -364,7 +325,85 @@ int compare_against_newick_string(TreeT& tree,
     }
 }
 
-int compare_against_standard_test_tree(TestDataTree & tree);
+template <class TreeT>
+int compare_against_standard_test_tree(TreeT & tree,
+        const std::function<std::string (const typename TreeT::value_type &)> & get_label = [](const typename TreeT::value_type & nv){return nv->get_label();}
+        ) {
+    int has_failed = 0;
+
+    // postorder
+    std::vector<std::string> postorder_visits;
+    for (auto ndi = tree.postorder_begin(); ndi != tree.postorder_end(); ++ndi) {
+        postorder_visits.push_back(get_label(*ndi));
+    }
+    has_failed += platypus::testing::compare_equal(
+            STANDARD_TEST_TREE_POSTORDER,
+            postorder_visits,
+            __FILE__,
+            __LINE__);
+
+    // preorder
+    std::vector<std::string> preorder_visits;
+    for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
+        preorder_visits.push_back(get_label(*ndi));
+    }
+    has_failed += platypus::testing::compare_equal(
+            STANDARD_TEST_TREE_PREORDER,
+            preorder_visits,
+            __FILE__,
+            __LINE__);
+
+    // leaves
+    std::vector<std::string> leaves;
+    for (auto ndi = tree.leaf_begin(); ndi != tree.leaf_end(); ++ndi) {
+        leaves.push_back(get_label(*ndi));
+    }
+    has_failed += platypus::testing::compare_equal(
+            STANDARD_TEST_TREE_LEAVES,
+            leaves,
+            __FILE__,
+            __LINE__);
+
+    // children
+    std::map<std::string, std::vector<std::string>> children;
+    for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
+        for (auto chi = tree.children_begin(ndi); chi != tree.children_end(); ++chi) {
+            children[get_label(*ndi)].push_back(get_label(*chi));
+        }
+        auto expected_iter = STANDARD_TEST_TREE_CHILDREN.find(get_label(*ndi));
+        assert(expected_iter != STANDARD_TEST_TREE_CHILDREN.end());
+        auto expected_children = expected_iter->second;
+        has_failed += platypus::testing::compare_equal(
+                expected_children,
+                children[get_label(*ndi)],
+                __FILE__,
+                __LINE__,
+                "Parent node: ", *ndi);
+    }
+
+    // siblings
+    std::map<std::string, std::vector<std::string>> siblings;
+    for (auto ndi = tree.preorder_begin(); ndi != tree.preorder_end(); ++ndi) {
+        if (ndi == tree.begin()) {
+            // skip root
+            continue;
+        }
+        for (auto sib = tree.next_sibling_begin(ndi); sib != tree.next_sibling_end(); ++sib) {
+            siblings[get_label(*ndi)].push_back(get_label(*sib));
+        }
+        auto expected_iter = STANDARD_TEST_TREE_SIBLINGS.find(get_label(*ndi));
+        assert(expected_iter != STANDARD_TEST_TREE_SIBLINGS.end());
+        auto expected_siblings = expected_iter->second;
+        has_failed += platypus::testing::compare_equal(
+                expected_siblings,
+                siblings[get_label(*ndi)],
+                __FILE__,
+                __LINE__,
+                "Start node: ", *ndi);
+    }
+
+    return has_failed;
+}
 
 int compare_token_vectors(
         const std::vector<std::string> & expected,
