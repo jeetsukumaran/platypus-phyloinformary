@@ -327,7 +327,7 @@ int compare_against_newick_string(TreeT& tree,
 
 template <class TreeT>
 int compare_against_standard_test_tree(TreeT & tree,
-        const std::function<std::string (const typename TreeT::value_type &)> & get_label = [](const typename TreeT::value_type & nv){return nv->get_label();}
+        const std::function<std::string (const typename TreeT::value_type &)> & get_label = [](const typename TreeT::value_type & nv){return nv.get_label();}
         ) {
     int has_failed = 0;
 

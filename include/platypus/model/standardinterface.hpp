@@ -31,10 +31,51 @@
 namespace platypus {
 
 //////////////////////////////////////////////////////////////////////////////
+// StandardInterface
+// Definition of standard interface node values.
+
+template <class EdgeLengthT=double>
+class StandardNodeValueInterface {
+    public:
+        virtual ~StandardNodeValueInterface() { }
+        virtual void set_label(const std::string & label) = 0;
+        virtual std::string & get_label() = 0;
+        virtual const std::string & get_label() const = 0;
+        virtual void set_edge_length(EdgeLengthT edge_length) = 0;
+        virtual EdgeLengthT get_edge_length() const = 0;
+}; // StandardNodeValueInterface
+
+//////////////////////////////////////////////////////////////////////////////
+// StandardTree
+// Definition of standard interface for trees.
+
+template <class NodeValueT, class TreeNodeAllocatorT = std::allocator<TreeNode<NodeValueT>>>
+class StandardTreeInterface : public Tree<NodeValueT, TreeNodeAllocatorT> {
+    public:
+        StandardTreeInterface(bool is_rooted=false, bool manage_node_allocation=true)
+                : Tree<NodeValueT, TreeNodeAllocatorT>(manage_node_allocation) {
+        }
+        StandardTreeInterface(const StandardTreeInterface & other)
+                : Tree<NodeValueT, TreeNodeAllocatorT>(other) {
+        }
+        StandardTreeInterface(StandardTreeInterface && other)
+                : Tree<NodeValueT, TreeNodeAllocatorT>(other) {
+        }
+        virtual StandardTreeInterface & operator=(StandardTreeInterface && other) {
+            Tree<NodeValueT, TreeNodeAllocatorT>::operator=(other);
+            return * this;
+        }
+        virtual ~StandardTreeInterface() { }
+        virtual bool is_rooted() const = 0;
+        virtual void set_is_rooted(bool rooted) = 0;
+}; // StandardTreeInterface
+
+//////////////////////////////////////////////////////////////////////////////
 // StandardNodeValue
 // Reference implementation of standard interface (for node values).
 
-class StandardNodeValue {
+template <class EdgeLengthT=double>
+class StandardNodeValue : public StandardNodeValueInterface<EdgeLengthT> {
     public:
         StandardNodeValue()
             : edge_length_(0.0) { }
@@ -52,19 +93,19 @@ class StandardNodeValue {
         //     this->edge_length_ = std::move(nd.edge_length_);
         //     return *this;
         // }
-        virtual void set_label(const std::string & label) {
+        virtual void set_label(const std::string & label) override {
             this->label_ = label;
         }
-        virtual std::string & get_label() {
+        virtual std::string & get_label() override {
             return this->label_;
         }
-        virtual const std::string get_label() const {
+        virtual const std::string & get_label() const override {
             return this->label_;
         }
-        virtual void set_edge_length(double edge_length) {
+        virtual void set_edge_length(EdgeLengthT edge_length) override {
             this->edge_length_ = edge_length;
         }
-        virtual double get_edge_length() const {
+        virtual EdgeLengthT get_edge_length() const override {
             return this->edge_length_;
         }
         virtual void clear() {
@@ -72,8 +113,8 @@ class StandardNodeValue {
             this->edge_length_ = 0.0;
         }
     protected:
-        std::string     label_;
-        double          edge_length_;
+        std::string    label_;
+        EdgeLengthT    edge_length_;
 }; // StandardNodeValue
 
 //////////////////////////////////////////////////////////////////////////////
@@ -81,14 +122,14 @@ class StandardNodeValue {
 // Reference implementation of standard interface (for node values).
 
 template <class NodeValueT, class TreeNodeAllocatorT = std::allocator<TreeNode<NodeValueT>>>
-class StandardTree : public Tree<NodeValueT, TreeNodeAllocatorT> {
+class StandardTree : public StandardTreeInterface<NodeValueT, TreeNodeAllocatorT> {
     public:
         StandardTree(bool is_rooted=false, bool manage_node_allocation=true)
-            : Tree<NodeValueT, TreeNodeAllocatorT>(manage_node_allocation)
+            : StandardTreeInterface<NodeValueT, TreeNodeAllocatorT>(manage_node_allocation)
             , is_rooted_(is_rooted) {
         }
         StandardTree(const StandardTree & other)
-            : Tree<NodeValueT, TreeNodeAllocatorT>(other)
+            : StandardTreeInterface<NodeValueT, TreeNodeAllocatorT>(other)
               , is_rooted_(other.is_rooted_) {
         }
         virtual ~StandardTree() {
@@ -106,7 +147,7 @@ class StandardTree : public Tree<NodeValueT, TreeNodeAllocatorT> {
         }
     private:
         bool is_rooted_;
-}; // CommonTree
+}; // StandardTree
 
 //////////////////////////////////////////////////////////////////////////////
 // Functions
