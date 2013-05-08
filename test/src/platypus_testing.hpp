@@ -11,6 +11,8 @@
 #include <map>
 #include <functional>
 #include <platypus/model/tree.hpp>
+#include <platypus/parse/newick.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include <platypus/utility/tokenizer.hpp>
 #include <platypus/utility/testing.hpp>
 
@@ -111,6 +113,23 @@ class TestDataTree : public platypus::Tree<TestData> {
         unsigned long    nints_;
         double           length_;
 }; // TestDataTree
+
+template <class TreeT>
+platypus::NewickReader<TreeT> get_test_data_tree_newick_reader() {
+    auto tree_reader = platypus::NewickReader<TreeT>();
+    platypus::bind_standard_interface(tree_reader);
+    return tree_reader;
+}
+
+template <class TreeT>
+std::vector<TreeT> get_test_data_tree_vector_from_string(const std::string & s) {
+    std::vector<TreeT> trees;
+    auto tree_reader = get_test_data_tree_newick_reader<TreeT>();
+    tree_reader.read(std::istringstream(s),
+            [&trees]()->TreeT&{trees.emplace_back(); return trees.back();}
+            );
+    return trees;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // General String Support/Utility

@@ -8,14 +8,8 @@ using namespace platypus::test;
 
 int main () {
 
-    typedef TestDataTree TreeType;
-    std::vector<TreeType> trees;
-    auto tree_reader = platypus::NewickReader<TreeType>();
-    platypus::bind_standard_interface(tree_reader);
     std::string tree_string = "(,(,(,)));";
-    tree_reader.read(std::istringstream(tree_string),
-            [&trees]()->TreeType&{trees.emplace_back(); return trees.back();}
-            );
+    auto trees = platypus::test::get_test_data_tree_vector_from_string<TestDataTree>(tree_string);
     assert(trees.size() == 1);
     auto tree = trees[0];
     int fail = 0;
