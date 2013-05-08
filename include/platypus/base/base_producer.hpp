@@ -135,7 +135,7 @@ class BaseTreeProducer {
          *   sum of edge lengths on the tree).
          */
         virtual void set_tree_postprocess_fn(const tree_postprocess_fntype & tree_postprocess_fn) {
-            this->tree_postprocess_fn_ = tree_postprocess_fn_;
+            this->tree_postprocess_fn_ = tree_postprocess_fn;
         }
         virtual void clear_tree_postprocess_fn() {
             this->tree_postprocess_fn_ = [] (tree_type &, unsigned long, unsigned long, EdgeLengthT) { };

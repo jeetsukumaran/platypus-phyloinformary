@@ -68,7 +68,10 @@ class TestDataTree : public platypus::Tree<TestData> {
         typedef platypus::TreeNode<TestData> TreeNodeType;
     public:
         TestDataTree()
-            : is_rooted_(true) { }
+            : is_rooted_(true)
+              , ntips_(0)
+              , nints_(0)
+              , length_(0.0) { }
         ~TestDataTree() { }
         void set_is_rooted(bool rooted) {
             this->is_rooted_ = rooted;
@@ -76,8 +79,29 @@ class TestDataTree : public platypus::Tree<TestData> {
         bool is_rooted() const {
             return this->is_rooted_;
         }
+        unsigned long get_ntips() const {
+            return this->ntips_;
+        }
+        void set_ntips(unsigned long ntips) {
+            this->ntips_ = ntips;
+        }
+        unsigned long get_nints() const {
+            return this->nints_;
+        }
+        void set_nints(unsigned long nints) {
+            this->nints_ = nints;
+        }
+        double get_length() const {
+            return this->length_;
+        }
+        void set_length(double length) {
+            this->length_ = length;
+        }
     private:
-        bool is_rooted_;
+        bool             is_rooted_;
+        unsigned long    ntips_;
+        unsigned long    nints_;
+        double           length_;
 }; // TestDataTree
 
 //////////////////////////////////////////////////////////////////////////////
