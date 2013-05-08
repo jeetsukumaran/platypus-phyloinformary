@@ -205,7 +205,7 @@ class BaseTreeReader : public BaseTreeProducer<TreeT, EdgeLengthT> {
     protected:
 
         // To be implementad by derived classes.
-        virtual int parse_stream(
+        virtual unsigned long parse_stream(
                 std::istream& src,
                 const std::function<TreeT & ()> & get_new_tree_reference,
                 unsigned long tree_limit=0) = 0;

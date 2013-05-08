@@ -90,12 +90,12 @@ class NewickReader : public BaseTreeReader<TreeT, EdgeLengthT> {
 
     protected:
 
-        int parse_stream(
+        unsigned long parse_stream(
                 std::istream & src,
                 const std::function<tree_type & ()> & get_new_tree_reference,
                 unsigned long tree_limit=0) override {
             NexusTokenizer::iterator src_iter = this->tokenizer_.begin(src);
-            int tree_count = 0;
+            unsigned long tree_count = 0;
             // skip over leading semi-colons
             while (!src_iter.eof() && *src_iter == ";") {
                 ++src_iter;

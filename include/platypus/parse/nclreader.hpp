@@ -43,26 +43,28 @@ template <typename TreeT, class EdgeLengthT=double>
 class NclTreeReader : public BaseTreeReader<TreeT> {
 
     public:
+        typedef TreeT                          tree_type;
+        typedef typename tree_type::node_type  tree_node_type;
+        typedef typename tree_type::value_type tree_value_type;
 
-        NclTreeReader(
-                const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory,
-                const typename BaseTreeReader<TreeT>::tree_is_rooted_setter_fntype & tree_is_rooted_func,
-                const typename BaseTreeReader<TreeT>::node_value_label_setter_fntype & node_value_label_func,
-                const typename BaseTreeReader<TreeT>::node_value_edge_length_setter_fntype & node_value_edge_length_func)
-            : BaseTreeReader<TreeT>(tree_factory,
-                    tree_is_rooted_func,
-                    node_value_label_func,
-                    node_value_edge_length_func) {
+    public:
+
+        NclTreeReader() { }
+
+    protected:
+
+        unsigned long parse_stream(
+                std::istream & src,
+                const std::function<tree_type & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0) override {
+            return this->parse_stream(src, get_new_tree_reference, tree_limit, "nexus");
         }
 
-        NclTreeReader(const typename BaseTreeReader<TreeT>::tree_factory_fntype & tree_factory)
-            : BaseTreeReader<TreeT>(tree_factory) {
-        }
-
-        NclTreeReader() {
-        }
-
-        int parse_stream(std::istream& src, const std::string& format) override {
+        unsigned long parse_stream(
+                std::istream & src,
+                const std::function<tree_type & ()> & get_new_tree_reference,
+                unsigned long tree_limit=0,
+                const std::string & format="nexus") {
             MultiFormatReader reader(-1, NxsReader::IGNORE_WARNINGS);
             reader.SetWarningOutputLevel(NxsReader::AMBIGUOUS_CONTENT_WARNING);
             reader.SetCoerceUnderscoresToSpaces(false);
@@ -83,19 +85,23 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                 return 0;
             }
             unsigned int num_trees = trees_block->GetNumTrees();
-            int tree_count = 0;
+            unsigned long tree_count = 0;
             for (unsigned int tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-                auto & tree = this->create_new_tree();
+                auto & tree = get_new_tree_reference();
                 const NxsFullTreeDescription & ftd = trees_block->GetFullTreeDescription(tree_idx);
-                this->build_tree(tree, taxa_block, ftd);
+                this->build_tree(tree, taxa_block, ftd, tree_count);
                 ++tree_count;
+                if (tree_limit > 0 && tree_count >= tree_limit) {
+                    break;
+                }
             }
             return tree_count;
         }
 
-    protected:
-
-        void build_tree(TreeT& ttree, const NxsTaxaBlock * tb, const NxsFullTreeDescription & ftd) {
+        void build_tree(TreeT& ttree,
+                const NxsTaxaBlock * tb,
+                const NxsFullTreeDescription & ftd,
+                unsigned long tree_count=0) {
             this->set_tree_is_rooted(ttree, ftd.IsRooted());
             NxsSimpleTree ncl_tree(ftd, -1, -1.0);
             auto * root = ttree.head_node();
@@ -150,9 +156,12 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                     node_parent->add_child(new_node);
                 }
             }
-            this->set_tree_stats_num_leaf_nodes(ttree, num_leaf_nodes);
-            this->set_tree_stats_num_internal_nodes(ttree, num_internal_nodes);
-            this->set_tree_stats_tree_length(ttree, tree_length);
+            this->postprocess_tree(
+                    ttree,
+                    tree_count,
+                    num_leaf_nodes,
+                    num_internal_nodes,
+                    tree_length);
         }
 
 }; // NclTreeReader
