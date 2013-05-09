@@ -391,6 +391,21 @@ class DataTableRow {
             this->set_cell_value(this->cells_[citer->second], val);
         }
 
+        const DataTableBaseCell & cell(unsigned long column_idx) const {
+            if (column_idx >= this->cells_.size()) {
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+            }
+            return *this->cells_[column_idx];
+        }
+
+        const DataTableBaseCell & cell(const std::string & col_name) const {
+            auto citer = this->column_label_index_map_.find(col_name);
+            if (citer == this->column_label_index_map_.end()) {
+                throw DataTableUndefinedColumnError(__FILE__, __LINE__, col_name);
+            }
+            return *this->cells_[citer->second];
+        }
+
         //////////////////////////////////////////////////////////////////////////////
         // Iteration
 
@@ -525,20 +540,20 @@ class DataTableRow {
             }
         }
 
-        static void write_formatted_cell(std::ostream & out, DataTableBaseCell * cell) {
+        static void write_formatted_cell(std::ostream & out, const DataTableBaseCell * cell) {
             auto & column_definition = cell->get_column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
-                DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
+                const DataTableSignedIntegerCell * t = dynamic_cast<const DataTableSignedIntegerCell *>(cell);
                 t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::UnsignedInteger) {
-                DataTableUnsignedIntegerCell * t = dynamic_cast<DataTableUnsignedIntegerCell *>(cell);
+                const DataTableUnsignedIntegerCell * t = dynamic_cast<const DataTableUnsignedIntegerCell *>(cell);
                 t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::FloatingPoint) {
-                DataTableFloatingPointCell * t = dynamic_cast<DataTableFloatingPointCell *>(cell);
+                const DataTableFloatingPointCell * t = dynamic_cast<const DataTableFloatingPointCell *>(cell);
                 t->write_formatted(out);
             } else if (cell_value_type == DataTableColumn::ValueType::String) {
-                DataTableStringCell * t = dynamic_cast<DataTableStringCell *>(cell);
+                const DataTableStringCell * t = dynamic_cast<const DataTableStringCell *>(cell);
                 t->write_formatted(out);
             } else {
                 throw DataTableUndefinedColumnValueType(__FILE__, __LINE__, DataTableColumn::get_value_type_name_as_string(cell_value_type));
@@ -570,7 +585,7 @@ class DataTableRow {
     private:
         std::vector<DataTableColumn *> &          columns_;
         std::map<std::string, unsigned long> &    column_label_index_map_;
-        std::vector<DataTableBaseCell *>                   cells_;
+        std::vector<DataTableBaseCell *>          cells_;
         unsigned long                             current_entry_cell_idx_;
 
 }; // DataTableRow
@@ -738,6 +753,7 @@ class DataTable {
                 bool include_header_row=true) {
             if (include_header_row) {
                 unsigned long cidx = 0;
+                // TODO! Key columns may not all be given first!
                 for (auto & col : key_columns_) {
                     if (true) { // later, ability to hide columns
                         if (cidx > 0) {
@@ -761,6 +777,54 @@ class DataTable {
             for (auto & row : this->rows_) {
                 row->write_formatted(out, column_delimiter);
             }
+        }
+
+        void write_stacked(std::ostream & out,
+                const std::string & stacked_field_identifier_label="key",
+                const std::string & stacked_field_value_label="value",
+                const std::string & column_delimiter="\t",
+                bool include_header_row=true) {
+            unsigned long printed_idx = 0;
+            if (include_header_row) {
+                for (auto & col : key_columns_) {
+                    if (true) { // later, ability to hide columns
+                        if (printed_idx > 0) {
+                            out << column_delimiter;
+                        }
+                        out << col->get_label();
+                        printed_idx += 1;
+                    }
+                }
+            }
+            if (printed_idx > 0) {
+                out << column_delimiter;
+            }
+            out << stacked_field_identifier_label << column_delimiter << stacked_field_value_label << "\n";
+            for (auto & row : this->rows_) {
+                printed_idx = 0;
+                for (auto & data_col : data_columns_) { // each data column is itse own row
+                    if (true) { // later, ability to hide columns
+                        for (auto & key_col : key_columns_) {
+                            if (true) { // later, ability to hide columns
+                                if (printed_idx > 0) {
+                                    out << column_delimiter;
+                                }
+                                DataTableRow::write_formatted_cell(out, &(row->cell(key_col->get_label())));
+                                printed_idx += 1;
+                            }
+                        } // key colums
+                        if (printed_idx > 0) {
+                            out << column_delimiter;
+                        }
+                        out << data_col->get_label();
+                        out << column_delimiter;
+                        DataTableRow::write_formatted_cell(out, &(row->cell(data_col->get_label())));
+                        printed_idx += 2;
+                        out << "\n";
+                    }
+                } // data columns
+                out << "\n";
+            } // row
         }
 
     private:
