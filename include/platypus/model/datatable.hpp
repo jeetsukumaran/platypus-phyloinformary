@@ -133,7 +133,8 @@ class DataTableColumn {
                 const platypus::stream::OutputStreamFormatters & formatters={})
                 : value_type_(value_type)
                 , label_(label)
-                , formatters_(formatters) {
+                , formatters_(formatters)
+                , is_hidden_(false) {
         }
         const std::string & get_label() const {
             return this->label_;
@@ -163,10 +164,14 @@ class DataTableColumn {
             out << val;
             out.copyfmt(std::ios(NULL)); // restore state
         }
+        bool is_hidden() const {
+            return this->is_hidden_;
+        }
     protected:
-        ValueType                   value_type_;
-        std::string                 label_;
+        ValueType                                   value_type_;
+        std::string                                 label_;
         platypus::stream::OutputStreamFormatters    formatters_;
+        bool                                        is_hidden_;
 }; // DataTableColumn
 
 //////////////////////////////////////////////////////////////////////////////
@@ -332,8 +337,12 @@ class DataTableRow {
     public:
         DataTableRow(
                 std::vector<DataTableColumn *> & columns,
+                std::vector<DataTableColumn *> & key_columns,
+                std::vector<DataTableColumn *> & data_columns,
                 std::map<std::string, unsigned long> & column_label_index_map)
                 : columns_(columns)
+                , key_columns_(key_columns)
+                , data_columns_(data_columns)
                 , column_label_index_map_(column_label_index_map)
                 , current_entry_cell_idx_(0) {
             this->create_cells();
@@ -486,14 +495,44 @@ class DataTableRow {
         //////////////////////////////////////////////////////////////////////////////
         // Output
 
-        void write_formatted(std::ostream & out, std::string separator="\t") {
+        void write_formatted(std::ostream & out, const std::string & column_separator="\t") {
+            unsigned long print_idx = 0;
             for(unsigned long cell_idx = 0; cell_idx < this->cells_.size(); ++cell_idx) {
-                if (cell_idx > 0) {
-                    out << separator;
+                if (!this->columns_[cell_idx]->is_hidden()) {
+                    if (print_idx > 0) {
+                        out << column_separator;
+                    }
+                    DataTableRow::write_formatted_cell(out, this->cells_[cell_idx]);
+                    print_idx += 1;
                 }
-                DataTableRow::write_formatted_cell(out, this->cells_[cell_idx]);
             }
             out << std::endl;
+        }
+
+        void write_stacked(std::ostream & out, const std::string & column_separator="\t") {
+            unsigned long printed_idx = 0;
+            for (auto & data_col : this->data_columns_) { // each data column is itse own row
+                printed_idx = 0;
+                if (!data_col->is_hidden()) {
+                    for (auto & key_col : this->key_columns_) {
+                        if (!key_col->is_hidden()) {
+                            if (printed_idx > 0) {
+                                out << column_separator;
+                            }
+                            DataTableRow::write_formatted_cell(out, &(this->cell(key_col->get_label())));
+                            printed_idx += 1;
+                        }
+                    } // key colums
+                    if (printed_idx > 0) {
+                        out << column_separator;
+                    }
+                    out << data_col->get_label();
+                    out << column_separator;
+                    DataTableRow::write_formatted_cell(out, &(this->cell(data_col->get_label())));
+                    printed_idx += 2;
+                    out << "\n";
+                }
+            } // data columns
         }
 
     public:
@@ -584,6 +623,8 @@ class DataTableRow {
 
     private:
         std::vector<DataTableColumn *> &          columns_;
+        std::vector<DataTableColumn *> &          key_columns_;
+        std::vector<DataTableColumn *> &          data_columns_;
         std::map<std::string, unsigned long> &    column_label_index_map_;
         std::vector<DataTableBaseCell *>          cells_;
         unsigned long                             current_entry_cell_idx_;
@@ -632,7 +673,10 @@ class DataTable {
             return col;
         }
         Row & add_row() {
-            Row * r = new Row(this->columns_, this->column_label_index_map_);
+            Row * r = new Row(this->columns_,
+                    this->key_columns_,
+                    this->data_columns_,
+                    this->column_label_index_map_);
             this->rows_.push_back(r);
             return *r;
         }
@@ -749,24 +793,16 @@ class DataTable {
         }
 
         void write(std::ostream & out,
-                const std::string & column_delimiter="\t",
+                const std::string & column_separator="\t",
                 bool include_header_row=true) {
+
             if (include_header_row) {
                 unsigned long cidx = 0;
                 // TODO! Key columns may not all be given first!
-                for (auto & col : key_columns_) {
-                    if (true) { // later, ability to hide columns
+                for (auto & col : this->columns_) {
+                    if (!col->is_hidden()) {
                         if (cidx > 0) {
-                            out << column_delimiter;
-                        }
-                        out << col->get_label();
-                        cidx += 1;
-                    }
-                }
-                for (auto & col : data_columns_) {
-                    if (true) { // later, ability to hide columns
-                        if (cidx > 0) {
-                            out << column_delimiter;
+                            out << column_separator;
                         }
                         out << col->get_label();
                         cidx += 1;
@@ -774,55 +810,37 @@ class DataTable {
                 }
             }
             out << "\n";
+
             for (auto & row : this->rows_) {
-                row->write_formatted(out, column_delimiter);
+                row->write_formatted(out, column_separator);
             }
         }
 
         void write_stacked(std::ostream & out,
                 const std::string & stacked_field_identifier_label="key",
                 const std::string & stacked_field_value_label="value",
-                const std::string & column_delimiter="\t",
+                const std::string & column_separator="\t",
                 bool include_header_row=true) {
+
             unsigned long printed_idx = 0;
             if (include_header_row) {
-                for (auto & col : key_columns_) {
-                    if (true) { // later, ability to hide columns
+                for (auto & key_col : this->key_columns_) {
+                    if (!key_col->is_hidden()) { // later, ability to hide columns
                         if (printed_idx > 0) {
-                            out << column_delimiter;
+                            out << column_separator;
                         }
-                        out << col->get_label();
+                        out << key_col->get_label();
                         printed_idx += 1;
                     }
                 }
             }
             if (printed_idx > 0) {
-                out << column_delimiter;
+                out << column_separator;
             }
-            out << stacked_field_identifier_label << column_delimiter << stacked_field_value_label << "\n";
+            out << stacked_field_identifier_label << column_separator << stacked_field_value_label << "\n";
+
             for (auto & row : this->rows_) {
-                for (auto & data_col : data_columns_) { // each data column is itse own row
-                    printed_idx = 0;
-                    if (true) { // later, ability to hide columns
-                        for (auto & key_col : key_columns_) {
-                            if (true) { // later, ability to hide columns
-                                if (printed_idx > 0) {
-                                    out << column_delimiter;
-                                }
-                                DataTableRow::write_formatted_cell(out, &(row->cell(key_col->get_label())));
-                                printed_idx += 1;
-                            }
-                        } // key colums
-                        if (printed_idx > 0) {
-                            out << column_delimiter;
-                        }
-                        out << data_col->get_label();
-                        out << column_delimiter;
-                        DataTableRow::write_formatted_cell(out, &(row->cell(data_col->get_label())));
-                        printed_idx += 2;
-                        out << "\n";
-                    }
-                } // data columns
+                row->write_stacked(out, column_separator);
             } // row
         }
 
