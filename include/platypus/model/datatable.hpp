@@ -733,6 +733,36 @@ class DataTable {
             return iterator< std::vector<Row *>::iterator>(this->rows_.end(), this->rows_.end());
         }
 
+        void write(std::ostream & out,
+                const std::string & column_delimiter="\t",
+                bool include_header_row=true) {
+            if (include_header_row) {
+                unsigned long cidx = 0;
+                for (auto & col : key_columns_) {
+                    if (true) { // later, ability to hide columns
+                        if (cidx > 0) {
+                            out << column_delimiter;
+                        }
+                        out << col->get_label();
+                        cidx += 1;
+                    }
+                }
+                for (auto & col : data_columns_) {
+                    if (true) { // later, ability to hide columns
+                        if (cidx > 0) {
+                            out << column_delimiter;
+                        }
+                        out << col->get_label();
+                        cidx += 1;
+                    }
+                }
+            }
+            out << "\n";
+            for (auto & row : this->rows_) {
+                row->write_formatted(out, column_delimiter);
+            }
+        }
+
     private:
         template <class T> Column & create_column(
                 const std::string & label,
