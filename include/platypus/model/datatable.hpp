@@ -130,9 +130,11 @@ class DataTableColumn {
     public:
         DataTableColumn(ValueType value_type,
                 const std::string & label,
+                bool is_key_column=false,
                 const platypus::stream::OutputStreamFormatters & formatters={})
                 : value_type_(value_type)
                 , label_(label)
+                , is_key_column_(is_key_column)
                 , formatters_(formatters)
                 , is_hidden_(false) {
         }
@@ -141,6 +143,12 @@ class DataTableColumn {
         }
         ValueType get_value_type() const {
             return this->value_type_;
+        }
+        bool is_key_column() const {
+            return this->is_key_column_;
+        }
+        void set_key_column(bool v) {
+            this->is_key_column_ = v;
         }
         template <class T>
         void add_formatting(const T & formatter) {
@@ -170,6 +178,7 @@ class DataTableColumn {
     protected:
         ValueType                                   value_type_;
         std::string                                 label_;
+        bool                                        is_key_column_;
         platypus::stream::OutputStreamFormatters    formatters_;
         bool                                        is_hidden_;
 }; // DataTableColumn
@@ -337,12 +346,8 @@ class DataTableRow {
     public:
         DataTableRow(
                 std::vector<DataTableColumn *> & columns,
-                std::vector<DataTableColumn *> & key_columns,
-                std::vector<DataTableColumn *> & data_columns,
                 std::map<std::string, unsigned long> & column_label_index_map)
                 : columns_(columns)
-                , key_columns_(key_columns)
-                , data_columns_(data_columns)
                 , column_label_index_map_(column_label_index_map)
                 , current_entry_cell_idx_(0) {
             this->create_cells();
@@ -509,12 +514,15 @@ class DataTableRow {
             out << std::endl;
         }
 
-        void write_stacked(std::ostream & out, const std::string & column_separator="\t") {
+        void write_stacked(std::ostream & out,
+                std::vector<DataTableColumn *> & key_columns,
+                std::vector<DataTableColumn *> & data_columns,
+                const std::string & column_separator="\t") {
             unsigned long printed_idx = 0;
-            for (auto & data_col : this->data_columns_) { // each data column is itse own row
+            for (auto & data_col : data_columns) { // each data column is itse own row
                 printed_idx = 0;
                 if (!data_col->is_hidden()) {
-                    for (auto & key_col : this->key_columns_) {
+                    for (auto & key_col : key_columns) {
                         if (!key_col->is_hidden()) {
                             if (printed_idx > 0) {
                                 out << column_separator;
@@ -623,8 +631,6 @@ class DataTableRow {
 
     private:
         std::vector<DataTableColumn *> &          columns_;
-        std::vector<DataTableColumn *> &          key_columns_;
-        std::vector<DataTableColumn *> &          data_columns_;
         std::map<std::string, unsigned long> &    column_label_index_map_;
         std::vector<DataTableBaseCell *>          cells_;
         unsigned long                             current_entry_cell_idx_;
@@ -663,19 +669,15 @@ class DataTable {
             }
         }
         template <class T> Column & add_key_column(const std::string & label, const platypus::stream::OutputStreamFormatters & formatters={}) {
-            auto & col = this->create_column<T>(label, formatters);
-            this->key_columns_.push_back(&col);
+            auto & col = this->create_column<T>(label, true, formatters);
             return col;
         }
         template <class T> Column & add_data_column(const std::string & label, const platypus::stream::OutputStreamFormatters & formatters={}) {
-            auto & col = this->create_column<T>(label, formatters);
-            this->data_columns_.push_back(&col);
+            auto & col = this->create_column<T>(label, false, formatters);
             return col;
         }
         Row & add_row() {
             Row * r = new Row(this->columns_,
-                    this->key_columns_,
-                    this->data_columns_,
                     this->column_label_index_map_);
             this->rows_.push_back(r);
             return *r;
@@ -797,15 +799,15 @@ class DataTable {
                 bool include_header_row=true) {
 
             if (include_header_row) {
-                unsigned long cidx = 0;
+                unsigned long printed_idx = 0;
                 // TODO! Key columns may not all be given first!
                 for (auto & col : this->columns_) {
                     if (!col->is_hidden()) {
-                        if (cidx > 0) {
+                        if (printed_idx > 0) {
                             out << column_separator;
                         }
                         out << col->get_label();
-                        cidx += 1;
+                        printed_idx += 1;
                     }
                 }
             }
@@ -822,14 +824,26 @@ class DataTable {
                 const std::string & column_separator="\t",
                 bool include_header_row=true) {
 
+            // sort key and data columns
+            std::vector<Column *> key_columns;
+            std::vector<Column *> data_columns;
+            for (auto & col : this->columns_) {
+                if (col->is_key_column()) {
+                    key_columns.push_back(col);
+                } else {
+                    data_columns.push_back(col);
+                }
+            }
+
+            // print headers
             unsigned long printed_idx = 0;
             if (include_header_row) {
-                for (auto & key_col : this->key_columns_) {
-                    if (!key_col->is_hidden()) { // later, ability to hide columns
+                for (auto & col : this->columns_) {
+                    if (col->is_key_column() && !col->is_hidden()) {
                         if (printed_idx > 0) {
                             out << column_separator;
                         }
-                        out << key_col->get_label();
+                        out << col->get_label();
                         printed_idx += 1;
                     }
                 }
@@ -839,14 +853,19 @@ class DataTable {
             }
             out << stacked_field_identifier_label << column_separator << stacked_field_value_label << "\n";
 
+            // print rows
             for (auto & row : this->rows_) {
-                row->write_stacked(out, column_separator);
+                row->write_stacked(out,
+                        key_columns,
+                        data_columns,
+                        column_separator);
             } // row
         }
 
     private:
         template <class T> Column & create_column(
                 const std::string & label,
+                bool is_key_column=false,
                 const platypus::stream::OutputStreamFormatters & formatters={}) {
             if (!this->rows_.empty()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: rows have already been added");
@@ -854,7 +873,7 @@ class DataTable {
             if (this->column_label_index_map_.find(label) != this->column_label_index_map_.end()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: duplicate column name");
             }
-            auto new_col = new Column(Column::identify_type<T>(), label, formatters);
+            auto new_col = new Column(Column::identify_type<T>(), label, is_key_column, formatters);
             this->column_label_index_map_[label] = this->columns_.size();
             this->columns_.push_back(new_col);
             return *new_col;
@@ -862,8 +881,6 @@ class DataTable {
     private:
         std::vector<Column *>                   columns_;
         std::map<std::string, unsigned long>    column_label_index_map_;
-        std::vector<Column *>                   key_columns_;
-        std::vector<Column *>                   data_columns_;
         std::vector<Row *>                      rows_;
 }; // DataTable
 
