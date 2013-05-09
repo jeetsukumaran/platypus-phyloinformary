@@ -801,8 +801,8 @@ class DataTable {
             }
             out << stacked_field_identifier_label << column_delimiter << stacked_field_value_label << "\n";
             for (auto & row : this->rows_) {
-                printed_idx = 0;
                 for (auto & data_col : data_columns_) { // each data column is itse own row
+                    printed_idx = 0;
                     if (true) { // later, ability to hide columns
                         for (auto & key_col : key_columns_) {
                             if (true) { // later, ability to hide columns
@@ -823,7 +823,6 @@ class DataTable {
                         out << "\n";
                     }
                 } // data columns
-                out << "\n";
             } // row
         }
 
