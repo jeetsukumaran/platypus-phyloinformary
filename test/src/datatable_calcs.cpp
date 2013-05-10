@@ -30,7 +30,23 @@ int test_get_column() {
             by_idx2,
             __FILE__,
             __LINE__,
+            "Column 2");
+
+    auto by_name1 = table.get_column<double>("v1");
+    auto by_name2 = table.get_column<double>("v2");
+    fails += platypus::testing::compare_equal(
+            exp1,
+            by_name1,
+            __FILE__,
+            __LINE__,
             "Column 1");
+    fails += platypus::testing::compare_equal(
+            exp2,
+            by_name2,
+            __FILE__,
+            __LINE__,
+            "Column 2");
+
     return fails;
 }
 
