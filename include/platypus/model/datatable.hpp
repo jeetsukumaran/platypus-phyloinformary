@@ -176,6 +176,9 @@ class DataTableColumn {
         bool is_hidden() const {
             return this->is_hidden_;
         }
+        bool set_hidden(bool hidden) {
+            this->is_hidden_ = hidden;
+        }
     protected:
         ValueType                                   value_type_;
         std::string                                 label_;
