@@ -63,20 +63,13 @@ int test_summarize() {
         row << v1[i];
     }
     auto o1 = table.summarize_column<double>(0);
-    // std::cout << std::fixed << std::setprecision(20) << o1.size                << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.sum                 << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.mean                << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.sample_variance     << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.population_variance << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.minimum             << std::endl;
-    // std::cout << std::fixed << std::setprecision(20) << o1.maximum             << std::endl;
-    fails += platypus::testing::compare_equal(v1.size() , o1.size                , __FILE__ , __LINE__ , "size");
+    fails += platypus::testing::compare_equal(v1.size()                 , o1.size                , __FILE__ , __LINE__ , "size");
     fails += platypus::testing::compare_almost_equal(44.020522985999996 , o1.sum                 , __FILE__ , __LINE__ , "sum");
-    fails += platypus::testing::compare_almost_equal(4.402052298599999 , o1.mean                , __FILE__ , __LINE__ , "mean");
-    fails += platypus::testing::compare_almost_equal(82.71037145898468 , o1.sample_variance     , __FILE__ , __LINE__ , "sample variance");
-    fails += platypus::testing::compare_almost_equal(74.43933431308622 , o1.population_variance , __FILE__ , __LINE__ , "population variance");
-    fails += platypus::testing::compare_almost_equal(-8.8573444  , o1.minimum             , __FILE__ , __LINE__ , "minimum");
-    fails += platypus::testing::compare_almost_equal(19.058397   , o1.maximum             , __FILE__ , __LINE__ , "maximum");
+    fails += platypus::testing::compare_almost_equal(4.402052298599999  , o1.mean                , __FILE__ , __LINE__ , "mean");
+    fails += platypus::testing::compare_almost_equal(82.71037145898468  , o1.sample_variance     , __FILE__ , __LINE__ , "sample variance");
+    fails += platypus::testing::compare_almost_equal(74.43933431308622  , o1.population_variance , __FILE__ , __LINE__ , "population variance");
+    fails += platypus::testing::compare_almost_equal(-8.8573444         , o1.minimum             , __FILE__ , __LINE__ , "minimum");
+    fails += platypus::testing::compare_almost_equal(19.058397          , o1.maximum             , __FILE__ , __LINE__ , "maximum");
     return fails;
 }
 
