@@ -191,7 +191,7 @@ class DataTableBaseCell {
         DataTableBaseCell(const DataTableColumn & column)
             : column_(column) { }
         virtual ~DataTableBaseCell() { }
-        const DataTableColumn & get_column() const {
+        const DataTableColumn & column() const {
             return this->column_;
         }
     protected:
@@ -547,7 +547,7 @@ class DataTableRow {
 
         template <class T>
         static const T get_cell_value(DataTableBaseCell * cell) {
-            auto & column_definition = cell->get_column();
+            auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
@@ -568,7 +568,7 @@ class DataTableRow {
 
         template <class T>
         static void set_cell_value(DataTableBaseCell * cell, const T & val) {
-            auto & column_definition = cell->get_column();
+            auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 DataTableSignedIntegerCell * t = dynamic_cast<DataTableSignedIntegerCell *>(cell);
@@ -588,7 +588,7 @@ class DataTableRow {
         }
 
         static void write_formatted_cell(std::ostream & out, const DataTableBaseCell * cell) {
-            auto & column_definition = cell->get_column();
+            auto & column_definition = cell->column();
             auto cell_value_type = column_definition.get_value_type();
             if (cell_value_type == DataTableColumn::ValueType::SignedInteger) {
                 const DataTableSignedIntegerCell * t = dynamic_cast<const DataTableSignedIntegerCell *>(cell);
