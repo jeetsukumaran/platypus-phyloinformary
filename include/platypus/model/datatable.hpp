@@ -734,6 +734,24 @@ class DataTable {
         template <class T> const T get(unsigned long ridx, unsigned long cidx) const {
             return this->row(ridx).get<T>(cidx);
         }
+        template <class T>
+        std::vector<T> get_column(const std::string & col_name) const {
+            std::vector<T> vals;
+            vals.reserve(this->rows_.size());
+            for (auto & row : this->rows_) {
+                vals.push_back(row->get<T>(col_name));
+            }
+            return vals;
+        }
+        template <class T>
+        std::vector<T> get_column(unsigned long cidx) const {
+            std::vector<T> vals;
+            vals.reserve(this->rows_.size());
+            for (auto & row : this->rows_) {
+                vals.push_back(row->get<T>(cidx));
+            }
+            return vals;
+        }
 
         //////////////////////////////////////////////////////////////////////////////
         // Iteration

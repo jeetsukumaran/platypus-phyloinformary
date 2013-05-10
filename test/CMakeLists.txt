@@ -50,6 +50,7 @@ SET(TEST_TARGET_SOURCES
     src/tokenizer_simple_str.cpp
     src/newick_reader_basic.cpp
     src/datatable_basic.cpp
+    src/datatable_calcs.cpp
     src/newick_reader_basic2.cpp
     src/newick_reader_edge_lengths.cpp
     src/newick_reader_missing_commas.cpp
