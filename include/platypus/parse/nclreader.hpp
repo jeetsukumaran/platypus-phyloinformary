@@ -50,6 +50,13 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
     public:
 
         NclTreeReader() { }
+        unsigned long read(
+                std::istream & src,
+                const std::function<tree_type & ()> & get_new_tree_reference,
+                const std::string & format,
+                unsigned long tree_limit=0) {
+            return this->parse_stream(src, get_new_tree_reference, format, tree_limit);
+        }
 
     protected:
 
@@ -57,14 +64,14 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
                 std::istream & src,
                 const std::function<tree_type & ()> & get_new_tree_reference,
                 unsigned long tree_limit=0) override {
-            return this->parse_stream(src, get_new_tree_reference, tree_limit, "nexus");
+            return this->parse_stream(src, get_new_tree_reference,"nexus", tree_limit);
         }
 
         unsigned long parse_stream(
                 std::istream & src,
                 const std::function<tree_type & ()> & get_new_tree_reference,
-                unsigned long tree_limit=0,
-                const std::string & format="nexus") {
+                const std::string & format,
+                unsigned long tree_limit=0) {
             MultiFormatReader reader(-1, NxsReader::IGNORE_WARNINGS);
             reader.SetWarningOutputLevel(NxsReader::AMBIGUOUS_CONTENT_WARNING);
             reader.SetCoerceUnderscoresToSpaces(false);
