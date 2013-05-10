@@ -22,6 +22,7 @@
 #ifndef PLATYPUS_MODEL_DATATABLE_HPP
 #define PLATYPUS_MODEL_DATATABLE_HPP
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <sstream>
@@ -648,6 +649,27 @@ class DataTable {
         typedef platypus::stream::OutputStreamFormatter     OutputStreamFormatter;
         typedef platypus::stream::OutputStreamFormatters    OutputStreamFormatters;
 
+        template <class T=DataTableColumn::floating_point_implementation_type>
+        struct Summary {
+            typedef long double value_type;
+            // Summary()
+            //     : size(0.0)
+            //     , sum(0.0)
+            //     , min(0.0)
+            //     , max(0.0)
+            //     , mean(0.0)
+            //     , sample_variance(0.0)
+            //     , population_variance(0.0) { }
+            value_type  size;
+            value_type  sum;
+            value_type  minimum;
+            value_type  maximum;
+            value_type  mean;
+            value_type  sum_of_squares;
+            value_type  sample_variance;
+            value_type  population_variance;
+        };
+
     public:
         DataTable() {
         }
@@ -710,7 +732,7 @@ class DataTable {
             return *(this->columns_[column_idx]);
         }
         const Column & column(unsigned long column_idx) const {
-            return this->column(column_idx);
+                                return this->column(column_idx);
         }
         Column & column(const std::string & col_name) {
             auto citer = this->column_label_index_map_.find(col_name);
@@ -751,6 +773,18 @@ class DataTable {
                 vals.push_back(row->get<T>(cidx));
             }
             return vals;
+        }
+
+        template <class T=DataTableColumn::floating_point_implementation_type>
+        Summary<T> summarize_column(const std::string & col_name) const {
+            auto vals = this->get_column<T>(col_name);
+            return DataTable::summarize(vals);
+        }
+
+        template <class T=DataTableColumn::floating_point_implementation_type>
+        Summary<T> summarize_column(unsigned long cidx) const {
+            auto vals = this->get_column<T>(cidx);
+            return DataTable::summarize(vals);
         }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -878,6 +912,25 @@ class DataTable {
                         data_columns,
                         column_separator);
             } // row
+        }
+
+    public:
+        template <class T=DataTableColumn::floating_point_implementation_type>
+        static Summary<T> summarize(const std::vector<T> & vals) {
+            Summary<T> summary;
+            summary.size = vals.size();
+            summary.sum = std::accumulate(vals.begin(), vals.end(), 0);
+            summary.mean = summary.sum / summary.size;
+            auto ss_f = [](const T & a, const T & b)->T {
+                return a + (b * b);
+            };
+            summary.sum_of_squares = std::accumulate(vals.begin(), vals.end(), 0, ss_f);
+            summary.sample_variance = summary.sum_of_squares / (summary.size - 1);
+            summary.population_variance = summary.sum_of_squares / (summary.size);
+            auto range = std::minmax_element(vals.begin(), vals.end());
+            summary.minimum = *range.first;
+            summary.maximum = *range.second;
+            return summary;
         }
 
     private:
