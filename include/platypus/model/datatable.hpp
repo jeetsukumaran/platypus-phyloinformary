@@ -108,7 +108,7 @@ class DataTableColumn {
                 String };
         static const std::string & get_value_type_name_as_string(DataTableColumn::ValueType vt) {
             static const std::vector<std::string> value_type_names{"SignedInteger", "UnsignedInteger", "FloatingPoint", "String"};
-            return value_type_names[static_cast<typename std::underlying_type<DataTableColumn::ValueType>::type>(vt)];
+            return value_type_names.at(static_cast<typename std::underlying_type<DataTableColumn::ValueType>::type>(vt));
         }
 
         typedef long             signed_integer_implementation_type;
