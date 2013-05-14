@@ -98,6 +98,8 @@ class DataTableInvalidRowError : public DataTableException {
 //////////////////////////////////////////////////////////////////////////////
 // DataTableColumn
 
+class DataTable;
+
 class DataTableColumn {
     public:
 
@@ -129,11 +131,14 @@ class DataTableColumn {
             }
         }
     public:
-        DataTableColumn(ValueType value_type,
+        DataTableColumn(
+                DataTable & table,
+                ValueType value_type,
                 const std::string & label,
                 bool is_key_column=false,
                 const platypus::stream::OutputStreamFormatters & formatters={})
-                : value_type_(value_type)
+                : table_(table)
+                , value_type_(value_type)
                 , label_(label)
                 , is_key_column_(is_key_column)
                 , formatters_(formatters)
@@ -179,7 +184,9 @@ class DataTableColumn {
         bool set_hidden(bool hidden) {
             this->is_hidden_ = hidden;
         }
+        template <class T> T max() const;
     protected:
+        DataTable &                                 table_;
         ValueType                                   value_type_;
         std::string                                 label_;
         bool                                        is_key_column_;
@@ -968,7 +975,7 @@ class DataTable {
             if (this->column_label_index_map_.find(label) != this->column_label_index_map_.end()) {
                 throw DataTableStructureError(__FILE__, __LINE__, "Cannot add new column: duplicate column name");
             }
-            auto new_col = new Column(Column::identify_type<T>(), label, is_key_column, formatters);
+            auto new_col = new Column(*this, Column::identify_type<T>(), label, is_key_column, formatters);
             this->column_label_index_map_[label] = this->columns_.size();
             this->columns_.push_back(new_col);
             return *new_col;
@@ -980,5 +987,17 @@ class DataTable {
 }; // DataTable
 
 } // namespace platypus
+
+//////////////////////////////////////////////////////////////////////////////
+// DataTableColumn
+
+template <class T> T platypus::DataTableColumn::max() const {
+    std::vector<T> vals;
+    vals.reserve(this->table_.num_rows());
+    for (auto & row : this->table_) {
+        vals.push_back(row.get<T>(this->label_));
+    }
+    return *(std::max_element(vals.begin(), vals.end()));
+}
 
 #endif
