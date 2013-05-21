@@ -172,9 +172,14 @@ class TreeNode {
             this->value_ = value;
         }
 
-        inline NodeValueT& parent() const {
+        inline const NodeValueT & parent() const {
             assert(this->parent_);
-            return this->parent_->value;
+            return this->parent_->value_;
+        }
+
+        inline NodeValueT & parent() {
+            assert(this->parent_);
+            return this->parent_->value_;
         }
 
         inline NodeValueT& first_child() const {
@@ -291,13 +296,14 @@ class Tree {
 
         class base_iterator {
             public:
-				typedef base_iterator               self_type;
-				typedef NodeValueT                    value_type;
-				typedef NodeValueT *                  pointer;
-				typedef NodeValueT &                  reference;
-				typedef unsigned long               size_type;
-				typedef int                         difference_type;
-				typedef std::forward_iterator_tag   iterator_category;
+				typedef base_iterator                self_type;
+				typedef NodeValueT                   value_type;
+				typedef NodeValueT *                 pointer;
+				typedef NodeValueT &                 reference;
+				typedef const NodeValueT &           const_reference;
+				typedef unsigned long                size_type;
+				typedef int                          difference_type;
+				typedef std::forward_iterator_tag    iterator_category;
 
                 base_iterator(node_type * node)
                     : node_(node) { }
@@ -321,7 +327,11 @@ class Tree {
                     assert(this->node_);
                     return this->node_->is_leaf();
                 }
-                reference parent() const {
+                const_reference parent() const {
+                    assert(this->node_);
+                    return this->node_->parent();
+                }
+                reference parent() {
                     assert(this->node_);
                     return this->node_->parent();
                 }
