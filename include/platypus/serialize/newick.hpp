@@ -26,6 +26,7 @@
 #include <exception>
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include <memory>
 #include "../base/base_writer.hpp"
 
@@ -159,7 +160,8 @@ class NewickWriter : public BaseTreeWriter<TreeT> {
                 out << this->node_value_label_getter_(*node_iter);
             }
             if (this->node_value_edge_length_getter_ && !this->suppress_edge_lengths_) {
-                out << ":" << this->node_value_edge_length_getter_(*node_iter);
+                out << ":" << std::fixed << std::setprecision(this->edge_length_precision_) << this->node_value_edge_length_getter_(*node_iter);
+                out.copyfmt(std::ios(NULL)); // restore state
             }
         }
 

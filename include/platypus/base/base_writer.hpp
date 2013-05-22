@@ -72,7 +72,7 @@ class BaseTreeWriter {
         typedef std::function<EdgeLengthT (const tree_value_type &)>    node_value_edge_length_getter_fntype;
 
     public:
-        BaseTreeWriter() { }
+        BaseTreeWriter() : edge_length_precision_(6) { }
         virtual ~BaseTreeWriter() { }
 
         // Setting/binding of functions
