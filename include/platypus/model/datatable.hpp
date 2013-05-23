@@ -49,7 +49,6 @@ class DataTableException : public PlatypusException {
             : PlatypusException(filename, line_num, message) { }
 };
 
-
 class DataTableUndefinedColumnError : public DataTableException {
     public:
         DataTableUndefinedColumnError(
@@ -83,7 +82,7 @@ class DataTableStructureError : public DataTableException {
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
-            : DataTableStructureError(filename, line_num, message) { }
+            : DataTableException(filename, line_num, message) { }
 };
 
 class DataTableInvalidRowError : public DataTableException {
@@ -181,7 +180,7 @@ class DataTableColumn {
         bool is_hidden() const {
             return this->is_hidden_;
         }
-        bool set_hidden(bool hidden) {
+        void set_hidden(bool hidden) {
             this->is_hidden_ = hidden;
         }
         template <class T> T max() const;
