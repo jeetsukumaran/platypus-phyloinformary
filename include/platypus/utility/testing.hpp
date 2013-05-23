@@ -22,10 +22,15 @@
 
 #include <iostream>
 #include <iterator>
+#include <iomanip>
 #include <cmath>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+#ifndef PLATYPUS_TESTING_OUTPUT_PRECISION
+#define PLATYPUS_TESTING_OUTPUT_PRECISION 22
+#endif
 
 namespace platypus { namespace testing {
 
@@ -66,8 +71,8 @@ int fail_test(const std::string& test_name,
     std::cerr << "\n||| FAIL |||";
     std::cerr << "\n|     Test: " << test_name;
     std::cerr << "\n|     Line: " << line_num;
-    platypus::testing::detail::log_(std::cerr, "\n| Expected: ", expected);
-    platypus::testing::detail::log_(std::cerr, "\n| Observed: ", observed);
+    platypus::testing::detail::log_(std::cerr, "\n| Expected: ", std::fixed, std::setprecision(PLATYPUS_TESTING_OUTPUT_PRECISION), expected);
+    platypus::testing::detail::log_(std::cerr, "\n| Observed: ", std::fixed, std::setprecision(PLATYPUS_TESTING_OUTPUT_PRECISION), observed);
     platypus::testing::detail::log_(std::cerr, "\n|  Remarks: ", args...);
     std::cerr << std::endl;
     return 1;
