@@ -55,7 +55,7 @@ class DataTableUndefinedColumnError : public DataTableException {
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
-            : DataTableException(filename, line_num, message) { }
+            : DataTableException(filename, line_num, "Undefined column: " + message) { }
 };
 
 class DataTableInvalidCellError : public DataTableException {
@@ -64,7 +64,7 @@ class DataTableInvalidCellError : public DataTableException {
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
-            : DataTableException(filename, line_num, message) { }
+            : DataTableException(filename, line_num, "Invalid cell: " + message) { }
 };
 
 class DataTableUndefinedColumnValueType : public DataTableException {
@@ -73,7 +73,7 @@ class DataTableUndefinedColumnValueType : public DataTableException {
                     const std::string & filename,
                     unsigned long line_num,
                     const std::string & message)
-            : DataTableException(filename, line_num, message) { }
+            : DataTableException(filename, line_num, "Undefined column value type: " + message) { }
 };
 
 class DataTableStructureError : public DataTableException {
@@ -372,7 +372,7 @@ class DataTableRow {
         template <class T>
         const T get(unsigned long column_idx) const {
             if (column_idx >= this->cells_.size()) {
-                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds: " + std::to_string(column_idx));
             }
             auto * cell = this->cells_[column_idx];
             return DataTableRow::get_cell_value<T>(cell);
@@ -400,7 +400,7 @@ class DataTableRow {
         template <class T>
         void set(unsigned long column_idx, const T & val) {
             if (column_idx >= this->cells_.size()) {
-                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds: " + std::to_string(column_idx));
             }
             auto * cell = this->cells_[column_idx];
             this->set_cell_value(cell, val);
@@ -417,7 +417,7 @@ class DataTableRow {
 
         const DataTableBaseCell & cell(unsigned long column_idx) const {
             if (column_idx >= this->cells_.size()) {
-                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds: " + std::to_string(column_idx));
             }
             return *this->cells_[column_idx];
         }
@@ -753,7 +753,7 @@ class DataTable {
         }
         Column & column(unsigned long column_idx) {
             if (column_idx >= this->columns_.size()) {
-                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds");
+                throw DataTableInvalidCellError(__FILE__, __LINE__, "column index is out of bounds: " + std::to_string(column_idx));
             }
             return *(this->columns_[column_idx]);
         }
