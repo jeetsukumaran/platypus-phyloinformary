@@ -170,6 +170,9 @@ class DataTableColumn {
             // this->formatters_.clear();
             // this->formatters_.insert(this->formatters_.end(), formatters.cbegin(), formatters.cend());
         }
+        const platypus::stream::OutputStreamFormatters & get_formatting() const {
+            return this->formatters_;
+        }
         template <class T> void write_formatted_value(std::ostream & out, const T & val) const {
             for (auto m : this->formatters_) {
                 out << m;
@@ -769,6 +772,42 @@ class DataTable {
         }
         const Column & column(const std::string & col_name) const {
             return this->column(col_name);
+        }
+        const std::vector<const Column *> column_ptrs() const {
+            std::vector<const Column *> columns;
+            columns.reserve(this->columns_.size());
+            for (auto & col : this->columns_) {
+                columns.push_back(&(*col));
+            }
+            return columns;
+        }
+        const std::vector<std::string> column_names() const {
+            std::vector<std::string> column_names;
+            column_names.reserve(this->columns_.size());
+            for (auto & col : this->columns_) {
+                column_names.push_back(col->get_label());
+            }
+            return column_names;
+        }
+        const std::vector<std::string> key_column_names() const {
+            std::vector<std::string> column_names;
+            column_names.reserve(this->columns_.size());
+            for (auto & col : this->columns_) {
+                if (col->is_key_column()) {
+                    column_names.push_back(col->get_label());
+                }
+            }
+            return column_names;
+        }
+        const std::vector<std::string> data_column_names() const {
+            std::vector<std::string> column_names;
+            column_names.reserve(this->columns_.size());
+            for (auto & col : this->columns_) {
+                if (!col->is_key_column()) {
+                    column_names.push_back(col->get_label());
+                }
+            }
+            return column_names;
         }
         template <class T> T get(unsigned long ridx, const std::string & col_name) {
             return this->row(ridx).get<T>(col_name);
