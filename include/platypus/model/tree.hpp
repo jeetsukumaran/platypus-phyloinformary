@@ -463,7 +463,6 @@ class Tree {
             private:
                 std::vector<node_type *>                       nodes_;
                 typename std::vector<node_type *>::iterator    node_iter_;
-
         }; // level_order_iterator
 
         class leaf_iterator : public base_iterator {
@@ -563,14 +562,14 @@ class Tree {
 
         // -- level-order--
 
-        std::vector<node_type *> level_order_nodes(bool order_root_to_tips=true) const {
+        std::vector<node_type *> level_order_nodes(bool order_root_to_tips=true, bool include_leaves=true) const {
             std::vector<node_type *> nodes_in_level_order;
             std::map<node_type *, unsigned long> node_steps_from_root;
             for (auto ndi = this->preorder_begin(); ndi != this->preorder_end(); ++ndi) {
                 node_type * nptr = ndi.node();
                 if (ndi.parent_node() == nullptr) {
                     node_steps_from_root[nptr] = 0;
-                } else {
+                } else if (include_leaves || !nptr->is_leaf()) {
                     node_steps_from_root[nptr] = node_steps_from_root[ndi.parent_node()] + 1;
                 }
             }
@@ -588,11 +587,19 @@ class Tree {
             return nodes_in_level_order;
         }
 
-        level_order_iterator level_order_begin() const {
-            return level_order_iterator(this->level_order_nodes());
+        level_order_iterator level_order_begin(bool include_leaves=true) const {
+            return level_order_iterator(this->level_order_nodes(true, include_leaves));
         }
 
         level_order_iterator level_order_end() const {
+            return level_order_iterator();
+        }
+
+        level_order_iterator level_order_rbegin(bool include_leaves=true) const {
+            return level_order_iterator(this->level_order_nodes(false, include_leaves));
+        }
+
+        level_order_iterator level_order_rend() const {
             return level_order_iterator();
         }
 
