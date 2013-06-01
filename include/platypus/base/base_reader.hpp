@@ -23,6 +23,7 @@
 #define PLATYPUS_BASE_READER_BASE_HPP
 
 #include <stdexcept>
+#include <vector>
 #include <functional>
 #include <iostream>
 #include <fstream>

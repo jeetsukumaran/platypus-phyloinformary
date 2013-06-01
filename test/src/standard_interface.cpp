@@ -32,16 +32,17 @@ int main() {
     // writer
     auto writer = platypus::NewickWriter<TreeType>();
     bind_standard_interface(writer);
+    writer.set_edge_length_precision(1);
     std::ostringstream out;
     writer.write(out, trees.begin(), trees.end());
     auto result = out.str();
 
     std::string expected =
-        "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
-        "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
-        "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
-        "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n"
-        "[&R] ((i:0, (j:0, k:0)e:0)b:0, ((l:0, m:0)g:0, (n:0, (o:0, p:0)h:0)f:0)c:0)a:0;\n";
+        "[&R] ((i:0.0, (j:0.0, k:0.0)e:0.0)b:0.0, ((l:0.0, m:0.0)g:0.0, (n:0.0, (o:0.0, p:0.0)h:0.0)f:0.0)c:0.0)a:0.0;\n"
+        "[&R] ((i:0.0, (j:0.0, k:0.0)e:0.0)b:0.0, ((l:0.0, m:0.0)g:0.0, (n:0.0, (o:0.0, p:0.0)h:0.0)f:0.0)c:0.0)a:0.0;\n"
+        "[&R] ((i:0.0, (j:0.0, k:0.0)e:0.0)b:0.0, ((l:0.0, m:0.0)g:0.0, (n:0.0, (o:0.0, p:0.0)h:0.0)f:0.0)c:0.0)a:0.0;\n"
+        "[&R] ((i:0.0, (j:0.0, k:0.0)e:0.0)b:0.0, ((l:0.0, m:0.0)g:0.0, (n:0.0, (o:0.0, p:0.0)h:0.0)f:0.0)c:0.0)a:0.0;\n"
+        "[&R] ((i:0.0, (j:0.0, k:0.0)e:0.0)b:0.0, ((l:0.0, m:0.0)g:0.0, (n:0.0, (o:0.0, p:0.0)h:0.0)f:0.0)c:0.0)a:0.0;\n";
 
     int chk = platypus::testing::compare_equal(expected, result, __FILE__, __LINE__);
     if (chk == 0) {

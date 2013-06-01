@@ -22,7 +22,7 @@ int main () {
     newick_writer.set_compact_spaces(true);
     newick_writer.write(o, tree);
     std::string result = o.str();
-    std::string expected =  "(((((m,l),(o,n)),((c,b),(e,d))),(((g,f),(k,j)),((q,p),(i,h)))),a);";
+    std::string expected =  "((((a,b),(c,d)),((e,f),(g,h))),(((i,j),(k,l)),((m,n),(q,(o,p)))));";
     int chk = platypus::testing::compare_equal(expected, result, __FILE__, __LINE__);
     if (chk == 0) {
         return EXIT_SUCCESS;
