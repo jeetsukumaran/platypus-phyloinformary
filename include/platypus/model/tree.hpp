@@ -28,11 +28,13 @@
 #ifndef PLATYPUS_MODEL_TREE_HPP
 #define PLATYPUS_MODEL_TREE_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <stack>
 #include <iostream>
 #include <stdexcept>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
