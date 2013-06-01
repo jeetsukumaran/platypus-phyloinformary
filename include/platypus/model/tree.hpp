@@ -431,6 +431,41 @@ class Tree {
                 }
         }; // postorder_iterator
 
+        class level_order_iterator : public base_iterator {
+            public:
+                typedef level_order_iterator self_type;
+                level_order_iterator(const std::vector<node_type *> & nodes)
+                    : base_iterator(nullptr)
+                      , nodes_(nodes) {
+                    this->node_iter_ = this->nodes_.begin();
+                    if (!nodes.empty()) {
+                        this->node_ = *this->node_iter_;
+                    }
+                }
+                level_order_iterator()
+                    : base_iterator(nullptr) {
+                }
+                virtual ~level_order_iterator() {}
+                const self_type& operator++() {
+                    ++this->node_iter_;
+                    if (this->node_iter_ != this->nodes_.end()) {
+                        this->node_ = *this->node_iter_;
+                    } else {
+                        this->node_ = nullptr;
+                    }
+                    return *this;
+                }
+                self_type operator++(int) {
+                    self_type i = *this;
+                    ++(*this);
+                    return i;
+                }
+            private:
+                std::vector<node_type *>                       nodes_;
+                typename std::vector<node_type *>::iterator    node_iter_;
+
+        }; // level_order_iterator
+
         class leaf_iterator : public base_iterator {
 
             public:
@@ -524,6 +559,41 @@ class Tree {
 
         postorder_iterator postorder_end() const {
             return postorder_iterator(this->head_node_->next_sibling_node());
+        }
+
+        // -- level-order--
+
+        std::vector<node_type *> level_order_nodes(bool order_root_to_tips=true) const {
+            std::vector<node_type *> nodes_in_level_order;
+            std::map<node_type *, unsigned long> node_steps_from_root;
+            for (auto ndi = this->preorder_begin(); ndi != this->preorder_end(); ++ndi) {
+                node_type * nptr = ndi.node();
+                if (ndi.parent_node() == nullptr) {
+                    node_steps_from_root[nptr] = 0;
+                } else {
+                    node_steps_from_root[nptr] = node_steps_from_root[ndi.parent_node()] + 1;
+                }
+            }
+            std::multimap<unsigned long, node_type *> steps_from_root_nodes;
+            for (auto & si : node_steps_from_root) {
+                steps_from_root_nodes.insert(std::make_pair(si.second, si.first));
+            }
+            nodes_in_level_order.reserve(steps_from_root_nodes.size());
+            for (auto & si : steps_from_root_nodes) {
+                nodes_in_level_order.push_back(si.second);
+            }
+            if (!order_root_to_tips) {
+                std::reverse(nodes_in_level_order.begin(), nodes_in_level_order.end());
+            }
+            return nodes_in_level_order;
+        }
+
+        level_order_iterator level_order_begin() const {
+            return level_order_iterator(this->level_order_nodes());
+        }
+
+        level_order_iterator level_order_end() const {
+            return level_order_iterator();
         }
 
         // -- leaf iterator --

@@ -254,6 +254,8 @@ const std::string STANDARD_TEST_TREE_WEDGE_NEWICK = "((i:1, (j:2, k:3)e:4)b:5, (
 const std::vector<std::string> STANDARD_TEST_TREE_PREORDER = {"a", "b", "i", "e", "j", "k", "c", "g", "l", "m", "f", "n", "h", "o", "p"};
 const std::vector<std::string> STANDARD_TEST_TREE_POSTORDER = {"i", "j", "k", "e", "b", "l", "m", "g", "n", "o", "p", "h", "f", "c", "a"};
 const std::vector<std::string> STANDARD_TEST_TREE_LEAVES = {"i", "j", "k", "l", "m", "n", "o", "p"};
+const std::vector<std::string> STANDARD_TEST_TREE_LEVEL_ORDER = {"a", "bc", "iegf", "jklmnh", "op"};
+const std::vector<std::string> STANDARD_TEST_TREE_INTERNAL_LEVEL_ORDER = {"a", "bc", "egf", "h"};
 const std::map<std::string, std::vector<std::string>> STANDARD_TEST_TREE_CHILDREN = {
     {"a", {"b", "c"}},
     {"b", {"i", "e"}},
