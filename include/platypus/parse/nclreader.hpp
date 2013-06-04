@@ -53,7 +53,7 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
         unsigned long read(
                 std::istream & src,
                 const std::function<tree_type & ()> & get_new_tree_reference,
-                const std::string & format,
+                const std::string & format="nexus",
                 unsigned long tree_limit=0) {
             return this->parse_stream(src, get_new_tree_reference, format, tree_limit);
         }
@@ -61,7 +61,7 @@ class NclTreeReader : public BaseTreeReader<TreeT> {
         unsigned long read(
                 std::istream && src,
                 const std::function<tree_type & ()> & get_new_tree_reference,
-                const std::string & format,
+                const std::string & format="nexus",
                 unsigned long tree_limit=0) {
             return this->parse_stream(src, get_new_tree_reference, format, tree_limit);
         }
