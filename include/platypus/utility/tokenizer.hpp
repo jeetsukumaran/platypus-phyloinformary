@@ -282,7 +282,7 @@ class Tokenizer {
                                         dest.put(cur_quote_char);
                                         this->get_next_char();
                                     } else {
-                                        this->get_next_char();
+                                        // this->get_next_char();
                                         break;
                                     }
                                 } else {
