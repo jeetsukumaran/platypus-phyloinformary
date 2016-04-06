@@ -178,7 +178,8 @@ class Tokenizer {
                     } else if ( this->src_ptr_ == rhs.src_ptr_) {
                         return true;
                     } else if (this->src_ptr_ && rhs.src_ptr_) {
-                        return *(this->src_ptr_) == *(rhs.src_ptr_);
+                        /* return *(this->src_ptr_) == *(rhs.src_ptr_); */
+                        return false;
                     } else {
                         return false;
                     }

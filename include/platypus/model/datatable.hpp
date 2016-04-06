@@ -22,6 +22,8 @@
 #ifndef PLATYPUS_MODEL_DATATABLE_HPP
 #define PLATYPUS_MODEL_DATATABLE_HPP
 
+#include <numeric>
+#include <cmath>
 #include <algorithm>
 #include <map>
 #include <set>
